@@ -21,7 +21,7 @@ class Manyfest
 			{
 				strict: false
 			});
-		
+
 		this.scope = undefined;
 		this.elementAddresses = undefined;
 		this.elementHashes = undefined;
