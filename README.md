@@ -13,7 +13,7 @@ As data crosses these boundaries, though, context is lost.  We reinvent the whee
 
 Manyfest's purpose is to solve this problem by creating a simple pattern to describe, validate, manipulate and interpret data.
 
-![Official Mascot](https://github.com/stevenvelozo/Manyfest/raw/master/diagrams/Mascot.png)
+![Official Mascot](https://github.com/stevenvelozo/Manyfest/raw/main/diagrams/Mascot.png)
 
 _Man-E-Faces approves of Manyfest!_
 
