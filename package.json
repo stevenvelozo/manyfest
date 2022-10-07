@@ -1,8 +1,8 @@
 {
   "name": "manyfest",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "JSON Object Manifest for Data Description and Parsing",
-  "main": "index.js",
+  "main": "source/Manyfest.js",
   "scripts": {
     "docker-dev-build-image": "docker build ./ -f Dockerfile_LUXURYCode -t retold/manyfest:local",
     "docker-dev-run": "docker run -it -d --name manyfest -p 12340:8080 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/manyfest\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" retold/manyfest:local",
