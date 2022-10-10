@@ -398,9 +398,75 @@ class Manyfest
 
 		if (tmpSeparatorIndex === -1)
 		{
-			// Now is the time to set the value in the object
-			pObject[pAddress] = pValue;
-			return true;
+			// Check if it's a boxed property
+			let tmpBracketStartIndex = pAddress.indexOf('[');
+			let tmpBracketStopIndex = pAddress.indexOf(']');
+			// Boxed elements look like this:
+			// 		MyValues[10]
+			// 		MyValues['Name']
+			// 		MyValues["Age"]
+			// 		MyValues[`Cost`]
+			//
+			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
+			// The requirements to detect a boxed element are:
+			//    1) The start bracket is after character 0
+			if ((tmpBracketStartIndex > 0) 
+			//    2) The end bracket has something between them
+				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
+			//    3) There is data 
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+			{
+				// The "Name" of the Object contained too the left of the bracket
+				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
+
+				// If the subproperty doesn't test as a proper Object, none of the rest of this is possible.
+				// This is a rare case where Arrays testing as Objects is useful
+				if (typeof(pObject[tmpBoxedPropertyName]) !== 'object')
+				{
+					return false;
+				}
+
+				// The "Reference" to the property within it, either an array element or object property
+				let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
+				// Attempt to parse the reference as a number, which will be used as an array element
+				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+
+				// Guard: If the referrant is a number and the boxed property is not an array, or vice versa, return undefined.
+				//        This seems confusing to me at first read, so explaination:
+				//        Is the Boxed Object an Array?  TRUE
+				//        And is the Reference inside the boxed Object not a number? TRUE
+				//        -->  So when these are in agreement, it's an impossible access state
+				if (Array.isArray(pObject[tmpBoxedPropertyName]) == isNaN(tmpBoxedPropertyNumber))
+				{
+					return false;
+				}
+
+				//    4) If the middle part is *only* a number (no single, double or backtick quotes) it is an array element,
+				//       otherwise we will try to treat it as a dynamic object property.
+				if (isNaN(tmpBoxedPropertyNumber))
+				{
+					// This isn't a number ... let's treat it as a dynamic object property.
+					// We would expect the property to be wrapped in some kind of quotes so strip them
+					tmpBoxedPropertyReference = this.cleanWrapCharacters('"', tmpBoxedPropertyReference);
+					tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
+					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
+
+					// Return the value in the property
+					pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = pValue;
+					return true;
+				}
+				else
+				{
+					pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber] = pValue;
+					return true;
+				}
+			}
+			else
+			{
+				// Now is the time in recursion to set the value in the object
+				pObject[pAddress] = pValue;
+				return true;
+			}
 		}
 		else
 		{
@@ -475,7 +541,13 @@ class Manyfest
 			tmpValidationData.Errors.push(`Expected passed in object to be type object but was passed in ${typeof(pObject)}`);
 		}
 
-		// Now enumerate through the values and check for anomalies
+		let addValidationError = (pAddress, pErrorMessage) =>
+		{
+			tmpValidationData.Error = true;
+			tmpValidationData.Errors.push(`Element at address "${pAddress}" ${pErrorMessage}.`);
+		};
+
+		// Now enumerate through the values and check for anomalies based on the schema
 		for (let i = 0; i < this.elementAddresses.length; i++)
 		{
 			let tmpDescriptor = this.getDescriptor(this.elementAddresses[i]);
@@ -483,12 +555,73 @@ class Manyfest
 
 			if (typeof(tmpValue) == 'undefined')
 			{
+				// This will technically mean that `Object.Some.Value = undefined` will end up showing as "missing"
+				// TODO: Do we want to do a different message based on if the property exists but is undefined?
 				tmpValidationData.MissingElements.push(tmpDescriptor.Address);
-
 				if (tmpDescriptor.Required || this.options.strict)
 				{
-					tmpValidationData.Error = true;
-					tmpValidationData.Errors.push(`Element at address '${tmpDescriptor.Address}' is flagged Required but is not present.`);
+					addValidationError(tmpDescriptor.Address, 'is flagged REQUIRED but is not set in the object');
+				}
+			}
+
+			// Now see if there is a data type specified for this element
+			if (tmpDescriptor.DataType)
+			{
+				let tmpElementType = typeof(tmpValue);
+				switch(tmpDescriptor.DataType.toString().trim().toLowerCase())
+				{
+					case 'string':
+						if (tmpElementType != 'string')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						break;
+
+					case 'number':
+						if (tmpElementType != 'number')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						break;
+
+					case 'integer':
+						if (tmpElementType != 'number')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						else
+						{
+							let tmpValueString = tmpValue.toString();
+							if (tmpValueString.indexOf('.') > -1)
+							{
+								// TODO: Is this an error?
+								addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but has a decimal point in the number.`);
+							}
+						}
+						break;
+
+					case 'float':
+						if (tmpElementType != 'number')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						break;
+
+					case 'DateTime':
+						let tmpValueDate = new Date(tmpValue);
+						if (tmpValueDate.toString() == 'Invalid Date')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is not parsable as a Date by Javascript`);
+						}
+	
+					default:
+						// Check if this is a string, in the default case
+						// Note this is only when a DataType is specified and it is an unrecognized data type.
+						if (tmpElementType != 'string')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} (which auto-converted to String because it was unrecognized) but is of the type ${tmpElementType}`);
+						}
+						break;
 				}
 			}
 		}

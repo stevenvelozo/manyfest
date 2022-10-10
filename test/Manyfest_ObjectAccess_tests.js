@@ -107,14 +107,38 @@ suite
 									}
 							});
 
-						let tmpValidationResults = animalManyfest.validate({MedicalStats: { Temps: { CET:200 }},Name:'Froggy'});
+						let tmpValidationResults = animalManyfest.validate({IDAnimal: 100, MedicalStats: { Temps: { CET:200 }},Name:'Froggy'});
 
 						Expect(tmpValidationResults.Error)
 							.to.equal(null);
 
 						fTestComplete();
 					}
-				);				
+				);
+				test
+				(
+					'Validate should be able to test for dates',
+					(fTestComplete)=>
+					{
+						let animalManyfest = new libManyfest(
+							{
+								"Scope": "Animal",
+								"Descriptors":
+									{
+										"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+										"Birthday": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+										"Name": { "Required":true, "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." }
+									}
+							});
+
+						let tmpValidationResults = animalManyfest.validate({IDAnimal: 100, MedicalStats: { Temps: { CET:200 }}});
+
+						Expect(tmpValidationResults.Error)
+							.to.equal(true);
+
+						fTestComplete();
+					}
+				);
 				test
 				(
 					'Validate should error when required elements do not exist',

@@ -70,16 +70,17 @@ Error does not mean the software throws an exception.  It comes back as well-for
 Below is a lexicon of terms used throughout this documentation.  If you see anything missing, want more elaboration or just dislike a particular term, please file an issue in github!
 
 | Term | Description |
-| Scope | The scope of this representation; generally the clustered or parent record name (e.g. Animal, User, Transaction, etc.) -- does not have functional purpose; only for information and logging. |
-| Schema | The stateful representation of an object's structural definition. |
-| Element | A defined element of data in an object. |
-| Address | The address where that data lies in the object. |
-| Descriptor | A description of an element including data such as Name, NameShort, Hash, Description, and other important properties. |
-| Name | The name of the element.  Meant to be the most succinct human readable name possible. |
-| NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name. |
-| Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)! |
-| Hash | A unique within this scope string-based key for this element.  Used for easy access of data. |
-| Constraint | A validation constraint for an element such as MaxLength, MinLength, Required, Default and such. |
+| ---- | ----------- |
+Scope | The scope of this representation; generally the clustered or parent record name (e.g. Animal, User, Transaction, etc.) -- does not have functional purpose; only for information and logging.
+Schema | The stateful representation of an object's structural definition.
+Element | A defined element of data in an object.
+Address | The address where that data lies in the object.
+Descriptor | A description of an element including data such as Name, NameShort, Hash, Description, and other important properties.
+Name | The name of the element.  Meant to be the most succinct human readable name possible.
+NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name.
+Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)!
+Hash | A unique within this scope string-based key for this element.  Used for easy access of data.
+Constraint | A validation constraint for an element such as MaxLength, MinLength, Required, Default and such.
 
 ## A More Advanced Schema Example
 
@@ -108,6 +109,7 @@ let animalManyfest = new libManyfest(
                         "Name":"Comfortable Environmental Temperature",
                         "NameShort":"Comf Env Temp",
                         "Hash":"ComfET",
+                        "DataType":"Float",
                         "Description":"The most comfortable temperature for this animal to survive in."
                     }
             }
@@ -117,6 +119,17 @@ let animalManyfest = new libManyfest(
 Notice in this example, the addresses are more complex.  They have a dot syntax.  This notifies Manyfest that they are nested values.  Further, there is both a Name and a NameShort descriptor setup.  This gives us a framework for consistently referring to the data element both internally and to the user.  It is no longer a mystery what someAnimal.MedicalStats.Temps.CET means.  Developers, user interface designers, database engineers, product managers and other folks who work on the software side don't have to maintain a third body of documentation about what the data means.
 
 To aid in this discovery, reference and such, we've given it a NameShort (for use in things like tabular views and graphs/charts), a longer Name and a Hash (to enable easy reading and writing using the object element read/write functions described later in this documentation).
+
+### Data Types
+
+| Type | Description |
+| ---- | ----------- |
+String | A pretty basic string
+Integer | An integer number
+Float | A floating point number; does not require a decimal point
+Number | A number of any type
+DateTime | A date parsable by Javascript
+Object | A plain old Javascript object
 
 ## Reading and Writing Element Properties
 

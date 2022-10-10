@@ -74,7 +74,19 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Access nested array properties',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						let tmpDog = _Manyfest.getValueAtAddress({Kennel:[{Name:'Fido',Speed:100},{Name:'Spot'},{Name:'Trinity'}]}, 'Kennel[1].Name');
+						Expect(tmpDog)
+							.to.equal('Spot');
+						fTestComplete();
+					}
+				);
 			}
-		)
+		);
 	}
 );
