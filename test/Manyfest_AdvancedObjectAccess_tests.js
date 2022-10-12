@@ -59,6 +59,9 @@ suite
 						let tmpDog = _Manyfest.getValueAtAddress({Dogs:{RunnerUp:'Fido',Loser:'Spot',Winner:'Trinity'}}, 'Dogs["Disqualified"]');
 						Expect(tmpDog)
 							.to.be.an('undefined');
+						let tmpWinner = _Manyfest.getValueAtAddress({Dogs:{RunnerUp:'Fido',Loser:'Spot',Winner:'Trinity'}}, 'Dogs["Winner"]');
+						Expect(tmpWinner)
+							.to.equal('Trinity');
 						fTestComplete();
 					}
 				);
