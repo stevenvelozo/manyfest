@@ -628,6 +628,12 @@ class Manyfest
 
 		return tmpValidationData;
 	}
+
+	// Enumerate through an object and populate default values if they don't exist.
+	populateDefaults(pObject)
+	{
+		
+	}
 };
 
 module.exports = Manyfest;

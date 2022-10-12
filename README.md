@@ -46,7 +46,7 @@ let animalManyfest = new libManyfest(
         "Scope": "Animal",
         "Descriptors":
             {
-                "IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+                "IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer", "Default":0 },
                 "Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
                 "Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." }
             }
@@ -80,7 +80,7 @@ Name | The name of the element.  Meant to be the most succinct human readable na
 NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name.
 Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)!
 Hash | A unique within this scope string-based key for this element.  Used for easy access of data.
-Constraint | A validation constraint for an element such as MaxLength, MinLength, Required, Default and such.
+Required | Set to true if this element is required.
 
 ## A More Advanced Schema Example
 
