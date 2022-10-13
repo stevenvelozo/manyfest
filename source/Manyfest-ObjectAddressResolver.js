@@ -207,12 +207,12 @@ class ManyfestObjectAddressResolver
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
 					// Recurse directly into the subobject
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress);
+					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress);
 				}
 				else
 				{
 					// We parsed a valid number out of the boxed property name, so recurse into the array
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress);
+					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress);
 				}
 			}
 
@@ -225,13 +225,13 @@ class ManyfestObjectAddressResolver
 			else if (pObject.hasOwnProperty(tmpSubObjectName))
 			{
 				// If there is already a subobject pass that to the recursive thingy
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress);
+				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
 			}
 			else
 			{
 				// Create a subobject and then pass that
 				pObject[tmpSubObjectName] = {};
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress);
+				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
 			}
 		}
 	}

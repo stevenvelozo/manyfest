@@ -7,7 +7,8 @@
     "docker-dev-build-image": "docker build ./ -f Dockerfile_LUXURYCode -t retold/manyfest:local",
     "docker-dev-run": "docker run -it -d --name manyfest -p 12340:8080 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/manyfest\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" retold/manyfest:local",
     "test": "./node_modules/mocha/bin/_mocha -u tdd -R spec",
-    "tests": "./node_modules/mocha/bin/_mocha -u tdd -R spec --grep"
+    "tests": "./node_modules/mocha/bin/_mocha -u tdd -R spec --grep",
+    "coverage": "nyc npm run test && nyc report --reporter=lcov"
   },
   "repository": {
     "type": "git",

@@ -36,6 +36,17 @@ suite
 				);
 				test
 				(
+					'The class should print an error message with a bad manifest.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({Scope:'BadManifest', Descriptors:'BadDescriptors'});
+						Expect(_Manyfest)
+							.to.be.an('object', 'Manyfest should initialize as an object with no parameters.');
+						fTestComplete();
+					}
+				);
+				test
+				(
 					'Default properties should be automatically set.',
 					(fTestComplete)=>
 					{
@@ -44,6 +55,44 @@ suite
 							.to.be.a('string', 'Manyfest should have a scope.');
 						Expect(_Manyfest.scope)
 							.to.equal('DEFAULT', 'Manyfest should default to the Scope DEFAULT.');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Exercise the default logging.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						_Manyfest.logError('Error...');
+						_Manyfest.logInfo('Info...');
+						_Manyfest.logInfo();
+
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Pass in a custom logger.',
+					(fTestComplete)=>
+					{
+						let tmpLogState = [];
+						let fWriteLog = (pLogLine, pLogObject) =>
+						{
+							tmpLogState.push(pLogLine);
+						};
+
+						let _Manyfest = new libManyfest(undefined, fWriteLog, fWriteLog);
+						_Manyfest.logError('Error...');
+						Expect(tmpLogState.length)
+							.to.equal(1);
+						Expect(tmpLogState[0])
+							.to.equal('Error...');
+						_Manyfest.logInfo('Info...');
+						_Manyfest.logInfo();
+						Expect(tmpLogState.length)
+							.to.equal(3);
+
 						fTestComplete();
 					}
 				);

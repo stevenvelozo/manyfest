@@ -13,7 +13,7 @@ const logToConsole = (pLogLine, pLogObject) =>
 
     console.log(`[Manyfest] ${tmpLogLine}`);
 
-    if (pLogObject) console.log(JSON.stringify(tmpLogObject,null,4)+"\n");
+    if (pLogObject) console.log(JSON.stringify(pLogObject));
 };
 
 module.exports = logToConsole;

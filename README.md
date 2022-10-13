@@ -128,8 +128,13 @@ String | A pretty basic string
 Integer | An integer number
 Float | A floating point number; does not require a decimal point
 Number | A number of any type
-DateTime | A date parsable by Javascript
-Object | A plain old Javascript object
+Boolean | A boolean value represented by the JSON true or false
+Binary | A boolean value represented as 1 or 0
+YesNo | A boolean value represented as Y or N
+DateTime | A javascript date
+Array | A plain old javascript array
+Object | A plain old javascript object
+Null | A null value
 
 ## Reading and Writing Element Properties
 

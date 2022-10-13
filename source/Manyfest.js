@@ -12,7 +12,7 @@ let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
 */
 class Manyfest
 {
-	constructor(pManifest, pInfoLog, pErrorLog)
+	constructor(pManifest, pInfoLog, pErrorLog, pOptions)
 	{
 		// Wire in logging
 		this.logInfo = (typeof(pInfoLog) === 'function') ? pInfoLog : libSimpleLog;
@@ -23,7 +23,20 @@ class Manyfest
 
 		this.options = (
 			{
-				strict: false
+				strict: false,
+				defaultValues: 
+					{
+						"String": "",
+						"Number": 0,
+						"Float": 0.0,
+						"Integer": 0,
+						"Boolean": false,
+						"Binary": 0,
+						"DateTime": 0,
+						"Array": [],
+						"Object": {},
+						"Null": null
+					}
 			});
 
 		this.scope = undefined;
@@ -76,12 +89,12 @@ class Manyfest
 			}
 			else
 			{
-				this.logError(`(${this.scope}) Error loading scope from manifest; expecting a string but property was type ${typeof(pManifest.Scope)}.`);
+				this.logError(`(${this.scope}) Error loading scope from manifest; expecting a string but property was type ${typeof(pManifest.Scope)}.`, pManifest);
 			}
 		}
 		else
 		{
-			this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`);
+			this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`, pManifest);
 		}
 
 		if (pManifest.hasOwnProperty('Descriptors'))
@@ -96,12 +109,12 @@ class Manyfest
 			}
 			else
 			{
-				this.logError(`(${this.scope}) Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ${typeof(pManifest.Description)}.`);
+				this.logError(`(${this.scope}) Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ${typeof(pManifest.Descriptors)}.`, pManifest);
 			}
 		}
 		else
 		{
-			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the object.`);
+			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, pManifest);
 		}
 	}
 
@@ -179,7 +192,21 @@ class Manyfest
 	/*************************************************************************
 	 * Beginning of Object Manipulation (read & write) Functions
 	 */
-	// Get the value of an element at an address
+	// Check if an element exists by its hash
+	checkAddressExistsByHash (pObject, pHash)
+	{
+		if (this.elementHashes.hasOwnProperty(pHash))
+		{
+			return this.checkAddressExists(pObject, this.elementHashes[pHash]);
+		}
+		else
+		{
+			this.logError(`(${this.scope}) Error in checkAddressExistsByHash; the Hash ${pHash} doesn't exist in the schema.`);
+			return undefined;
+		}
+	}
+
+	// Check if an element exists at an address
 	checkAddressExists (pObject, pAddress)
 	{
 		return this.objectAddressResolver.checkAddressExists(pObject, pAddress);
@@ -226,34 +253,6 @@ class Manyfest
 	{
 		return this.objectAddressResolver.setValueAtAddress(pObject, pAddress, pValue);
 	}
-
-	setValueAtAddressInContainer (pRecordObject, pFormContainerAddress, pFormContainerIndex, pFormValueAddress, pFormValue)
-	{
-		// First see if there *is* a container object
-		let tmpContainerObject = this.getValueAtAddress(pRecordObject, pFormContainerAddress);
-
-		if (typeof(pFormContainerAddress) !== 'string') return false;
-
-		let tmpFormContainerIndex = parseInt(pFormContainerIndex, 10);
-		if (isNaN(tmpFormContainerIndex)) return false;
-
-		if ((typeof(tmpContainerObject) !== 'object') || (!Array.isArray(tmpContainerObject)))
-		{
-			// Check if there is a value here and we want to store it in the "__OverwrittenData" thing
-			tmpContainerObject = [];
-			this.setValueAtAddress(pRecordObject, pFormContainerAddress, tmpContainerObject);
-		}
-
-		for (let i = 0; (tmpContainerObject.length + i) <= (tmpFormContainerIndex+1); i++)
-		{
-			// Add objects to this container until it has enough
-			tmpContainerObject.push({});
-		}
-
-		// Now set the value *in* the container object
-		return this.setValueAtAddress(tmpContainerObject[tmpFormContainerIndex], pFormValueAddress, pFormValue);
-	}
-
 
 	// Validate the consistency of an object against the schema
 	validate(pObject)
@@ -359,10 +358,69 @@ class Manyfest
 		return tmpValidationData;
 	}
 
-	// Enumerate through an object and populate default values if they don't exist.
-	populateDefaults(pObject)
+	// Returns a default value, or, the default value for the data type (which is overridable with configuration)
+	getDefaultValue(pDescriptor)
 	{
-		
+		if (pDescriptor.hasOwnProperty('Default'))
+		{
+			return pDescriptor.Default;
+		}
+		else
+		{
+			// Default to a null if it doesn't have a type specified.
+			// This will ensure a placeholder is created but isn't misinterpreted.
+			let tmpDataType = (pDescriptor.hasOwnProperty('DataType')) ? pDescriptor.DataType : 'String';
+			if (this.options.defaultValues.hasOwnProperty(tmpDataType))
+			{
+				return this.options.defaultValues[tmpDataType];
+			}
+			else
+			{
+				// give up and return null
+				return null;
+			}
+		}
+	}
+
+	// Enumerate through the schema and populate default values if they don't exist.
+	populateDefaults(pObject, pOverwriteProperties)
+	{
+		return this.populateObject(pObject, pOverwriteProperties,
+			// This just sets up a simple filter to see if there is a default set.
+			(pDescriptor) =>
+			{
+				return pDescriptor.hasOwnProperty('Default');
+			});
+	}
+
+	// Forcefully populate all values even if they don't have defaults.
+	// Based on type, this can do unexpected things.
+	populateObject(pObject, pOverwriteProperties, fFilter)
+	{
+		// Automatically create an object if one isn't passed in.
+		let tmpObject = (typeof(pObject) === 'object') ? pObject : {};
+		// Default to *NOT OVERWRITING* properties
+		let tmpOverwriteProperties = (typeof(pOverwriteProperties) == 'undefined') ? false : pOverwriteProperties;
+		// This is a filter function, which is passed the schema and allows complex filtering of population
+		// The default filter function just returns true, populating everything.
+		let tmpFilterFunction = (typeof(fFilter) == 'function') ? fFilter : (pDescriptor) => { return true; };
+
+		this.elementAddresses.forEach(
+			(pAddress) =>
+			{
+				let tmpDescriptor = this.getDescriptor(pAddress);
+				// Check the filter function to see if this is an address we want to set the value for.
+				if (tmpFilterFunction(tmpDescriptor))
+				{
+					// If we are overwriting properties OR the property does not exist
+					if (tmpOverwriteProperties || !this.checkAddressExists(tmpObject, pAddress))
+					{
+						this.setValueAtAddress(tmpObject, pAddress, this.getDefaultValue(tmpDescriptor));
+					}
+				}
+			});
+
+		return tmpObject;
 	}
 };
 
