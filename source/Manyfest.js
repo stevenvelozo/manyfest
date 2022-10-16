@@ -71,6 +71,19 @@ class Manyfest
 		this.elementDescriptors = {};
 	}
 
+	clone()
+	{
+		// Make a copy of the options in-place
+		let tmpNewOptions = JSON.parse(JSON.stringify(this.options));
+
+		let tmpNewManyfest = new Manyfest(this.getManifest(), this.logInfo, this.logError, tmpNewOptions);
+
+		// Import the hash translations
+		tmpNewManyfest.hashTranslations.addTranslation(this.hashTranslations.translationTable);
+
+		return tmpNewManyfest;
+	}
+
 	// Deserialize a Manifest from a string
 	deserialize(pManifestString)
 	{
@@ -125,6 +138,7 @@ class Manyfest
 	}
 
 	// Serialize the Manifest to a string
+	// TODO: Should this also serialize the translation table?
 	serialize()
 	{
 		return JSON.stringify(this.getManifest());
@@ -132,7 +146,7 @@ class Manyfest
 
 	getManifest()
 	{
-		let tmpManifest = (
+		return (
 			{
 				Scope: this.scope,
 				Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors))

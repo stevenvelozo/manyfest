@@ -87,6 +87,82 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Cloning should work.',
+					(fTestComplete)=>
+					{
+						let tmpSchemaDescriptors = (
+							{
+								"a": { "Hash": "a", "Type": "Number" },
+								"b": { "Hash": "b", "Type": "Number" }
+							});
+
+						let tmpTranslationTable = (
+							{
+								"a": "CarrotCost",
+								"b": "AppleCost"
+							});
+						
+						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
+						// Property not schema, accessed by hash:
+						let tmpCreator = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator');
+						Expect(tmpCreator).to.equal('General Mills');
+						let _ClonedManyfest = _Manyfest.clone();
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('General Mills');
+	
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Cloning should take into account translation.',
+					(fTestComplete)=>
+					{
+						let tmpSchemaDescriptors = (
+							{
+								"a": { "Hash": "a", "Type": "Number" },
+								"b": { "Hash": "b", "Type": "Number" }
+							});
+
+						let tmpTranslationTable = (
+							{
+								"a": "CarrotCost",
+								"b": "AppleCost"
+							});
+						
+						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
+						// Property not schema, accessed by hash:
+						let tmpCreator = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator');
+						Expect(tmpCreator).to.equal('General Mills');
+						// Create a translation between "Creator" and "Director" as well as "Author"
+						_Manyfest.hashTranslations.addTranslation({"Director":"Creator", "Author":"Creator", "Songwriter":"Creator"});
+						Expect(tmpCreator).to.equal('General Mills');
+						// Director should also work
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal('General Mills');
+						// And Author!
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal('General Mills');
+						// Now remove Director
+						_Manyfest.hashTranslations.clearTranslations();
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal(undefined);
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Songwriter')).to.equal(undefined);
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('General Mills');
+
+						let _ClonedManyfest = _Manyfest.clone();
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal(undefined);
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Songwriter')).to.equal(undefined);
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('General Mills');
+
+						// New translations should not affect the old manyfest
+						_ClonedManyfest.hashTranslations.addTranslation({"Director":"Creator", "Author":"Creator", "Songwriter":"Creator"});
+						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal('General Mills');
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
+	
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}
