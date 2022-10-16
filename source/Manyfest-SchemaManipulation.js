@@ -107,6 +107,32 @@ class ManyfestSchemaManipulation
 		this.resolveAddressMappings(tmpManyfestSchemaDescriptors, pAddressMapping);
 		return tmpManyfestSchemaDescriptors;
 	}
+
+	mergeAddressMappings(pManyfestSchemaDescriptorsDestination, pManyfestSchemaDescriptorsSource)
+	{
+		if ((typeof(pManyfestSchemaDescriptorsSource) != 'object') || (typeof(pManyfestSchemaDescriptorsDestination) != 'object'))
+		{
+			this.logError(`Attempted to merge two schema descriptors but both were not objects.`);
+			return false;
+		}
+
+		let tmpSource = JSON.parse(JSON.stringify(pManyfestSchemaDescriptorsSource));
+		let tmpNewManyfestSchemaDescriptors = JSON.parse(JSON.stringify(pManyfestSchemaDescriptorsDestination));
+
+		// The first passed-in set of descriptors takes precedence.
+		let tmpDescriptorAddresses = Object.keys(tmpSource);
+
+		tmpDescriptorAddresses.forEach(
+			(pDescriptorAddress) => 
+			{
+				if (!tmpNewManyfestSchemaDescriptors.hasOwnProperty(pDescriptorAddress))
+				{
+					tmpNewManyfestSchemaDescriptors[pDescriptorAddress] = tmpSource[pDescriptorAddress];
+				}
+			});
+		
+		return tmpNewManyfestSchemaDescriptors;
+	}
 }
 
 module.exports = ManyfestSchemaManipulation;

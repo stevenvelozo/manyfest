@@ -89,6 +89,40 @@ suite
 				);
 				test
 				(
+					'We should be able to merge properties safely.',
+					(fTestComplete)=>
+					{
+						let tmpSchemaDescriptors = (
+							{
+								"a": { "Hash": "a", "Type": "Number" },
+								"b": { "Hash": "b", "Type": "Number" }
+							});
+						
+						let tmpSchemaDescriptorsToMerge = (
+							{
+								"c": { "Hash": "c" },
+								"d": { "Hash": "d" },
+								"e": { "Hash": "e" },
+								"a": { "Hash": "ARBUCKLE", "Type": "Number" }
+							});
+						
+						Expect(tmpSchemaDescriptors.a.Hash).to.equal('a');
+
+						let _Manyfest = new libManyfest();
+						// Now remap the schema (in-place)
+						let tmpNewSchemaDescriptors = _Manyfest.schemaManipulations.mergeAddressMappings(tmpSchemaDescriptors, tmpSchemaDescriptorsToMerge);
+
+						// The schema should be safe
+						Expect(tmpNewSchemaDescriptors.a.Hash).to.equal('a');
+						// And a new schema should have been created with the alterations
+						Expect(tmpNewSchemaDescriptors.b.Hash).to.equal('b');
+						Expect(tmpNewSchemaDescriptors.c.Hash).to.equal('c');
+
+						fTestComplete();
+					}
+				);
+				test
+				(
 					'Cloning should work.',
 					(fTestComplete)=>
 					{
