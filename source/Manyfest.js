@@ -183,15 +183,7 @@ class Manyfest
 
 	getDescriptorByHash(pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
-		{
-			return this.getDescriptor(this.elementHashes[this.hashTranslations.translate(pHash)]);
-		}
-		else
-		{
-			this.logError(`(${this.scope}) Error in getDescriptorByHash; the Hash ${pHash} doesn't exist in the schema.`);
-			return undefined;
-		}
+		return this.getDescriptor(this.resolveHashAddress(pHash));
 	}
 
 	getDescriptor(pAddress)
@@ -205,15 +197,7 @@ class Manyfest
 	// Check if an element exists by its hash
 	checkAddressExistsByHash (pObject, pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
-		{
-			return this.checkAddressExists(pObject, this.elementHashes[this.hashTranslations.translate(pHash)]);
-		}
-		else
-		{
-			this.logError(`(${this.scope}) Error in checkAddressExistsByHash; the Hash ${pHash} doesn't exist in the schema.`);
-			return undefined;
-		}
+		return this.checkAddressExists(pObject,this.resolveHashAddress(pHash));
 	}
 
 	// Check if an element exists at an address
@@ -222,19 +206,43 @@ class Manyfest
 		return this.objectAddressResolver.checkAddressExists(pObject, pAddress);
 	}
 
+	// Turn a hash into an address, factoring in the translation table.
+	resolveHashAddress(pHash)
+	{
+		let tmpAddress = undefined;
+
+		let tmpInElementHashTable = this.elementHashes.hasOwnProperty(pHash);
+		let tmpInTranslationTable = this.hashTranslations.translationTable.hasOwnProperty(pHash);
+
+		// The most straightforward: the hash exists, no translations.
+		if (tmpInElementHashTable && !tmpInTranslationTable)
+		{
+			tmpAddress = this.elementHashes[pHash];
+		}
+		// There is a translation from one hash to another, and, the elementHashes contains the pointer end
+		else if (tmpInTranslationTable && this.elementHashes.hasOwnProperty(this.hashTranslations.translate(pHash)))
+		{
+			tmpAddress = this.elementHashes[this.hashTranslations.translate(pHash)];
+		}
+		// Use the level of indirection only in the Translation Table 
+		else if (tmpInTranslationTable)
+		{
+			tmpAddress = this.hashTranslations.translate(pHash);
+		}
+		// Just treat the hash as an address.
+		// TODO: Discuss this ... it is magic but controversial
+		else
+		{
+			tmpAddress = pHash;
+		}
+
+		return tmpAddress;
+	}
 
 	// Get the value of an element by its hash
 	getValueByHash (pObject, pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
-		{
-			return this.getValueAtAddress(pObject, this.elementHashes[this.hashTranslations.translate(pHash)]);
-		}
-		else
-		{
-			this.logError(`(${this.scope}) Error in getValueByHash; the Hash ${pHash} doesn't exist in the schema.`);
-			return undefined;
-		}
+		return this.getValueAtAddress(pObject, this.resolveHashAddress(pHash));
 	}
 
 	// Get the value of an element at an address
@@ -246,15 +254,7 @@ class Manyfest
 	// Set the value of an element by its hash
 	setValueByHash(pObject, pHash, pValue)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
-		{
-			return this.setValueAtAddress(pObject, this.elementHashes[this.hashTranslations.translate(pHash)], pValue);
-		}
-		else
-		{
-			this.logError(`(${this.scope}) Error in setValueByHash; the Hash ${pHash} doesn't exist in the schema.  Value ${pValue} will not be written!`);
-			return undefined;
-		}
+		return this.setValueAtAddress(pObject, this.resolveHashAddress(pHash), pValue);
 	}
 
 

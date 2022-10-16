@@ -148,6 +148,22 @@ suite
 				);
 				test
 				(
+					'Translate to a value not in the hashes, falling back to address.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
+						// Create a translation between "Creator" and "metadata.identifier", which isn't in the manifest in any way 
+						_Manyfest.hashTranslations.addTranslation({"Creator":"metadata.identifier"});
+						// This address is not in the descriptor address list or the hash list
+						Expect(_Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata.identifier')).to.equal('FrankenberryCountChoculaTevevisionCommercial1971');
+						// But now we've pointed the Creator hash to it!
+						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('FrankenberryCountChoculaTevevisionCommercial1971');
+							
+						fTestComplete();
+					}
+				);
+				test
+				(
 					'Add a bogus translation.',
 					(fTestComplete)=>
 					{
