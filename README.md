@@ -75,12 +75,14 @@ Scope | The scope of this representation; generally the clustered or parent reco
 Schema | The stateful representation of an object's structural definition.
 Element | A defined element of data in an object.
 Address | The address where that data lies in the object.
+Hash | A unique within this scope string-based key for this element.  Used for easy access of data.
 Descriptor | A description of an element including data such as Name, NameShort, Hash, Description, and other important properties.
 Name | The name of the element.  Meant to be the most succinct human readable name possible.
 NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name.
 Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)!
-Hash | A unique within this scope string-based key for this element.  Used for easy access of data.
 Required | Set to true if this element is required.
+
+Okay so these are a lot of crazy words.  The important two are *Address* and *Hash*.  Every element in a schema must have an address.  Having a hash just multiplies the usefulness of these addresses.
 
 ## A More Advanced Schema Example
 
@@ -204,6 +206,10 @@ console.log(animalManyfest.getValueByHash(favAnimal,'ComfET'));
 ```
 
 For any elements that haven't defined a Hash, the Address is used.  This allows code to gracefully fall back.
+
+## Hash Translation Tables
+
+Sometimes we want to reuse the structure of a schema, but look up values by hash using translations.
 
 ## Programmatically Defining a Schema
 

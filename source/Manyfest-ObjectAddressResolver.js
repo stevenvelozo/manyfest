@@ -27,8 +27,8 @@ class ManyfestObjectAddressResolver
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
-		this.logInfo = (typeof(pInfoLog) === 'function') ? pInfoLog : libSimpleLog;
-		this.logError = (typeof(pErrorLog) === 'function') ? pErrorLog : libSimpleLog;
+		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
+		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 	}
 
 	// When a boxed property is passed in, it should have quotes of some
@@ -67,15 +67,15 @@ class ManyfestObjectAddressResolver
 	{
 		// TODO: Should these throw an error?
 		// Make sure pObject is an object
-		if (!typeof(pObject) === 'object') return false;
+		if (typeof(pObject) != 'object') return false;
 		// Make sure pAddress is a string
-		if (!typeof(pAddress) === 'string') return false;
+		if (typeof(pAddress) != 'string') return false;
 
 		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
 		let tmpSeparatorIndex = pAddress.indexOf('.');
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-		if (tmpSeparatorIndex === -1)
+		if (tmpSeparatorIndex == -1)
 		{
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
@@ -240,15 +240,15 @@ class ManyfestObjectAddressResolver
 	getValueAtAddress (pObject, pAddress)
 	{
 		// Make sure pObject is an object
-		if (!typeof(pObject) === 'object') return undefined;
+		if (typeof(pObject) != 'object') return undefined;
 		// Make sure pAddress is a string
-		if (!typeof(pAddress) === 'string') return undefined;
+		if (typeof(pAddress) != 'string') return undefined;
 
 		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
 		let tmpSeparatorIndex = pAddress.indexOf('.');
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-		if (tmpSeparatorIndex === -1)
+		if (tmpSeparatorIndex == -1)
 		{
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
@@ -410,13 +410,13 @@ class ManyfestObjectAddressResolver
 	setValueAtAddress (pObject, pAddress, pValue)
 	{
 		// Make sure pObject is an object
-		if (!typeof(pObject) === 'object') return false;
+		if (typeof(pObject) != 'object') return false;
 		// Make sure pAddress is a string
-		if (!typeof(pAddress) === 'string') return false;
+		if (typeof(pAddress) != 'string') return false;
 
 		let tmpSeparatorIndex = pAddress.indexOf('.');
 
-		if (tmpSeparatorIndex === -1)
+		if (tmpSeparatorIndex == -1)
 		{
 			// Check if it's a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');

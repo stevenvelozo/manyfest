@@ -4,6 +4,8 @@
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
+let libHashTranslation = require('./Manyfest-HashTranslation.js');
+let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 
 /**
 * Manyfest object address-based descriptions and manipulations.
@@ -50,6 +52,10 @@ class Manyfest
 		{
 			this.loadManifest(pManifest);
 		}
+
+		this.schemaManipulations = new libSchemaManipulation(this.logInfo, this.logError);
+
+		this.hashTranslations = new libHashTranslation(this.logInfo, this.logError);
 	}
 
 	/*************************************************************************
@@ -153,13 +159,17 @@ class Manyfest
 			this.elementDescriptors[pAddress] = pDescriptor;
 
 			// Always add the address as a hash
-			// TODO: Check if this is a good idea or not.
-			//       Collisions are bound to happen with both representations of the address/hash in here.
 			this.elementHashes[pAddress] = pAddress;
 
 			if (pDescriptor.hasOwnProperty('Hash'))
 			{
+				// TODO: Check if this is a good idea or not..
+				//       Collisions are bound to happen with both representations of the address/hash in here and developers being able to create their own hashes.
 				this.elementHashes[pDescriptor.Hash] = pAddress;
+			}
+			else
+			{
+				pDescriptor.Hash = pAddress;
 			}
 
 			return true;
@@ -173,9 +183,9 @@ class Manyfest
 
 	getDescriptorByHash(pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash))
+		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
 		{
-			return this.getDescriptor(this.elementHashes[pHash]);
+			return this.getDescriptor(this.elementHashes[this.hashTranslations.translate(pHash)]);
 		}
 		else
 		{
@@ -195,9 +205,9 @@ class Manyfest
 	// Check if an element exists by its hash
 	checkAddressExistsByHash (pObject, pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash))
+		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
 		{
-			return this.checkAddressExists(pObject, this.elementHashes[pHash]);
+			return this.checkAddressExists(pObject, this.elementHashes[this.hashTranslations.translate(pHash)]);
 		}
 		else
 		{
@@ -216,9 +226,9 @@ class Manyfest
 	// Get the value of an element by its hash
 	getValueByHash (pObject, pHash)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash))
+		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
 		{
-			return this.getValueAtAddress(pObject, this.elementHashes[pHash]);
+			return this.getValueAtAddress(pObject, this.elementHashes[this.hashTranslations.translate(pHash)]);
 		}
 		else
 		{
@@ -236,9 +246,9 @@ class Manyfest
 	// Set the value of an element by its hash
 	setValueByHash(pObject, pHash, pValue)
 	{
-		if (this.elementHashes.hasOwnProperty(pHash))
+		if (this.elementHashes.hasOwnProperty(pHash) || this.hashTranslations.translationTable.hasOwnProperty(pHash))
 		{
-			return this.setValueAtAddress(pObject, this.elementHashes[pHash], pValue);
+			return this.setValueAtAddress(pObject, this.elementHashes[this.hashTranslations.translate(pHash)], pValue);
 		}
 		else
 		{

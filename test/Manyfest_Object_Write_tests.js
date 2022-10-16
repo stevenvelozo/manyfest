@@ -1,5 +1,5 @@
 /**
-* Unit tests for Meadow
+* Unit tests for Manyfest
 *
 * @license     MIT
 *
