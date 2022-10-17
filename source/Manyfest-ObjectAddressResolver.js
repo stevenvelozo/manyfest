@@ -93,7 +93,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				// The "Name" of the Object contained too the left of the bracket
 				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
@@ -167,7 +167,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				let tmpBoxedPropertyName = tmpSubObjectName.substring(0, tmpBracketStartIndex).trim();
 
@@ -237,12 +237,17 @@ class ManyfestObjectAddressResolver
 	}
 
 	// Get the value of an element at an address
-	getValueAtAddress (pObject, pAddress)
+	getValueAtAddress (pObject, pAddress, pParentAddress)
 	{
 		// Make sure pObject is an object
 		if (typeof(pObject) != 'object') return undefined;
 		// Make sure pAddress is a string
 		if (typeof(pAddress) != 'string') return undefined;
+		let tmpParentAddress = "";
+		if (typeof(pParentAddress) == 'string')
+		{
+			tmpParentAddress = pParentAddress;
+		}
 
 		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
 		let tmpSeparatorIndex = pAddress.indexOf('.');
@@ -253,6 +258,11 @@ class ManyfestObjectAddressResolver
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
 			let tmpBracketStopIndex = pAddress.indexOf(']');
+
+			// Check for the Object Set Type marker.
+			// Note this will not work with a bracket in the same address box set
+			let tmpObjectTypeMarkerIndex = pAddress.indexOf('{}');
+
 			// Boxed elements look like this:
 			// 		MyValues[10]
 			// 		MyValues['Name']
@@ -266,7 +276,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				// The "Name" of the Object contained too the left of the bracket
 				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
@@ -311,6 +321,37 @@ class ManyfestObjectAddressResolver
 					return pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber];
 				}
 			}
+			// The requirements to detect a boxed set element are:
+			//    1) The start bracket is after character 0
+			else if ((tmpBracketStartIndex > 0) 
+			//    2) The end bracket is after the start bracket
+				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
+			//    3) There is nothing in the brackets
+				&& (tmpBracketStopIndex - tmpBracketStartIndex == 1))
+			{
+				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
+
+				if (!Array.isArray(pObject[tmpBoxedPropertyName]))
+				{
+					// We asked for a set from an array but it isnt' an array.
+					return false;
+				}
+
+				return pObject[tmpBoxedPropertyName];
+			}
+			// The object has been flagged as an object set, so treat it as such
+			else if (tmpObjectTypeMarkerIndex > 0)
+			{
+				let tmpObjectPropertyName = pAddress.substring(0, tmpObjectTypeMarkerIndex).trim();
+
+				if (typeof(pObject[tmpObjectPropertyName]) != 'object')
+				{
+					// We asked for a set from an array but it isnt' an array.
+					return false;
+				}
+
+				return pObject[tmpObjectPropertyName];
+			}
 			else
 			{
 				// Now is the point in recursion to return the value in the address
@@ -322,6 +363,7 @@ class ManyfestObjectAddressResolver
 			let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
 			let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
 
+			// BOXED ELEMENTS
 			// Test if the tmpNewAddress is an array or object
 			// Check if it's a boxed property
 			let tmpBracketStartIndex = tmpSubObjectName.indexOf('[');
@@ -339,7 +381,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				let tmpBoxedPropertyName = tmpSubObjectName.substring(0, tmpBracketStartIndex).trim();
 
@@ -376,14 +418,79 @@ class ManyfestObjectAddressResolver
 					tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
+					// Continue to manage the parent address for recursion
+					tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 					// Recurse directly into the subobject
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress);
+					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpParentAddress);
 				}
 				else
 				{
+					// Continue to manage the parent address for recursion
+					tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 					// We parsed a valid number out of the boxed property name, so recurse into the array
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress);
+					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpParentAddress);
 				}
+			}
+			// The requirements to detect a boxed set element are:
+			//    1) The start bracket is after character 0
+			else if ((tmpBracketStartIndex > 0) 
+			//    2) The end bracket is after the start bracket
+				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
+			//    3) There is nothing in the brackets
+				&& (tmpBracketStopIndex - tmpBracketStartIndex == 1))
+			{
+				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
+
+				if (!Array.isArray(pObject[tmpBoxedPropertyName]))
+				{
+					// We asked for a set from an array but it isnt' an array.
+					return false;
+				}
+
+				// We need to enumerate the array and grab the addresses from there.
+				let tmpArrayProperty = pObject[tmpBoxedPropertyName];
+				// Managing the parent address is a bit more complex here -- the box will be added for each element.
+				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpBoxedPropertyName}`;
+				// The container object is where we have the "Address":SOMEVALUE pairs
+				let tmpContainerObject = {};
+				for (let i = 0; i < tmpArrayProperty.length; i++)
+				{
+					let tmpPropertyParentAddress = `${tmpParentAddress}[${i}]`;
+					let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);;
+					tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+				}
+
+				return tmpContainerObject;
+			}
+
+			// OBJECT SET
+			// Note this will not work with a bracket in the same address box set
+			let tmpObjectTypeMarkerIndex = pAddress.indexOf('{}');
+			if (tmpObjectTypeMarkerIndex > 0)
+			{
+				let tmpObjectPropertyName = pAddress.substring(0, tmpObjectTypeMarkerIndex).trim();
+
+				if (typeof(pObject[tmpObjectPropertyName]) != 'object')
+				{
+					// We asked for a set from an array but it isnt' an array.
+					return false;
+				}
+
+				// We need to enumerate the Object and grab the addresses from there.
+				let tmpObjectProperty = pObject[tmpObjectPropertyName];
+				let tmpObjectPropertyKeys = Object.keys(tmpObjectProperty);
+				// Managing the parent address is a bit more complex here -- the box will be added for each element.
+				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpObjectPropertyName}`;
+				// The container object is where we have the "Address":SOMEVALUE pairs
+				let tmpContainerObject = {};
+				for (let i = 0; i < tmpObjectPropertyKeys.length; i++)
+				{
+					let tmpPropertyParentAddress = `${tmpParentAddress}.${tmpObjectPropertyKeys[i]}`;
+					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);;
+					tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+				}
+
+				return tmpContainerObject;
 			}
 
 			// If there is an object property already named for the sub object, but it isn't an object
@@ -395,13 +502,17 @@ class ManyfestObjectAddressResolver
 			else if (pObject.hasOwnProperty(tmpSubObjectName))
 			{
 				// If there is already a subobject pass that to the recursive thingy
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress);
+				// Continue to manage the parent address for recursion
+				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
+				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
 			}
 			else
 			{
 				// Create a subobject and then pass that
+				// Continue to manage the parent address for recursion
+				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 				pObject[tmpSubObjectName] = {};
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress);
+				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
 			}
 		}
 	}
@@ -434,7 +545,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				// The "Name" of the Object contained too the left of the bracket
 				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
@@ -510,7 +621,7 @@ class ManyfestObjectAddressResolver
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex) 
 			//    3) There is data 
-				&& (tmpBracketStopIndex - tmpBracketStartIndex > 0))
+				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
 				let tmpBoxedPropertyName = tmpSubObjectName.substring(0, tmpBracketStartIndex).trim();
 
