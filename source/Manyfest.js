@@ -256,13 +256,29 @@ class Manyfest
 	// Get the value of an element by its hash
 	getValueByHash (pObject, pHash)
 	{
-		return this.getValueAtAddress(pObject, this.resolveHashAddress(pHash));
+		let tmpValue = this.getValueAtAddress(pObject, this.resolveHashAddress(pHash));
+
+		if (typeof(tmpValue) == 'undefined')
+		{
+			// Try to get a default if it exists
+			tmpValue = this.getDefaultValue(this.getDescriptorByHash(pHash));
+		}
+
+		return tmpValue;
 	}
 
 	// Get the value of an element at an address
 	getValueAtAddress (pObject, pAddress)
 	{
-		return this.objectAddressResolver.getValueAtAddress(pObject, pAddress);
+		let tmpValue = this.objectAddressResolver.getValueAtAddress(pObject, pAddress);
+
+		if (typeof(tmpValue) == 'undefined')
+		{
+			// Try to get a default if it exists
+			tmpValue = this.getDefaultValue(this.getDescriptor(pAddress));
+		}
+
+		return tmpValue;
 	}
 
 	// Set the value of an element by its hash
@@ -385,6 +401,11 @@ class Manyfest
 	// Returns a default value, or, the default value for the data type (which is overridable with configuration)
 	getDefaultValue(pDescriptor)
 	{
+		if (typeof(pDescriptor) != 'object')
+		{
+			return undefined;
+		}
+
 		if (pDescriptor.hasOwnProperty('Default'))
 		{
 			return pDescriptor.Default;

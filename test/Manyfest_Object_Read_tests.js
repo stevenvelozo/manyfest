@@ -57,7 +57,7 @@ suite
 				);
 				test
 				(
-					'Exercise more hash accesss scenarios..',
+					'Return default values when none are supplied.',
 					(fTestComplete)=>
 					{
 						let animalManyfest = new libManyfest(
@@ -79,13 +79,19 @@ suite
 												"Name":"Comfortable Environmental Temperature",
 												"NameShort":"Comf Env Temp",
 												"Hash":"ComfET",
-												"Description":"The most comfortable temperature for this animal to survive in."
+												"Description":"The most comfortable temperature for this animal to survive in.",
+												"Default": "96.8"
 											}
 									}
 							});
 
-						Expect(animalManyfest.getValueByHash({MedicalStats: { Temps: { CET:200 }},Name:'Froggy'}, 'ComfET'))
-							.to.equal(200);
+							Expect(animalManyfest.getValueByHash({MedicalStats: { Temps: { CET:200 }},Name:'Froggy'}, 'ComfET')).to.equal(200);
+							Expect(animalManyfest.getValueByHash({MedicalStats: { Temps: { MinET:200 }},Name:'Froggy'}, 'ComfET')).to.equal('96.8');
+							Expect(animalManyfest.getValueByHash({MedicalStats: { Temps: { MinET:200 }},Name:'Froggy'}, 'CurrentTemperature')).to.equal(undefined);
+
+							Expect(animalManyfest.getValueAtAddress({MedicalStats: { Temps: { CET:200 }},Name:'Froggy'}, 'MedicalStats.Temps.CET')).to.equal(200);
+							Expect(animalManyfest.getValueAtAddress({MedicalStats: { Temps: { MinET:200 }},Name:'Froggy'}, 'MedicalStats.Temps.CET')).to.equal('96.8');
+							Expect(animalManyfest.getValueAtAddress({MedicalStats: { Temps: { MinET:200 }},Name:'Froggy'}, 'MedicalStats.Temps.HighET')).to.equal(undefined);
 
 						fTestComplete();
 					}
