@@ -4,6 +4,8 @@
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 
+let libPrecedent = require('precedent');
+
 let libHashTranslation = require('./Manyfest-HashTranslation.js');
 let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
 let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
@@ -48,6 +50,10 @@ class Manyfest
 		this.elementAddresses = undefined;
 		this.elementHashes = undefined;
 		this.elementDescriptors = undefined;
+		// This can cause a circular dependency chain, so it only gets initialized if the schema specifically calls for it.
+		this.dataSolvers = undefined;
+		// So solvers can use their own state
+		this.dataSolverState = undefined;
 
 		this.reset();
 
@@ -73,6 +79,11 @@ class Manyfest
 		this.elementAddresses = [];
 		this.elementHashes = {};
 		this.elementDescriptors = {};
+		this.dataSolvers = undefined;
+		this.dataSolverState = {};
+
+		this.libElucidator = undefined;
+		this.objectAddressResolver.elucidatorSolver = false;
 	}
 
 	clone()
@@ -138,6 +149,35 @@ class Manyfest
 		else
 		{
 			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, pManifest);
+		}
+
+		// This seems like it would create a circular dependency issue but it only goes as deep as the schema defines Solvers
+		if ((pManifest.hasOwnProperty('Solvers')) && (typeof(pManifest.Solvers) == 'object'))
+		{
+			// There are elucidator solvers passed-in, so we will create one to filter data.
+			let libElucidator = require('elucidator');
+			// WARNING THESE CAN MUTATE THE DATA
+				// The pattern for the solver is: {<~~SolverName~~>} anywhere in a property.
+				//   Yes, this means your Javascript elements can't have my self-styled jellyfish brackets in them.
+				//   This does, though, mean we can filter at multiple layers safely.
+				//   Because these can be put at any address
+			// The solver themselves:
+				//   They are passed-in an object, and the current record is in the Record subobject.
+				//   Basic operations can just write to the root object but...
+				//   IF YOU PERMUTE THE Record SUBOBJECT YOU CAN AFFECT RECURSION
+			// This is mostly meant for if statements to filter.
+				//   Basically on aggregation, if a filter is set it will set "keep record" to true and let the solver decide differently.
+			this.dataSolvers = new libElucidator(pManifest.Solvers, this.logInfo, this.logError);
+			this.objectAddressResolver.elucidatorSolver = this.dataSolvers;
+
+			// Load the solver state in so each instruction can have internal config
+			// TODO: Should this just be a part of the lower layer pattern?
+			let tmpSolverKeys = Object.keys(pManifest.Solvers)
+			for (let i = 0; i < tmpSolverKeys.length; i++)
+			{
+				this.dataSolverState[tmpSolverKeys] = pManifest.Solvers[tmpSolverKeys[i]];
+			}
+			this.objectAddressResolver.elucidatorSolverState = this.dataSolverState;
 		}
 	}
 

@@ -3,6 +3,7 @@
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
+let libPrecedent = require('precedent');
 
 /**
 * Object Address Resolver
@@ -19,6 +20,8 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 *                 be kind and rewind... meaning please keep the codebase less
 *                 terse and more verbose so humans can comprehend it.
 *                 
+* TODO: Once we validate this pattern is good to go, break these out into 
+*       three separate modules.
 *
 * @class ManyfestObjectAddressResolver
 */
@@ -29,6 +32,9 @@ class ManyfestObjectAddressResolver
 		// Wire in logging
 		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
+
+		this.elucidatorSolver = false;
+		this.elucidatorSolverState = {};
 	}
 
 	// When a boxed property is passed in, it should have quotes of some
@@ -236,13 +242,111 @@ class ManyfestObjectAddressResolver
 		}
 	}
 
+	checkFilters(pAddress, pRecord)
+	{
+		let tmpPrecedent = new libPrecedent();
+		// If we don't copy the string, precedent takes it out for good.
+		// TODO: Consider adding a "don't replace" option for precedent
+		let tmpAddress = pAddress;
+
+		if (!this.elucidatorSolver)
+		{
+			// Again, manage against circular dependencies
+			let libElucidator = require('elucidator');
+			this.elucidatorSolver = new libElucidator({}, this.logInfo, this.logError);
+		}
+
+		if (this.elucidatorSolver)
+		{
+			// This allows the magic filtration with elucidator configuration
+			// TODO: We could pass more state in (e.g. parent address, object, etc.)
+			// TODO: Discuss this metaprogramming AT LENGTH
+			let tmpFilterState = (
+				{
+					Record: pRecord,
+					keepRecord: true 
+				});
+
+			// This is about as complex as it gets.
+			// TODO: Optimize this so it is only initialized once.
+			// TODO: That means figuring out a healthy pattern for passing in state to this
+			tmpPrecedent.addPattern('<<~~', '~~>>',
+				(pInstructionHash) => 
+				{
+					// This is for internal config on the solution steps.  Right now config is not shared across steps.
+					if (this.elucidatorSolverState.hasOwnProperty(pInstructionHash))
+					{
+						tmpFilterState.SolutionState = this.elucidatorSolverState[pInstructionHash];
+					}
+					this.elucidatorSolver.solveInternalOperation('Custom', pInstructionHash, tmpFilterState);
+				});
+			tmpPrecedent.addPattern('<<~?', '?~>>',
+				(pMagicSearchExpression) => 
+				{
+					if (typeof(pMagicSearchExpression) !== 'string')
+					{
+						return false;
+					}
+					// This expects a comma separated expression:
+					//     Some.Address.In.The.Object,==,Search Term to Match
+					let tmpMagicComparisonPatternSet = pMagicSearchExpression.split(',');
+
+					let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
+					let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
+					let tmpSearchValue = tmpMagicComparisonPatternSet[2];
+
+					tmpFilterState.ComparisonState = (
+						{
+							SearchAddress: tmpSearchAddress,
+							Comparator: tmpSearchComparator,
+							SearchTerm: tmpSearchValue
+						});
+
+					this.elucidatorSolver.solveOperation(
+						{
+							"Description":
+							{
+								"Operation": "Simple_If",
+								"Synopsis": "Test for "
+							},
+							"Steps":
+							[
+								{
+									"Namespace": "Logic",
+									"Instruction": "if",
+		
+									"InputHashAddressMap": 
+										{
+											// This is ... dynamically assigning the address in the instruction
+											// The complexity is astounding.
+											"leftValue": `Record.${tmpSearchAddress}`,
+											"rightValue": "ComparisonState.SearchTerm",
+											"comparator": "ComparisonState.Comparator"
+										},
+									"OutputHashAddressMap": { "truthinessResult":"keepRecord" }
+								}
+							]
+						}, tmpFilterState);
+				});
+			tmpPrecedent.parseString(tmpAddress);
+
+			// It is expected that the operation will mutate this to some truthy value
+			return tmpFilterState.keepRecord;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	// Get the value of an element at an address
 	getValueAtAddress (pObject, pAddress, pParentAddress)
 	{
-		// Make sure pObject is an object
+		// Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)
 		if (typeof(pObject) != 'object') return undefined;
-		// Make sure pAddress is a string
+		// Make sure pAddress (the address we are resolving) is a string
 		if (typeof(pAddress) != 'string') return undefined;
+		// Stash the parent address for later resolution
 		let tmpParentAddress = "";
 		if (typeof(pParentAddress) == 'string')
 		{
@@ -337,7 +441,19 @@ class ManyfestObjectAddressResolver
 					return false;
 				}
 
-				return pObject[tmpBoxedPropertyName];
+				let tmpInputArray = pObject[tmpBoxedPropertyName];
+				let tmpOutputArray = [];
+				for (let i = 0; i < tmpInputArray.length; i++)
+				{
+					// The filtering is complex but allows config-based metaprogramming directly from schema
+					let tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+					if (tmpKeepRecord)
+					{
+						tmpOutputArray.push(tmpInputArray[i]);
+					}
+				}
+
+				return tmpOutputArray;
 			}
 			// The object has been flagged as an object set, so treat it as such
 			else if (tmpObjectTypeMarkerIndex > 0)
@@ -456,7 +572,8 @@ class ManyfestObjectAddressResolver
 				for (let i = 0; i < tmpArrayProperty.length; i++)
 				{
 					let tmpPropertyParentAddress = `${tmpParentAddress}[${i}]`;
-					let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);;
+					let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);
+					
 					tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
 				}
 
@@ -486,8 +603,14 @@ class ManyfestObjectAddressResolver
 				for (let i = 0; i < tmpObjectPropertyKeys.length; i++)
 				{
 					let tmpPropertyParentAddress = `${tmpParentAddress}.${tmpObjectPropertyKeys[i]}`;
-					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);;
-					tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
+	
+					// The filtering is complex but allows config-based metaprogramming directly from schema
+					let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
+					if (tmpKeepRecord)
+					{
+						tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+					}
 				}
 
 				return tmpContainerObject;
