@@ -3,9 +3,12 @@
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
-let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
+
 let libHashTranslation = require('./Manyfest-HashTranslation.js');
+let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
+let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
 let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
+
 
 /**
 * Manyfest object address-based descriptions and manipulations.
@@ -54,6 +57,7 @@ class Manyfest
 		}
 
 		this.schemaManipulations = new libSchemaManipulation(this.logInfo, this.logError);
+		this.objectAddressGeneration = new libObjectAddressGeneration(this.logInfo, this.logError);
 
 		this.hashTranslations = new libHashTranslation(this.logInfo, this.logError);
 	}
@@ -320,9 +324,10 @@ class Manyfest
 		for (let i = 0; i < this.elementAddresses.length; i++)
 		{
 			let tmpDescriptor = this.getDescriptor(this.elementAddresses[i]);
+			let tmpValueExists = this.checkAddressExists(pObject, tmpDescriptor.Address);
 			let tmpValue = this.getValueAtAddress(pObject, tmpDescriptor.Address);
 
-			if (typeof(tmpValue) == 'undefined')
+			if ((typeof(tmpValue) == 'undefined') || !tmpValueExists)
 			{
 				// This will technically mean that `Object.Some.Value = undefined` will end up showing as "missing"
 				// TODO: Do we want to do a different message based on if the property exists but is undefined?

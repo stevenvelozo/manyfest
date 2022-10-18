@@ -197,6 +197,52 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Schema definition prototypes should be able to be generated from any JSON object shape.',
+					(fTestComplete)=>
+					{
+						let tmpSchemaDescriptors = (
+							{
+								"a": { "Hash": "a", "Type": "Number" },
+								"b": { "Hash": "b", "Type": "Number" },
+								"TranslationTable":
+								{
+									"a": "CarrotCost",
+									"b": "AppleCost"
+								}
+							});
+						
+						let _Manyfest = new libManyfest();
+						// Now remap the schema (in-place)
+						let tmpSchemaPrototype = _Manyfest.objectAddressGeneration.generateAddressses(tmpSchemaDescriptors);
+
+						// The schema should be fundamentally altered to point these addresses to the old hashes
+						Expect(tmpSchemaPrototype).to.be.an('object');
+
+						Expect(tmpSchemaPrototype['TranslationTable.a'].DataType).to.equal('String');
+
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Make a much bigger schema prototype.',
+					(fTestComplete)=>
+					{						
+						let _Manyfest = new libManyfest();
+						// Now remap the schema (in-place)
+						let tmpSchemaPrototype = _Manyfest.objectAddressGeneration.generateAddressses(_SampleDataArchiveOrgFrankenberry);
+
+						// The schema should be fundamentally altered to point these addresses to the old hashes
+						Expect(tmpSchemaPrototype).to.be.an('object');
+
+						Expect(tmpSchemaPrototype['files_count'].Default).to.equal(17);
+						Expect(tmpSchemaPrototype['files_count'].DataType).to.equal('Number');
+
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}
