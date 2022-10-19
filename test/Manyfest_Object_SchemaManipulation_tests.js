@@ -243,6 +243,48 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Iterate through elements of a schema.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest(
+							{
+								"Scope": "Animal",
+								"Descriptors":
+									{
+										"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+										"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
+										"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
+										"MedicalStats": 
+											{
+												"Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
+											},
+										"MedicalStats.Temps.MinET": { "Name":"Minimum Environmental Temperature", "NameShort":"MinET", "Description":"Safest minimum temperature for this animal to survive in."},
+										"MedicalStats.Temps.MaxET": { "Name":"Maximum Environmental Temperature", "NameShort":"MaxET", "Description":"Safest maximum temperature for this animal to survive in."},
+										"MedicalStats.Temps.CET":
+											{
+												"Name":"Comfortable Environmental Temperature",
+												"NameShort":"Comf Env Temp",
+												"Hash":"ComfET",
+												"Description":"The most comfortable temperature for this animal to survive in.",
+												"Default": "96.8"
+											}
+									}
+							});
+
+						let tmpSchemaAddresses = [];
+
+						_Manyfest.eachDescriptor(
+							(pDescriptor)=>
+							{
+								tmpSchemaAddresses.push(pDescriptor.Hash);
+							})
+						Expect(tmpSchemaAddresses.length).to.equal(7);
+						Expect(tmpSchemaAddresses[6]).to.equal('ComfET');
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}

@@ -249,6 +249,17 @@ class Manyfest
 		return this.elementDescriptors[pAddress];
 	}
 
+	// execute an action function for each descriptor
+	eachDescriptor(fAction)
+	{
+        let tmpDescriptorAddresses = Object.keys(this.elementDescriptors);
+        for (let i = 0; i < tmpDescriptorAddresses.length; i++)
+        {
+            fAction(this.elementDescriptors[tmpDescriptorAddresses[i]]);
+        }
+
+	}
+
 	/*************************************************************************
 	 * Beginning of Object Manipulation (read & write) Functions
 	 */
