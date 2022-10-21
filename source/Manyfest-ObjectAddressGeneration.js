@@ -61,6 +61,11 @@ class ManyfestObjectAddressGeneration
 			}
 		)
 
+		if ((tmpObjectType == 'object') && (pObject == null))
+		{
+			tmpObjectType = 'null';
+		}
+
 		switch(tmpObjectType)
 		{
 			case 'string':
@@ -75,6 +80,7 @@ class ManyfestObjectAddressGeneration
 				tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;
 				break;
 			case 'undefined':
+			case 'null':
 				tmpSchemaObjectEntry.DataType = 'Any';
 				tmpSchemaObjectEntry.Default = pObject;
 				tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;

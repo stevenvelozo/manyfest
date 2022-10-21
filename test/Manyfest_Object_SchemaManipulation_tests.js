@@ -209,7 +209,8 @@ suite
 								"TranslationTable":
 								{
 									"a": "CarrotCost",
-									"b": "AppleCost"
+									"b": "AppleCost",
+									"c": null
 								}
 							});
 						
