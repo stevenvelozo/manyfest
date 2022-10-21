@@ -523,6 +523,12 @@ class ManyfestObjectAddressResolver
 				{
 					return undefined;
 				}
+				// Check if the boxed property is an object.
+				if (typeof(pObject[tmpBoxedPropertyName]) != 'object')
+				{
+					return undefined;
+				}
+
 
 				//This is a bracketed value
 				//    4) If the middle part is *only* a number (no single, double or backtick quotes) it is an array element,
