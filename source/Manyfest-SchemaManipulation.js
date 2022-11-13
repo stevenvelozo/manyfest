@@ -30,7 +30,7 @@ class ManyfestSchemaManipulation
     // And then an address mapping (basically a Hash->Address map)
     //  {
     //    "a": "New.Address.Of.a",
-    //    "b": "New.Address.Of.b"  
+    //    "b": "New.Address.Of.b"
     //  }
     //
     // NOTE: This mutates the schema object permanently, altering the base hash.
@@ -123,14 +123,14 @@ class ManyfestSchemaManipulation
 		let tmpDescriptorAddresses = Object.keys(tmpSource);
 
 		tmpDescriptorAddresses.forEach(
-			(pDescriptorAddress) => 
+			(pDescriptorAddress) =>
 			{
 				if (!tmpNewManyfestSchemaDescriptors.hasOwnProperty(pDescriptorAddress))
 				{
 					tmpNewManyfestSchemaDescriptors[pDescriptorAddress] = tmpSource[pDescriptorAddress];
 				}
 			});
-		
+
 		return tmpNewManyfestSchemaDescriptors;
 	}
 }

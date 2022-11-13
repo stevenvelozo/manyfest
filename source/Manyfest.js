@@ -7,7 +7,9 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 let libPrecedent = require('precedent');
 
 let libHashTranslation = require('./Manyfest-HashTranslation.js');
-let libObjectAddressResolver = require('./Manyfest-ObjectAddressResolver.js');
+let libObjectAddressCheckAddressExists = require('./Manyfest-ObjectAddress-CheckAddressExists.js');
+let libObjectAddressGetValue = require('./Manyfest-ObjectAddress-GetValue.js');
+let libObjectAddressSetValue = require('./Manyfest-ObjectAddress-SetValue.js');
 let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
 let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 
@@ -26,12 +28,14 @@ class Manyfest
 		this.logError = (typeof(pErrorLog) === 'function') ? pErrorLog : libSimpleLog;
 
 		// Create an object address resolver and map in the functions
-		this.objectAddressResolver = new libObjectAddressResolver(this.logInfo, this.logError);
+		this.objectAddressCheckAddressExists = new libObjectAddressCheckAddressExists(this.logInfo, this.logError);
+		this.objectAddressGetValue = new libObjectAddressGetValue(this.logInfo, this.logError);
+		this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
 
 		this.options = (
 			{
 				strict: false,
-				defaultValues: 
+				defaultValues:
 					{
 						"String": "",
 						"Number": 0,
@@ -83,7 +87,17 @@ class Manyfest
 		this.dataSolverState = {};
 
 		this.libElucidator = undefined;
-		this.objectAddressResolver.elucidatorSolver = false;
+	}
+
+	setElucidatorSolvers(pElucidatorSolver, pElucidatorSolverState)
+	{
+		this.objectAddressCheckAddressExists.elucidatorSolver = pElucidatorSolver;
+		this.objectAddressGetValue.elucidatorSolver = pElucidatorSolver;
+		this.objectAddressSetValue.elucidatorSolver = pElucidatorSolver;
+
+		this.objectAddressCheckAddressExists.elucidatorSolverState = pElucidatorSolverState;
+		this.objectAddressGetValue.elucidatorSolverState = pElucidatorSolverState;
+		this.objectAddressSetValue.elucidatorSolverState = pElucidatorSolverState;
 	}
 
 	clone()
@@ -168,7 +182,6 @@ class Manyfest
 			// This is mostly meant for if statements to filter.
 				//   Basically on aggregation, if a filter is set it will set "keep record" to true and let the solver decide differently.
 			this.dataSolvers = new libElucidator(pManifest.Solvers, this.logInfo, this.logError);
-			this.objectAddressResolver.elucidatorSolver = this.dataSolvers;
 
 			// Load the solver state in so each instruction can have internal config
 			// TODO: Should this just be a part of the lower layer pattern?
@@ -177,7 +190,8 @@ class Manyfest
 			{
 				this.dataSolverState[tmpSolverKeys] = pManifest.Solvers[tmpSolverKeys[i]];
 			}
-			this.objectAddressResolver.elucidatorSolverState = this.dataSolverState;
+
+			this.setElucidatorSolvers(this.dataSolvers, this.dataSolverState);
 		}
 	}
 
@@ -236,7 +250,7 @@ class Manyfest
 		{
 			this.logError(`(${this.scope}) Error loading object descriptor for address '${pAddress}' from manifest object.  Expecting an object but property was type ${typeof(pDescriptor)}.`);
 			return false;
-		}	
+		}
 	}
 
 	getDescriptorByHash(pHash)
@@ -272,7 +286,7 @@ class Manyfest
 	// Check if an element exists at an address
 	checkAddressExists (pObject, pAddress)
 	{
-		return this.objectAddressResolver.checkAddressExists(pObject, pAddress);
+		return this.objectAddressCheckAddressExists.checkAddressExists(pObject, pAddress);
 	}
 
 	// Turn a hash into an address, factoring in the translation table.
@@ -293,7 +307,7 @@ class Manyfest
 		{
 			tmpAddress = this.elementHashes[this.hashTranslations.translate(pHash)];
 		}
-		// Use the level of indirection only in the Translation Table 
+		// Use the level of indirection only in the Translation Table
 		else if (tmpInTranslationTable)
 		{
 			tmpAddress = this.hashTranslations.translate(pHash);
@@ -325,7 +339,7 @@ class Manyfest
 	// Get the value of an element at an address
 	getValueAtAddress (pObject, pAddress)
 	{
-		let tmpValue = this.objectAddressResolver.getValueAtAddress(pObject, pAddress);
+		let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
 
 		if (typeof(tmpValue) == 'undefined')
 		{
@@ -346,7 +360,7 @@ class Manyfest
 	// Set the value of an element at an address
 	setValueAtAddress (pObject, pAddress, pValue)
 	{
-		return this.objectAddressResolver.setValueAtAddress(pObject, pAddress, pValue);
+		return this.objectAddressSetValue.setValueAtAddress(pObject, pAddress, pValue);
 	}
 
 	// Validate the consistency of an object against the schema
@@ -438,7 +452,7 @@ class Manyfest
 						{
 							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is not parsable as a Date by Javascript`);
 						}
-	
+
 					default:
 						// Check if this is a string, in the default case
 						// Note this is only when a DataType is specified and it is an unrecognized data type.
