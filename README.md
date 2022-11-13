@@ -581,4 +581,6 @@ let _Schema = new libManyfest(schemaArchiveOrg);
 
 console.log(`The URL for "${_Schema.getValueByHash(dataArchiveOrg,'Title')}" is: ${_Schema.getValueByHash(dataArchiveOrg,'Server')}${_Schema.getValueByHash(dataArchiveOrg,'Path')}`);
 ```
+# Architectural TODO:
 
+Change the complex address resolution functions to leverage a single resolver that returns both `container` and `entry`.

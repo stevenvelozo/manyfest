@@ -10,6 +10,7 @@ let libHashTranslation = require('./Manyfest-HashTranslation.js');
 let libObjectAddressCheckAddressExists = require('./Manyfest-ObjectAddress-CheckAddressExists.js');
 let libObjectAddressGetValue = require('./Manyfest-ObjectAddress-GetValue.js');
 let libObjectAddressSetValue = require('./Manyfest-ObjectAddress-SetValue.js');
+let libObjectAddressDeleteValue = require('./Manyfest-ObjectAddress-DeleteValue.js');
 let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
 let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 
@@ -31,6 +32,7 @@ class Manyfest
 		this.objectAddressCheckAddressExists = new libObjectAddressCheckAddressExists(this.logInfo, this.logError);
 		this.objectAddressGetValue = new libObjectAddressGetValue(this.logInfo, this.logError);
 		this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
+		this.objectAddressDeleteValue = new libObjectAddressDeleteValue(this.logInfo, this.logError);
 
 		this.options = (
 			{
@@ -94,10 +96,12 @@ class Manyfest
 		this.objectAddressCheckAddressExists.elucidatorSolver = pElucidatorSolver;
 		this.objectAddressGetValue.elucidatorSolver = pElucidatorSolver;
 		this.objectAddressSetValue.elucidatorSolver = pElucidatorSolver;
+		this.objectAddressDeleteValue.elucidatorSolver = pElucidatorSolver;
 
 		this.objectAddressCheckAddressExists.elucidatorSolverState = pElucidatorSolverState;
 		this.objectAddressGetValue.elucidatorSolverState = pElucidatorSolverState;
 		this.objectAddressSetValue.elucidatorSolverState = pElucidatorSolverState;
+		this.objectAddressDeleteValue.elucidatorSolverState = pElucidatorSolverState;
 	}
 
 	clone()
@@ -356,11 +360,22 @@ class Manyfest
 		return this.setValueAtAddress(pObject, this.resolveHashAddress(pHash), pValue);
 	}
 
-
 	// Set the value of an element at an address
 	setValueAtAddress (pObject, pAddress, pValue)
 	{
 		return this.objectAddressSetValue.setValueAtAddress(pObject, pAddress, pValue);
+	}
+
+	// Delete the value of an element by its hash
+	deleteValueByHash(pObject, pHash, pValue)
+	{
+		return this.deleteValueAtAddress(pObject, this.resolveHashAddress(pHash), pValue);
+	}
+
+	// Delete the value of an element at an address
+	deleteValueAtAddress (pObject, pAddress, pValue)
+	{
+		return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, pAddress, pValue);
 	}
 
 	// Validate the consistency of an object against the schema
