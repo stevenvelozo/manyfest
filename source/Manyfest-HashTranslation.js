@@ -7,7 +7,7 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 /**
 * Hash Translation
 *
-* This is a very simple translation table for hashes, which allows the same schema to resolve 
+* This is a very simple translation table for hashes, which allows the same schema to resolve
 * differently based on a loaded translation table.
 *
 * This is to prevent the requirement for mutating schemas over and over again when we want to

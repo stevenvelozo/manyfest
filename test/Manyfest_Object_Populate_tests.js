@@ -47,7 +47,7 @@ suite
 
 						fTestComplete();
 					}
-				);				
+				);
 				test
 				(
 					'All properties should be auto created on Populate.',
@@ -133,7 +133,7 @@ suite
 
 						fTestComplete();
 					}
-				);	
+				);
 			}
 		);
 	}

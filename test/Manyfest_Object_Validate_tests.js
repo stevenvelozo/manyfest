@@ -60,7 +60,7 @@ suite
 
 						fTestComplete();
 					}
-				);				
+				);
 				test
 				(
 					'Validate should be able to test for dates.',

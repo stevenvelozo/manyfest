@@ -80,7 +80,7 @@ suite
 									},
                                 Solvers:
                                     {
-                                        'ThumbnailFilesOnly': 
+                                        'ThumbnailFilesOnly':
                                             {
                                                 "Description":
                                                 {
@@ -94,7 +94,7 @@ suite
                                                         "Namespace": "Logic",
                                                         "Instruction": "if",
 
-														"InputHashAddressMap": 
+														"InputHashAddressMap":
                                                             {
                                                                 "leftValue": "Record.format",
                                                                 "rightValue": "SolutionState.Config.SearchTerm",

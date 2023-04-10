@@ -41,7 +41,7 @@ suite
 								"a": "CarrotCost",
 								"b": "AppleCost"
 							});
-						
+
 						Expect(tmpSchemaDescriptors.a.Hash).to.equal('a');
 
 						let _Manyfest = new libManyfest();
@@ -71,7 +71,7 @@ suite
 								"a": "CarrotCost",
 								"b": "AppleCost"
 							});
-						
+
 						Expect(tmpSchemaDescriptors.a.Hash).to.equal('a');
 
 						let _Manyfest = new libManyfest();
@@ -97,7 +97,7 @@ suite
 								"a": { "Hash": "a", "Type": "Number" },
 								"b": { "Hash": "b", "Type": "Number" }
 							});
-						
+
 						let tmpSchemaDescriptorsToMerge = (
 							{
 								"c": { "Hash": "c" },
@@ -105,7 +105,7 @@ suite
 								"e": { "Hash": "e" },
 								"a": { "Hash": "ARBUCKLE", "Type": "Number" }
 							});
-						
+
 						Expect(tmpSchemaDescriptors.a.Hash).to.equal('a');
 
 						let _Manyfest = new libManyfest();
@@ -137,14 +137,14 @@ suite
 								"a": "CarrotCost",
 								"b": "AppleCost"
 							});
-						
+
 						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
 						// Property not schema, accessed by hash:
 						let tmpCreator = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator');
 						Expect(tmpCreator).to.equal('General Mills');
 						let _ClonedManyfest = _Manyfest.clone();
 						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('General Mills');
-	
+
 						fTestComplete();
 					}
 				);
@@ -164,7 +164,7 @@ suite
 								"a": "CarrotCost",
 								"b": "AppleCost"
 							});
-						
+
 						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
 						// Property not schema, accessed by hash:
 						let tmpCreator = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator');
@@ -193,7 +193,7 @@ suite
 						_ClonedManyfest.hashTranslations.addTranslation({"Director":"Creator", "Author":"Creator", "Songwriter":"Creator"});
 						Expect(_ClonedManyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal('General Mills');
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
-	
+
 						fTestComplete();
 					}
 				);
@@ -213,7 +213,7 @@ suite
 									"c": null
 								}
 							});
-						
+
 						let _Manyfest = new libManyfest();
 						// Now remap the schema (in-place)
 						let tmpSchemaPrototype = _Manyfest.objectAddressGeneration.generateAddressses(tmpSchemaDescriptors);
@@ -230,7 +230,7 @@ suite
 				(
 					'Make a much bigger schema prototype.',
 					(fTestComplete)=>
-					{						
+					{
 						let _Manyfest = new libManyfest();
 						// Now remap the schema (in-place)
 						let tmpSchemaPrototype = _Manyfest.objectAddressGeneration.generateAddressses(_SampleDataArchiveOrgFrankenberry);
@@ -257,7 +257,7 @@ suite
 										"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
 										"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
 										"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
-										"MedicalStats": 
+										"MedicalStats":
 											{
 												"Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
 											},

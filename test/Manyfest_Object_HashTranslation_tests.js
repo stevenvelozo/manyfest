@@ -45,7 +45,7 @@ suite
 						tmpCreator = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director');
 						Expect(tmpCreator)
 							.to.equal('General Mills');
-							
+
 						fTestComplete();
 					}
 				);
@@ -67,7 +67,7 @@ suite
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal('General Mills');
 						// And Author!
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal('General Mills');
-							
+
 						fTestComplete();
 					}
 				);
@@ -91,7 +91,7 @@ suite
 						_Manyfest.hashTranslations.removeTranslation('Director');
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal('General Mills');
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
-							
+
 						fTestComplete();
 					}
 				);
@@ -116,7 +116,7 @@ suite
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Author')).to.equal(undefined);
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Songwriter')).to.equal('General Mills');
-							
+
 						fTestComplete();
 					}
 				);
@@ -142,7 +142,7 @@ suite
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Director')).to.equal(undefined);
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Songwriter')).to.equal(undefined);
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('General Mills');
-							
+
 						fTestComplete();
 					}
 				);
@@ -152,13 +152,13 @@ suite
 					(fTestComplete)=>
 					{
 						let _Manyfest = new libManyfest({ Scope:'Archive.org', Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
-						// Create a translation between "Creator" and "metadata.identifier", which isn't in the manifest in any way 
+						// Create a translation between "Creator" and "metadata.identifier", which isn't in the manifest in any way
 						_Manyfest.hashTranslations.addTranslation({"Creator":"metadata.identifier"});
 						// This address is not in the descriptor address list or the hash list
 						Expect(_Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata.identifier')).to.equal('FrankenberryCountChoculaTevevisionCommercial1971');
 						// But now we've pointed the Creator hash to it!
 						Expect(_Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'Creator')).to.equal('FrankenberryCountChoculaTevevisionCommercial1971');
-							
+
 						fTestComplete();
 					}
 				);
@@ -172,7 +172,7 @@ suite
 						Expect(_Manyfest.hashTranslations.addTranslation('THIS SHOULD BE AN OBJECT')).to.equal(false);
 
 						Expect(_Manyfest.hashTranslations.translationCount()).to.equal(0);
-							
+
 						fTestComplete();
 					}
 				);

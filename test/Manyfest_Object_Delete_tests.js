@@ -67,7 +67,7 @@ suite
 										"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
 										"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
 										"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
-										"MedicalStats": 
+										"MedicalStats":
 											{
 												"Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
 											},
@@ -89,7 +89,7 @@ suite
 
 						fTestComplete();
 					}
-				);			
+				);
 			}
 		);
 	}
