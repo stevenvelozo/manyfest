@@ -42,6 +42,7 @@ suite
 							});
 						let tmpFileSet = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'FileSet');
 						Expect(Array.isArray(tmpFileSet)).to.equal(true);
+						let tmpFileSizes = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'FileSizes');
 						fTestComplete();
 					}
 				);

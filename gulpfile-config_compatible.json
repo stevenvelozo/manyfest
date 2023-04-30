@@ -1,0 +1,11 @@
+{
+	"EntrypointInputSourceFile": "./source/Manyfest-Browser-Shim.js",
+
+	"LibraryObjectName": "Manyfest",
+
+	"LibraryOutputFolder": "./dist/",
+
+	"LibraryUniminifiedFileName": "manyfest.compatible.js",
+
+	"LibraryMinifiedFileName": "manyfest.compatible.min.js"
+}

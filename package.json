@@ -1,14 +1,17 @@
 {
   "name": "manyfest",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "JSON Object Manifest for Data Description and Parsing",
   "main": "source/Manyfest.js",
   "scripts": {
+    "start": "node source/Manyfest.js",
     "docker-dev-build-image": "docker build ./ -f Dockerfile_LUXURYCode -t retold/manyfest:local",
     "docker-dev-run": "docker run -it -d --name manyfest -p 12340:8080 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/manyfest\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" retold/manyfest:local",
     "test": "./node_modules/mocha/bin/_mocha -u tdd -R spec",
     "tests": "./node_modules/mocha/bin/_mocha -u tdd -R spec --grep",
-    "coverage": "nyc npm run test && nyc report --reporter=lcov"
+    "coverage": "nyc npm run test && nyc report --reporter=lcov",
+    "build": "./node_modules/.bin/gulp build",
+    "build-compatible": "GULP_CUSTOM_BUILD_TARGET=compatible ./node_modules/.bin/gulp build"
   },
   "repository": {
     "type": "git",
@@ -48,6 +51,7 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-buble": "^0.9.0",
+    "gulp-env": "^0.4.0",
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
     "gulp-util": "^3.0.8",
@@ -59,7 +63,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "elucidator": "^1.0.2",
+    "elucidator": "^1.0.6",
     "precedent": "^1.0.6"
   },
   "author": "steven velozo <steven@velozo.com>",
