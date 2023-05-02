@@ -14,6 +14,8 @@ let libObjectAddressDeleteValue = require('./Manyfest-ObjectAddress-DeleteValue.
 let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
 let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 
+const _DefaultConfiguration = { Scope:'Default', Descriptors: {} }
+
 
 /**
 * Manyfest object address-based descriptions and manipulations.
@@ -130,47 +132,48 @@ class Manyfest
 		if (typeof(pManifest) !== 'object')
 		{
 			this.logError(`(${this.scope}) Error loading manifest; expecting an object but parameter was type ${typeof(pManifest)}.`);
-			return false;
 		}
 
-		if (pManifest.hasOwnProperty('Scope'))
+		let tmpManifest = (typeof(pManifest) == 'object') ? pManifest : {};
+
+		if (tmpManifest.hasOwnProperty('Scope'))
 		{
-			if (typeof(pManifest.Scope) === 'string')
+			if (typeof(tmpManifest.Scope) === 'string')
 			{
-				this.scope = pManifest.Scope;
+				this.scope = tmpManifest.Scope;
 			}
 			else
 			{
-				this.logError(`(${this.scope}) Error loading scope from manifest; expecting a string but property was type ${typeof(pManifest.Scope)}.`, pManifest);
+				this.logError(`(${this.scope}) Error loading scope from manifest; expecting a string but property was type ${typeof(tmpManifest.Scope)}.`, tmpManifest);
 			}
 		}
 		else
 		{
-			this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`, pManifest);
+			this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`, tmpManifest);
 		}
 
-		if (pManifest.hasOwnProperty('Descriptors'))
+		if (tmpManifest.hasOwnProperty('Descriptors'))
 		{
-			if (typeof(pManifest.Descriptors) === 'object')
+			if (typeof(tmpManifest.Descriptors) === 'object')
 			{
-				let tmpDescriptionAddresses = Object.keys(pManifest.Descriptors);
+				let tmpDescriptionAddresses = Object.keys(tmpManifest.Descriptors);
 				for (let i = 0; i < tmpDescriptionAddresses.length; i++)
 				{
-					this.addDescriptor(tmpDescriptionAddresses[i], pManifest.Descriptors[tmpDescriptionAddresses[i]]);
+					this.addDescriptor(tmpDescriptionAddresses[i], tmpManifest.Descriptors[tmpDescriptionAddresses[i]]);
 				}
 			}
 			else
 			{
-				this.logError(`(${this.scope}) Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ${typeof(pManifest.Descriptors)}.`, pManifest);
+				this.logError(`(${this.scope}) Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ${typeof(tmpManifest.Descriptors)}.`, tmpManifest);
 			}
 		}
 		else
 		{
-			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, pManifest);
+			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, tmpManifest);
 		}
 
 		// This seems like it would create a circular dependency issue but it only goes as deep as the schema defines Solvers
-		if ((pManifest.hasOwnProperty('Solvers')) && (typeof(pManifest.Solvers) == 'object'))
+		if ((tmpManifest.hasOwnProperty('Solvers')) && (typeof(tmpManifest.Solvers) == 'object'))
 		{
 			// There are elucidator solvers passed-in, so we will create one to filter data.
 			let libElucidator = require('elucidator');
@@ -185,14 +188,16 @@ class Manyfest
 				//   IF YOU PERMUTE THE Record SUBOBJECT YOU CAN AFFECT RECURSION
 			// This is mostly meant for if statements to filter.
 				//   Basically on aggregation, if a filter is set it will set "keep record" to true and let the solver decide differently.
-			this.dataSolvers = new libElucidator(pManifest.Solvers, this.logInfo, this.logError);
+			// Please refresh yourself on the complex metaprogramming mechanics of both the manyfest DSL and the elucidator configuration permutation before changing any of this.
+			    //   You broke it.  You bought it.
+			this.dataSolvers = new libElucidator(tmpManifest.Solvers, this.logInfo, this.logError);
 
 			// Load the solver state in so each instruction can have internal config
-			// TODO: Should this just be a part of the lower layer pattern?
-			let tmpSolverKeys = Object.keys(pManifest.Solvers)
+			let tmpSolverKeys = Object.keys(tmpManifest.Solvers)
 			for (let i = 0; i < tmpSolverKeys.length; i++)
 			{
-				this.dataSolverState[tmpSolverKeys] = pManifest.Solvers[tmpSolverKeys[i]];
+				// Each of these are passed through the metatemplate.
+				this.dataSolverState[tmpSolverKeys] = tmpManifest.Solvers[tmpSolverKeys[i]];
 			}
 
 			this.setElucidatorSolvers(this.dataSolvers, this.dataSolverState);
