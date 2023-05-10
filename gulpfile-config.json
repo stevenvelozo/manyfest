@@ -5,7 +5,7 @@
 
 	"LibraryOutputFolder": "./dist/",
 
-	"LibraryUniminifiedFileName": "manyfest.js",
+	"LibraryUniminifiedFileName": "manyfest.compatible.js",
 
-	"LibraryMinifiedFileName": "manyfest.min.js"
+	"LibraryMinifiedFileName": "manyfest.compatible.min.js"
 }
