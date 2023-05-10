@@ -41,7 +41,7 @@ class ManyfestObjectAddressResolverGetValue
 		this.precedent = new libPrecedent();
 
 		this.precedent.addPattern('<<~?', '?~>>',
-				(pMagicSearchExpression, pData) =>
+			(pMagicSearchExpression, pData) =>
 				{
 					if (typeof(pMagicSearchExpression) !== 'string')
 					{
