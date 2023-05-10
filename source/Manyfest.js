@@ -1,5 +1,4 @@
 /**
-* @license MIT
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
@@ -170,37 +169,6 @@ class Manyfest
 		else
 		{
 			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, tmpManifest);
-		}
-
-		// This seems like it would create a circular dependency issue but it only goes as deep as the schema defines Solvers
-		if ((tmpManifest.hasOwnProperty('Solvers')) && (typeof(tmpManifest.Solvers) == 'object'))
-		{
-			// There are elucidator solvers passed-in, so we will create one to filter data.
-			let libElucidator = require('elucidator');
-			// WARNING THESE CAN MUTATE THE DATA
-				// The pattern for the solver is: {<~~SolverName~~>} anywhere in a property.
-				//   Yes, this means your Javascript elements can't have my self-styled jellyfish brackets in them.
-				//   This does, though, mean we can filter at multiple layers safely.
-				//   Because these can be put at any address
-			// The solver themselves:
-				//   They are passed-in an object, and the current record is in the Record subobject.
-				//   Basic operations can just write to the root object but...
-				//   IF YOU PERMUTE THE Record SUBOBJECT YOU CAN AFFECT RECURSION
-			// This is mostly meant for if statements to filter.
-				//   Basically on aggregation, if a filter is set it will set "keep record" to true and let the solver decide differently.
-			// Please refresh yourself on the complex metaprogramming mechanics of both the manyfest DSL and the elucidator configuration permutation before changing any of this.
-			    //   You broke it.  You bought it.
-			this.dataSolvers = new libElucidator(tmpManifest.Solvers, this.logInfo, this.logError);
-
-			// Load the solver state in so each instruction can have internal config
-			let tmpSolverKeys = Object.keys(tmpManifest.Solvers)
-			for (let i = 0; i < tmpSolverKeys.length; i++)
-			{
-				// Each of these are passed through the metatemplate.
-				this.dataSolverState[tmpSolverKeys] = tmpManifest.Solvers[tmpSolverKeys[i]];
-			}
-
-			this.setElucidatorSolvers(this.dataSolvers, this.dataSolverState);
 		}
 	}
 

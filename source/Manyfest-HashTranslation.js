@@ -1,5 +1,4 @@
 /**
-* @license MIT
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');

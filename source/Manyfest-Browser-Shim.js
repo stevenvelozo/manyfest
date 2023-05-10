@@ -1,5 +1,4 @@
 /**
-* @license MIT
 * @author <steven@velozo.com>
 */
 

@@ -63,8 +63,7 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "elucidator": "^1.0.7",
-    "precedent": "^1.0.9"
+    "precedent": "^1.0.11"
   },
   "author": "steven velozo <steven@velozo.com>",
   "license": "MIT",

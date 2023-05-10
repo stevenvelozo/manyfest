@@ -1,5 +1,4 @@
 /**
-* @license MIT
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
@@ -38,48 +37,10 @@ class ManyfestObjectAddressResolverDeleteValue
 		this.elucidatorSolverState = {};
 
 		this.cleanWrapCharacters = fCleanWrapCharacters;
-	}
+		this.precedent = new libPrecedent();
 
-	checkFilters(pAddress, pRecord)
-	{
-		let tmpPrecedent = new libPrecedent();
-		// If we don't copy the string, precedent takes it out for good.
-		// TODO: Consider adding a "don't replace" option for precedent
-		let tmpAddress = pAddress;
-
-		if (!this.elucidatorSolver)
-		{
-			// Again, manage against circular dependencies
-			let libElucidator = require('elucidator');
-			this.elucidatorSolver = new libElucidator({}, this.logInfo, this.logError);
-		}
-
-		if (this.elucidatorSolver)
-		{
-			// This allows the magic filtration with elucidator configuration
-			// TODO: We could pass more state in (e.g. parent address, object, etc.)
-			// TODO: Discuss this metaprogramming AT LENGTH
-			let tmpFilterState = (
-				{
-					Record: pRecord,
-					keepRecord: true
-				});
-
-			// This is about as complex as it gets.
-			// TODO: Optimize this so it is only initialized once.
-			// TODO: That means figuring out a healthy pattern for passing in state to this
-			tmpPrecedent.addPattern('<<~~', '~~>>',
-				(pInstructionHash) =>
-				{
-					// This is for internal config on the solution steps.  Right now config is not shared across steps.
-					if (this.elucidatorSolverState.hasOwnProperty(pInstructionHash))
-					{
-						tmpFilterState.SolutionState = this.elucidatorSolverState[pInstructionHash];
-					}
-					this.elucidatorSolver.solveInternalOperation('Custom', pInstructionHash, tmpFilterState);
-				});
-			tmpPrecedent.addPattern('<<~?', '?~>>',
-				(pMagicSearchExpression) =>
+		this.precedent.addPattern('<<~?', '?~>>',
+			(pMagicSearchExpression, pData) =>
 				{
 					if (typeof(pMagicSearchExpression) !== 'string')
 					{
@@ -93,48 +54,56 @@ class ManyfestObjectAddressResolverDeleteValue
 					let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
 					let tmpSearchValue = tmpMagicComparisonPatternSet[2];
 
-					tmpFilterState.ComparisonState = (
-						{
-							SearchAddress: tmpSearchAddress,
-							Comparator: tmpSearchComparator,
-							SearchTerm: tmpSearchValue
-						});
-
-					this.elucidatorSolver.solveOperation(
-						{
-							"Description":
-							{
-								"Operation": "Simple_If",
-								"Synopsis": "Test for "
-							},
-							"Steps":
-							[
-								{
-									"Namespace": "Logic",
-									"Instruction": "if",
-
-									"InputHashAddressMap":
-										{
-											// This is ... dynamically assigning the address in the instruction
-											// The complexity is astounding.
-											"leftValue": `Record.${tmpSearchAddress}`,
-											"rightValue": "ComparisonState.SearchTerm",
-											"comparator": "ComparisonState.Comparator"
-										},
-									"OutputHashAddressMap": { "truthinessResult":"keepRecord" }
-								}
-							]
-						}, tmpFilterState);
+					switch(tmpSearchComparator)
+					{
+						case '!=':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) != tmpSearchValue);
+							break;
+						case '<':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) < tmpSearchValue);
+							break;
+						case '>':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) > tmpSearchValue);
+							break;
+						case '<=':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) <= tmpSearchValue);
+							break;
+						case '>=':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) >= tmpSearchValue);
+							break;
+						case '===':
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue);
+							break;
+						case '==':
+						default:
+							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue);
+							break;
+					}
 				});
-			tmpPrecedent.parseString(tmpAddress);
+	}
 
-			// It is expected that the operation will mutate this to some truthy value
-			return tmpFilterState.keepRecord;
-		}
-		else
-		{
-			return true;
-		}
+	// TODO: Dry me
+	checkFilters(pAddress, pRecord)
+	{
+		let tmpPrecedent = new libPrecedent();
+		// If we don't copy the string, precedent takes it out for good.
+		// TODO: Consider adding a "don't replace" option for precedent
+		let tmpAddress = pAddress;
+
+		// This allows the magic filtration with elucidator configuration
+		// TODO: We could pass more state in (e.g. parent address, object, etc.)
+		// TODO: Discuss this metaprogramming AT LENGTH
+		let tmpFilterState = (
+			{
+				Record: pRecord,
+				KeepRecord: true
+			});
+
+			// This is about as complex as it gets.
+
+		this.precedent.parseString(tmpAddress, tmpFilterState);
+
+		return tmpFilterState.KeepRecord;
 	}
 
 	// Delete the value of an element at an address
