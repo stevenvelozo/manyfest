@@ -31,9 +31,6 @@ class ManyfestObjectAddressSetValue
 		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 
-		this.elucidatorSolver = false;
-		this.elucidatorSolverState = {};
-
 		this.cleanWrapCharacters = fCleanWrapCharacters;
 	}
 

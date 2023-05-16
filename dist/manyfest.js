@@ -472,8 +472,6 @@
           // Wire in logging
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
-          this.elucidatorSolver = false;
-          this.elucidatorSolverState = {};
         }
 
         // Check if an address exists.
@@ -669,8 +667,6 @@
           // Wire in logging
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
-          this.elucidatorSolver = false;
-          this.elucidatorSolverState = {};
           this.cleanWrapCharacters = fCleanWrapCharacters;
           this.precedent = new libPrecedent();
           this.precedent.addPattern('<<~?', '?~>>', (pMagicSearchExpression, pData) => {
@@ -717,7 +713,7 @@
           // TODO: Consider adding a "don't replace" option for precedent
           let tmpAddress = pAddress;
 
-          // This allows the magic filtration with elucidator configuration
+          // This allows the magic filtration with solver configuration
           // TODO: We could pass more state in (e.g. parent address, object, etc.)
           // TODO: Discuss this metaprogramming AT LENGTH
           let tmpFilterState = {
@@ -1033,8 +1029,6 @@
           // Wire in logging
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
-          this.elucidatorSolver = false;
-          this.elucidatorSolverState = {};
           this.cleanWrapCharacters = fCleanWrapCharacters;
           this.precedent = new libPrecedent();
           this.precedent.addPattern('<<~?', '?~>>', (pMagicSearchExpression, pData) => {
@@ -1079,7 +1073,7 @@
           // TODO: Consider adding a "don't replace" option for precedent
           let tmpAddress = pAddress;
 
-          // This allows the magic filtration with elucidator configuration
+          // This allows the magic filtration with configuration
           // TODO: We could pass more state in (e.g. parent address, object, etc.)
           // TODO: Discuss this metaprogramming AT LENGTH
           let tmpFilterState = {
@@ -1388,8 +1382,6 @@
           // Wire in logging
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
-          this.elucidatorSolver = false;
-          this.elucidatorSolverState = {};
           this.cleanWrapCharacters = fCleanWrapCharacters;
         }
 
@@ -1847,17 +1839,6 @@
           this.elementDescriptors = {};
           this.dataSolvers = undefined;
           this.dataSolverState = {};
-          this.libElucidator = undefined;
-        }
-        setElucidatorSolvers(pElucidatorSolver, pElucidatorSolverState) {
-          this.objectAddressCheckAddressExists.elucidatorSolver = pElucidatorSolver;
-          this.objectAddressGetValue.elucidatorSolver = pElucidatorSolver;
-          this.objectAddressSetValue.elucidatorSolver = pElucidatorSolver;
-          this.objectAddressDeleteValue.elucidatorSolver = pElucidatorSolver;
-          this.objectAddressCheckAddressExists.elucidatorSolverState = pElucidatorSolverState;
-          this.objectAddressGetValue.elucidatorSolverState = pElucidatorSolverState;
-          this.objectAddressSetValue.elucidatorSolverState = pElucidatorSolverState;
-          this.objectAddressDeleteValue.elucidatorSolverState = pElucidatorSolverState;
         }
         clone() {
           // Make a copy of the options in-place

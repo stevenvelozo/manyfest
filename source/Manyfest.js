@@ -88,21 +88,6 @@ class Manyfest
 		this.elementDescriptors = {};
 		this.dataSolvers = undefined;
 		this.dataSolverState = {};
-
-		this.libElucidator = undefined;
-	}
-
-	setElucidatorSolvers(pElucidatorSolver, pElucidatorSolverState)
-	{
-		this.objectAddressCheckAddressExists.elucidatorSolver = pElucidatorSolver;
-		this.objectAddressGetValue.elucidatorSolver = pElucidatorSolver;
-		this.objectAddressSetValue.elucidatorSolver = pElucidatorSolver;
-		this.objectAddressDeleteValue.elucidatorSolver = pElucidatorSolver;
-
-		this.objectAddressCheckAddressExists.elucidatorSolverState = pElucidatorSolverState;
-		this.objectAddressGetValue.elucidatorSolverState = pElucidatorSolverState;
-		this.objectAddressSetValue.elucidatorSolverState = pElucidatorSolverState;
-		this.objectAddressDeleteValue.elucidatorSolverState = pElucidatorSolverState;
 	}
 
 	clone()

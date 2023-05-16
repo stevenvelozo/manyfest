@@ -28,9 +28,6 @@ class ManyfestObjectAddressResolverCheckAddressExists
 		// Wire in logging
 		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
-
-		this.elucidatorSolver = false;
-		this.elucidatorSolverState = {};
 	}
 
 	// Check if an address exists.

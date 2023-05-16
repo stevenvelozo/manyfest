@@ -33,9 +33,6 @@ class ManyfestObjectAddressResolverDeleteValue
 		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 
-		this.elucidatorSolver = false;
-		this.elucidatorSolverState = {};
-
 		this.cleanWrapCharacters = fCleanWrapCharacters;
 		this.precedent = new libPrecedent();
 
@@ -90,7 +87,7 @@ class ManyfestObjectAddressResolverDeleteValue
 		// TODO: Consider adding a "don't replace" option for precedent
 		let tmpAddress = pAddress;
 
-		// This allows the magic filtration with elucidator configuration
+		// This allows the magic filtration with solver configuration
 		// TODO: We could pass more state in (e.g. parent address, object, etc.)
 		// TODO: Discuss this metaprogramming AT LENGTH
 		let tmpFilterState = (
