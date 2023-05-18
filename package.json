@@ -1,6 +1,6 @@
 {
   "name": "manyfest",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "JSON Object Manifest for Data Description and Parsing",
   "main": "source/Manyfest.js",
   "scripts": {
@@ -63,7 +63,6 @@
     "vinyl-source-stream": "^2.0.0"
   },
   "dependencies": {
-    "precedent": "^1.0.11"
   },
   "author": "steven velozo <steven@velozo.com>",
   "license": "MIT",

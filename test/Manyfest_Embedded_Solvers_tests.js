@@ -27,6 +27,26 @@ suite
 			{
 				test
 				(
+					'Underlying template processors should be able to filter sets.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+
+						let templateParser = require(`../source/Manyfest-ParseConditionals.js`);
+
+						let tmpTestRecord = {Name:'Jimbo', Age:31, Pets:{Fido:'Dog',Spot:'Cat'}};
+
+						let tmpTestTemplate = 'Document.FormData.Parsable.Filters[]<<~?Name,==,Jimbo?~>>';
+
+						let tmpTestResult = templateParser(_Manyfest, tmpTestTemplate, tmpTestRecord);
+
+						Expect(tmpTestResult).to.equal(true);
+
+						return fTestComplete();
+					}
+				)
+				test
+				(
 					'Magic filters should be magic.',
 					(fTestComplete)=>
 					{

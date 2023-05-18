@@ -3,8 +3,6 @@
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 
-let libPrecedent = require('precedent');
-
 let libHashTranslation = require('./Manyfest-HashTranslation.js');
 let libObjectAddressCheckAddressExists = require('./Manyfest-ObjectAddress-CheckAddressExists.js');
 let libObjectAddressGetValue = require('./Manyfest-ObjectAddress-GetValue.js');

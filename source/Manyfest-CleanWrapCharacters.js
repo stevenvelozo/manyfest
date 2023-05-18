@@ -13,7 +13,7 @@
 //
 // TODO: Should template literals be processed?  If so what state do they have access to?  That should happen here if so.
 // TODO: Make a simple class include library with these
-let cleanWrapCharacters = (pCharacter, pString) =>
+const cleanWrapCharacters = (pCharacter, pString) =>
 {
 	if (pString.startsWith(pCharacter) && pString.endsWith(pCharacter))
 	{

@@ -1,3 +1,5 @@
+"use strict";
+
 (function (f) {
   if (typeof exports === "object" && typeof module !== "undefined") {
     module.exports = f();
@@ -46,262 +48,6 @@
   }()({
     1: [function (require, module, exports) {
       /**
-      * Precedent Meta-Templating
-      *
-      * @license     MIT
-      *
-      * @author      Steven Velozo <steven@velozo.com>
-      *
-      * @description Process text streams, parsing out meta-template expressions.
-      */
-      var libWordTree = require(`./WordTree.js`);
-      var libStringParser = require(`./StringParser.js`);
-      class Precedent {
-        /**
-         * Precedent Constructor
-         */
-        constructor() {
-          this.WordTree = new libWordTree();
-          this.StringParser = new libStringParser();
-          this.ParseTree = this.WordTree.ParseTree;
-        }
-
-        /**
-         * Add a Pattern to the Parse Tree
-         * @method addPattern
-         * @param {Object} pTree - A node on the parse tree to push the characters into
-         * @param {string} pPattern - The string to add to the tree
-         * @param {number} pIndex - callback function
-         * @return {bool} True if adding the pattern was successful
-         */
-        addPattern(pPatternStart, pPatternEnd, pParser) {
-          return this.WordTree.addPattern(pPatternStart, pPatternEnd, pParser);
-        }
-
-        /**
-         * Parse a string with the existing parse tree
-         * @method parseString
-         * @param {string} pString - The string to parse
-         * @param {object} pData - Data to pass in as the second argument
-         * @return {string} The result from the parser
-         */
-        parseString(pString, pData) {
-          return this.StringParser.parseString(pString, this.ParseTree, pData);
-        }
-      }
-      module.exports = Precedent;
-    }, {
-      "./StringParser.js": 2,
-      "./WordTree.js": 3
-    }],
-    2: [function (require, module, exports) {
-      /**
-      * String Parser
-      *
-      * @license     MIT
-      *
-      * @author      Steven Velozo <steven@velozo.com>
-      *
-      * @description Parse a string, properly processing each matched token in the word tree.
-      */
-
-      class StringParser {
-        /**
-         * StringParser Constructor
-         */
-        constructor() {}
-
-        /**
-         * Create a fresh parsing state object to work with.
-         * @method newParserState
-         * @param {Object} pParseTree - A node on the parse tree to begin parsing from (usually root)
-         * @return {Object} A new parser state object for running a character parser on
-         * @private
-         */
-        newParserState(pParseTree) {
-          return {
-            ParseTree: pParseTree,
-            Output: '',
-            OutputBuffer: '',
-            Pattern: false,
-            PatternMatch: false,
-            PatternMatchOutputBuffer: ''
-          };
-        }
-
-        /**
-         * Assign a node of the parser tree to be the next potential match.
-         * If the node has a PatternEnd property, it is a valid match and supercedes the last valid match (or becomes the initial match).
-         * @method assignNode
-         * @param {Object} pNode - A node on the parse tree to assign
-         * @param {Object} pParserState - The state object for the current parsing task
-         * @private
-         */
-        assignNode(pNode, pParserState) {
-          pParserState.PatternMatch = pNode;
-
-          // If the pattern has a END we can assume it has a parse function...
-          if (pParserState.PatternMatch.hasOwnProperty('PatternEnd')) {
-            // ... this is the legitimate start of a pattern.
-            pParserState.Pattern = pParserState.PatternMatch;
-          }
-        }
-
-        /**
-         * Append a character to the output buffer in the parser state.
-         * This output buffer is used when a potential match is being explored, or a match is being explored.
-         * @method appendOutputBuffer
-         * @param {string} pCharacter - The character to append
-         * @param {Object} pParserState - The state object for the current parsing task
-         * @private
-         */
-        appendOutputBuffer(pCharacter, pParserState) {
-          pParserState.OutputBuffer += pCharacter;
-        }
-
-        /**
-         * Flush the output buffer to the output and clear it.
-         * @method flushOutputBuffer
-         * @param {Object} pParserState - The state object for the current parsing task
-         * @private
-         */
-        flushOutputBuffer(pParserState) {
-          pParserState.Output += pParserState.OutputBuffer;
-          pParserState.OutputBuffer = '';
-        }
-
-        /**
-         * Check if the pattern has ended.  If it has, properly flush the buffer and start looking for new patterns.
-         * @method checkPatternEnd
-         * @param {Object} pParserState - The state object for the current parsing task
-         * @private
-         */
-        checkPatternEnd(pParserState, pData) {
-          if (pParserState.OutputBuffer.length >= pParserState.Pattern.PatternEnd.length + pParserState.Pattern.PatternStart.length && pParserState.OutputBuffer.substr(-pParserState.Pattern.PatternEnd.length) === pParserState.Pattern.PatternEnd) {
-            // ... this is the end of a pattern, cut off the end tag and parse it.
-            // Trim the start and end tags off the output buffer now
-            pParserState.OutputBuffer = pParserState.Pattern.Parse(pParserState.OutputBuffer.substr(pParserState.Pattern.PatternStart.length, pParserState.OutputBuffer.length - (pParserState.Pattern.PatternStart.length + pParserState.Pattern.PatternEnd.length)), pData);
-            // Flush the output buffer.
-            this.flushOutputBuffer(pParserState);
-            // End pattern mode
-            pParserState.Pattern = false;
-            pParserState.PatternMatch = false;
-          }
-        }
-
-        /**
-         * Parse a character in the buffer.
-         * @method parseCharacter
-         * @param {string} pCharacter - The character to append
-         * @param {Object} pParserState - The state object for the current parsing task
-         * @private
-         */
-        parseCharacter(pCharacter, pParserState, pData) {
-          // (1) If we aren't in a pattern match, and we aren't potentially matching, and this may be the start of a new pattern....
-          if (!pParserState.PatternMatch && pParserState.ParseTree.hasOwnProperty(pCharacter)) {
-            // ... assign the node as the matched node.
-            this.assignNode(pParserState.ParseTree[pCharacter], pParserState);
-            this.appendOutputBuffer(pCharacter, pParserState);
-          }
-          // (2) If we are in a pattern match (actively seeing if this is part of a new pattern token)
-          else if (pParserState.PatternMatch) {
-            // If the pattern has a subpattern with this key
-            if (pParserState.PatternMatch.hasOwnProperty(pCharacter)) {
-              // Continue matching patterns.
-              this.assignNode(pParserState.PatternMatch[pCharacter], pParserState);
-            }
-            this.appendOutputBuffer(pCharacter, pParserState);
-            if (pParserState.Pattern) {
-              // ... Check if this is the end of the pattern (if we are matching a valid pattern)...
-              this.checkPatternEnd(pParserState, pData);
-            }
-          }
-          // (3) If we aren't in a pattern match or pattern, and this isn't the start of a new pattern (RAW mode)....
-          else {
-            pParserState.Output += pCharacter;
-          }
-        }
-
-        /**
-         * Parse a string for matches, and process any template segments that occur.
-         * @method parseString
-         * @param {string} pString - The string to parse.
-         * @param {Object} pParseTree - The parse tree to begin parsing from (usually root)
-         * @param {Object} pData - The data to pass to the function as a second paramter
-         */
-        parseString(pString, pParseTree, pData) {
-          let tmpParserState = this.newParserState(pParseTree);
-          for (var i = 0; i < pString.length; i++) {
-            // TODO: This is not fast.
-            this.parseCharacter(pString[i], tmpParserState, pData);
-          }
-          this.flushOutputBuffer(tmpParserState);
-          return tmpParserState.Output;
-        }
-      }
-      module.exports = StringParser;
-    }, {}],
-    3: [function (require, module, exports) {
-      /**
-      * Word Tree
-      *
-      * @license     MIT
-      *
-      * @author      Steven Velozo <steven@velozo.com>
-      *
-      * @description Create a tree (directed graph) of Javascript objects, one character per object.
-      */
-
-      class WordTree {
-        /**
-         * WordTree Constructor
-         */
-        constructor() {
-          this.ParseTree = {};
-        }
-
-        /**
-         * Add a child character to a Parse Tree node
-         * @method addChild
-         * @param {Object} pTree - A parse tree to push the characters into
-         * @param {string} pPattern - The string to add to the tree
-         * @param {number} pIndex - The index of the character in the pattern
-         * @returns {Object} The resulting leaf node that was added (or found)
-         * @private
-         */
-        addChild(pTree, pPattern, pIndex) {
-          if (!pTree.hasOwnProperty(pPattern[pIndex])) pTree[pPattern[pIndex]] = {};
-          return pTree[pPattern[pIndex]];
-        }
-
-        /** Add a Pattern to the Parse Tree
-         * @method addPattern
-         * @param {Object} pPatternStart - The starting string for the pattern (e.g. "${")
-         * @param {string} pPatternEnd - The ending string for the pattern (e.g. "}")
-         * @param {number} pParser - The function to parse if this is the matched pattern, once the Pattern End is met.  If this is a string, a simple replacement occurs.
-         * @return {bool} True if adding the pattern was successful
-         */
-        addPattern(pPatternStart, pPatternEnd, pParser) {
-          if (pPatternStart.length < 1) return false;
-          if (typeof pPatternEnd === 'string' && pPatternEnd.length < 1) return false;
-          let tmpLeaf = this.ParseTree;
-
-          // Add the tree of leaves iteratively
-          for (var i = 0; i < pPatternStart.length; i++) tmpLeaf = this.addChild(tmpLeaf, pPatternStart, i);
-          tmpLeaf.PatternStart = pPatternStart;
-          tmpLeaf.PatternEnd = typeof pPatternEnd === 'string' && pPatternEnd.length > 0 ? pPatternEnd : pPatternStart;
-          tmpLeaf.Parse = typeof pParser === 'function' ? pParser : typeof pParser === 'string' ? () => {
-            return pParser;
-          } : pData => {
-            return pData;
-          };
-          return true;
-        }
-      }
-      module.exports = WordTree;
-    }, {}],
-    4: [function (require, module, exports) {
-      /**
       * @author <steven@velozo.com>
       */
 
@@ -314,9 +60,9 @@
       if (typeof window === 'object') window.Manyfest = libManyfest;
       module.exports = libManyfest;
     }, {
-      "./Manyfest.js": 14
+      "./Manyfest.js": 12
     }],
-    5: [function (require, module, exports) {
+    2: [function (require, module, exports) {
       // When a boxed property is passed in, it should have quotes of some
       // kind around it.
       //
@@ -332,7 +78,7 @@
       //
       // TODO: Should template literals be processed?  If so what state do they have access to?  That should happen here if so.
       // TODO: Make a simple class include library with these
-      let cleanWrapCharacters = (pCharacter, pString) => {
+      const cleanWrapCharacters = (pCharacter, pString) => {
         if (pString.startsWith(pCharacter) && pString.endsWith(pCharacter)) {
           return pString.substring(1, pString.length - 1);
         } else {
@@ -341,7 +87,7 @@
       };
       module.exports = cleanWrapCharacters;
     }, {}],
-    6: [function (require, module, exports) {
+    3: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -376,13 +122,13 @@
           // This adds a translation in the form of:
           // { "SourceHash": "DestinationHash", "SecondSourceHash":"SecondDestinationHash" }
           if (typeof pTranslation != 'object') {
-            this.logError(`Hash translation addTranslation expected a translation be type object but was passed in ${typeof pTranslation}`);
+            this.logError("Hash translation addTranslation expected a translation be type object but was passed in ".concat(typeof pTranslation));
             return false;
           }
           let tmpTranslationSources = Object.keys(pTranslation);
           tmpTranslationSources.forEach(pTranslationSource => {
             if (typeof pTranslation[pTranslationSource] != 'string') {
-              this.logError(`Hash translation addTranslation expected a translation destination hash for [${pTranslationSource}] to be a string but the referrant was a ${typeof pTranslation[pTranslationSource]}`);
+              this.logError("Hash translation addTranslation expected a translation destination hash for [".concat(pTranslationSource, "] to be a string but the referrant was a ").concat(typeof pTranslation[pTranslationSource]));
             } else {
               this.translationTable[pTranslationSource] = pTranslation[pTranslationSource];
             }
@@ -408,7 +154,7 @@
             });
             return true;
           } else {
-            this.logError(`Hash translation removeTranslation expected either a string or an object but the passed-in translation was type ${typeof pTranslation}`);
+            this.logError("Hash translation removeTranslation expected either a string or an object but the passed-in translation was type ".concat(typeof pTranslation));
             return false;
           }
         }
@@ -425,9 +171,9 @@
       }
       module.exports = ManyfestHashTranslation;
     }, {
-      "./Manyfest-LogToConsole.js": 7
+      "./Manyfest-LogToConsole.js": 4
     }],
-    7: [function (require, module, exports) {
+    4: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -438,12 +184,12 @@
 
       const logToConsole = (pLogLine, pLogObject) => {
         let tmpLogLine = typeof pLogLine === 'string' ? pLogLine : '';
-        console.log(`[Manyfest] ${tmpLogLine}`);
+        console.log("[Manyfest] ".concat(tmpLogLine));
         if (pLogObject) console.log(JSON.stringify(pLogObject));
       };
       module.exports = logToConsole;
     }, {}],
-    8: [function (require, module, exports) {
+    5: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -632,15 +378,15 @@
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 7
+      "./Manyfest-LogToConsole.js": 4
     }],
-    9: [function (require, module, exports) {
+    6: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
-      let libPrecedent = require('precedent');
       let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
+      let fParseConditionals = require("../source/Manyfest-ParseConditionals.js");
 
       /**
       * Object Address Resolver - DeleteValue
@@ -668,63 +414,11 @@
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.cleanWrapCharacters = fCleanWrapCharacters;
-          this.precedent = new libPrecedent();
-          this.precedent.addPattern('<<~?', '?~>>', (pMagicSearchExpression, pData) => {
-            if (typeof pMagicSearchExpression !== 'string') {
-              return false;
-            }
-            // This expects a comma separated expression:
-            //     Some.Address.In.The.Object,==,Search Term to Match
-            let tmpMagicComparisonPatternSet = pMagicSearchExpression.split(',');
-            let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
-            let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
-            let tmpSearchValue = tmpMagicComparisonPatternSet[2];
-            switch (tmpSearchComparator) {
-              case '!=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) != tmpSearchValue;
-                break;
-              case '<':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) < tmpSearchValue;
-                break;
-              case '>':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) > tmpSearchValue;
-                break;
-              case '<=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) <= tmpSearchValue;
-                break;
-              case '>=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) >= tmpSearchValue;
-                break;
-              case '===':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue;
-                break;
-              case '==':
-              default:
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue;
-                break;
-            }
-          });
         }
 
         // TODO: Dry me
         checkFilters(pAddress, pRecord) {
-          let tmpPrecedent = new libPrecedent();
-          // If we don't copy the string, precedent takes it out for good.
-          // TODO: Consider adding a "don't replace" option for precedent
-          let tmpAddress = pAddress;
-
-          // This allows the magic filtration with solver configuration
-          // TODO: We could pass more state in (e.g. parent address, object, etc.)
-          // TODO: Discuss this metaprogramming AT LENGTH
-          let tmpFilterState = {
-            Record: pRecord,
-            KeepRecord: true
-          };
-
-          // This is about as complex as it gets.
-
-          this.precedent.parseString(tmpAddress, tmpFilterState);
-          return tmpFilterState.KeepRecord;
+          return fParseConditionals(this, pAddress, pRecord);
         }
 
         // Delete the value of an element at an address
@@ -903,12 +597,12 @@
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
                 // Continue to manage the parent address for recursion
-                tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+                tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
                 // Recurse directly into the subobject
                 return this.deleteValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpParentAddress);
               } else {
                 // Continue to manage the parent address for recursion
-                tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+                tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
                 // We parsed a valid number out of the boxed property name, so recurse into the array
                 return this.deleteValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpParentAddress);
               }
@@ -929,13 +623,13 @@
               // We need to enumerate the array and grab the addresses from there.
               let tmpArrayProperty = pObject[tmpBoxedPropertyName];
               // Managing the parent address is a bit more complex here -- the box will be added for each element.
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpBoxedPropertyName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpBoxedPropertyName);
               // The container object is where we have the "Address":SOMEVALUE pairs
               let tmpContainerObject = {};
               for (let i = 0; i < tmpArrayProperty.length; i++) {
-                let tmpPropertyParentAddress = `${tmpParentAddress}[${i}]`;
+                let tmpPropertyParentAddress = "".concat(tmpParentAddress, "[").concat(i, "]");
                 let tmpValue = this.deleteValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);
-                tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+                tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
               }
               return tmpContainerObject;
             }
@@ -954,17 +648,17 @@
               let tmpObjectProperty = pObject[tmpObjectPropertyName];
               let tmpObjectPropertyKeys = Object.keys(tmpObjectProperty);
               // Managing the parent address is a bit more complex here -- the box will be added for each element.
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpObjectPropertyName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpObjectPropertyName);
               // The container object is where we have the "Address":SOMEVALUE pairs
               let tmpContainerObject = {};
               for (let i = 0; i < tmpObjectPropertyKeys.length; i++) {
-                let tmpPropertyParentAddress = `${tmpParentAddress}.${tmpObjectPropertyKeys[i]}`;
+                let tmpPropertyParentAddress = "".concat(tmpParentAddress, ".").concat(tmpObjectPropertyKeys[i]);
                 let tmpValue = this.deleteValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
 
                 // The filtering is complex but allows config-based metaprogramming directly from schema
                 let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
                 if (tmpKeepRecord) {
-                  tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+                  tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
                 }
               }
               return tmpContainerObject;
@@ -977,12 +671,12 @@
             } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
               // If there is already a subobject pass that to the recursive thingy
               // Continue to manage the parent address for recursion
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
               return this.deleteValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
             } else {
               // Create a subobject and then pass that
               // Continue to manage the parent address for recursion
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
               pObject[tmpSubObjectName] = {};
               return this.deleteValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
             }
@@ -992,17 +686,17 @@
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 5,
-      "./Manyfest-LogToConsole.js": 7,
-      "precedent": 1
+      "../source/Manyfest-ParseConditionals.js": 10,
+      "./Manyfest-CleanWrapCharacters.js": 2,
+      "./Manyfest-LogToConsole.js": 4
     }],
-    10: [function (require, module, exports) {
+    7: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
-      let libPrecedent = require('precedent');
       let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
+      let fParseConditionals = require("../source/Manyfest-ParseConditionals.js");
 
       /**
       * Object Address Resolver - GetValue
@@ -1030,61 +724,9 @@
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.cleanWrapCharacters = fCleanWrapCharacters;
-          this.precedent = new libPrecedent();
-          this.precedent.addPattern('<<~?', '?~>>', (pMagicSearchExpression, pData) => {
-            if (typeof pMagicSearchExpression !== 'string') {
-              return false;
-            }
-            // This expects a comma separated expression:
-            //     Some.Address.In.The.Object,==,Search Term to Match
-            let tmpMagicComparisonPatternSet = pMagicSearchExpression.split(',');
-            let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
-            let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
-            let tmpSearchValue = tmpMagicComparisonPatternSet[2];
-            switch (tmpSearchComparator) {
-              case '!=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) != tmpSearchValue;
-                break;
-              case '<':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) < tmpSearchValue;
-                break;
-              case '>':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) > tmpSearchValue;
-                break;
-              case '<=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) <= tmpSearchValue;
-                break;
-              case '>=':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) >= tmpSearchValue;
-                break;
-              case '===':
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue;
-                break;
-              case '==':
-              default:
-                pData.KeepRecord = this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue;
-                break;
-            }
-          });
         }
         checkFilters(pAddress, pRecord) {
-          let tmpPrecedent = new libPrecedent();
-          // If we don't copy the string, precedent takes it out for good.
-          // TODO: Consider adding a "don't replace" option for precedent
-          let tmpAddress = pAddress;
-
-          // This allows the magic filtration with configuration
-          // TODO: We could pass more state in (e.g. parent address, object, etc.)
-          // TODO: Discuss this metaprogramming AT LENGTH
-          let tmpFilterState = {
-            Record: pRecord,
-            KeepRecord: true
-          };
-
-          // This is about as complex as it gets.
-
-          this.precedent.parseString(tmpAddress, tmpFilterState);
-          return tmpFilterState.KeepRecord;
+          return fParseConditionals(this, pAddress, pRecord);
         }
 
         // Get the value of an element at an address
@@ -1258,12 +900,12 @@
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
                 // Continue to manage the parent address for recursion
-                tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+                tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
                 // Recurse directly into the subobject
                 return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpParentAddress);
               } else {
                 // Continue to manage the parent address for recursion
-                tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+                tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
                 // We parsed a valid number out of the boxed property name, so recurse into the array
                 return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpParentAddress);
               }
@@ -1284,13 +926,13 @@
               // We need to enumerate the array and grab the addresses from there.
               let tmpArrayProperty = pObject[tmpBoxedPropertyName];
               // Managing the parent address is a bit more complex here -- the box will be added for each element.
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpBoxedPropertyName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpBoxedPropertyName);
               // The container object is where we have the "Address":SOMEVALUE pairs
               let tmpContainerObject = {};
               for (let i = 0; i < tmpArrayProperty.length; i++) {
-                let tmpPropertyParentAddress = `${tmpParentAddress}[${i}]`;
+                let tmpPropertyParentAddress = "".concat(tmpParentAddress, "[").concat(i, "]");
                 let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);
-                tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+                tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
               }
               return tmpContainerObject;
             }
@@ -1309,17 +951,17 @@
               let tmpObjectProperty = pObject[tmpObjectPropertyName];
               let tmpObjectPropertyKeys = Object.keys(tmpObjectProperty);
               // Managing the parent address is a bit more complex here -- the box will be added for each element.
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpObjectPropertyName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpObjectPropertyName);
               // The container object is where we have the "Address":SOMEVALUE pairs
               let tmpContainerObject = {};
               for (let i = 0; i < tmpObjectPropertyKeys.length; i++) {
-                let tmpPropertyParentAddress = `${tmpParentAddress}.${tmpObjectPropertyKeys[i]}`;
+                let tmpPropertyParentAddress = "".concat(tmpParentAddress, ".").concat(tmpObjectPropertyKeys[i]);
                 let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
 
                 // The filtering is complex but allows config-based metaprogramming directly from schema
                 let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
                 if (tmpKeepRecord) {
-                  tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
+                  tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
                 }
               }
               return tmpContainerObject;
@@ -1332,12 +974,12 @@
             } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
               // If there is already a subobject pass that to the recursive thingy
               // Continue to manage the parent address for recursion
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
               return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
             } else {
               // Create a subobject and then pass that
               // Continue to manage the parent address for recursion
-              tmpParentAddress = `${tmpParentAddress}${tmpParentAddress.length > 0 ? '.' : ''}${tmpSubObjectName}`;
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
               pObject[tmpSubObjectName] = {};
               return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
             }
@@ -1347,16 +989,15 @@
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 5,
-      "./Manyfest-LogToConsole.js": 7,
-      "precedent": 1
+      "../source/Manyfest-ParseConditionals.js": 10,
+      "./Manyfest-CleanWrapCharacters.js": 2,
+      "./Manyfest-LogToConsole.js": 4
     }],
-    11: [function (require, module, exports) {
+    8: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
-      let libPrecedent = require('precedent');
       let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 
       /**
@@ -1536,11 +1177,10 @@
       ;
       module.exports = ManyfestObjectAddressSetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 5,
-      "./Manyfest-LogToConsole.js": 7,
-      "precedent": 1
+      "./Manyfest-CleanWrapCharacters.js": 2,
+      "./Manyfest-LogToConsole.js": 4
     }],
-    12: [function (require, module, exports) {
+    9: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1623,7 +1263,7 @@
                   tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;
                 }
                 for (let i = 0; i < pObject.length; i++) {
-                  this.generateAddressses(pObject[i], `${tmpBaseAddress}[${i}]`, tmpSchema);
+                  this.generateAddressses(pObject[i], "".concat(tmpBaseAddress, "[").concat(i, "]"), tmpSchema);
                 }
               } else {
                 tmpSchemaObjectEntry.DataType = 'Object';
@@ -1633,7 +1273,7 @@
                 }
                 let tmpObjectProperties = Object.keys(pObject);
                 for (let i = 0; i < tmpObjectProperties.length; i++) {
-                  this.generateAddressses(pObject[tmpObjectProperties[i]], `${tmpBaseAddress}${tmpObjectProperties[i]}`, tmpSchema);
+                  this.generateAddressses(pObject[tmpObjectProperties[i]], "".concat(tmpBaseAddress).concat(tmpObjectProperties[i]), tmpSchema);
                 }
               }
               break;
@@ -1648,9 +1288,84 @@
       ;
       module.exports = ManyfestObjectAddressGeneration;
     }, {
-      "./Manyfest-LogToConsole.js": 7
+      "./Manyfest-LogToConsole.js": 4
     }],
-    13: [function (require, module, exports) {
+    10: [function (require, module, exports) {
+      // Given a string, parse out any conditional expressions and set whether or not to keep the record.
+      //
+      // For instance:
+      // 		'files[]<<~?format,==,Thumbnail?~>>'
+      //      'files[]<<~?format,==,Metadata?~>>'
+      //      'files[]<<~?size,>,4000?~>>'
+      //
+      // The wrapping parts are the <<~? and ?~>> megabrackets.
+      //
+      // The function does not need to alter the string -- just check the conditionals within.
+
+      // Let's use indexOf since it is apparently the fastest.
+      const _ConditionalStanzaStart = '<<~?';
+      const _ConditionalStanzaStartLength = _ConditionalStanzaStart.length;
+      const _ConditionalStanzaEnd = '?~>>';
+      const _ConditionalStanzaEndLength = _ConditionalStanzaEnd.length;
+
+      // Test the condition of a value in a record
+      const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pValue) => {
+        switch (pSearchComparator) {
+          case '!=':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue;
+            break;
+          case '<':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) < pValue;
+            break;
+          case '>':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) > pValue;
+            break;
+          case '<=':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) <= pValue;
+            break;
+          case '>=':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) >= pValue;
+            break;
+          case '===':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === pValue;
+            break;
+          case '==':
+          default:
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) == pValue;
+            break;
+        }
+      };
+      const parseConditionals = (pManyfest, pAddress, pRecord) => {
+        let tmpKeepRecord = true;
+
+        /*
+        	Algorithm is simple:
+        		1.  Enuerate start points
+        		2.  Find stop points within each start point
+        	3. Check the conditional
+        */
+
+        let tmpStartIndex = pAddress.indexOf(_ConditionalStanzaStart);
+        while (tmpStartIndex != -1) {
+          let tmpStopIndex = pAddress.indexOf(_ConditionalStanzaEnd, tmpStartIndex + _ConditionalStanzaStartLength);
+          if (tmpStopIndex != -1) {
+            let tmpMagicComparisonPatternSet = pAddress.substring(tmpStartIndex + _ConditionalStanzaStartLength, tmpStopIndex).split(',');
+            let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
+            let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
+            let tmpSearchValue = tmpMagicComparisonPatternSet[2];
+
+            // Process the piece
+            tmpKeepRecord = tmpKeepRecord && testCondition(pManyfest, pRecord, tmpSearchAddress, tmpSearchComparator, tmpSearchValue);
+            tmpStartIndex = pAddress.indexOf(_ConditionalStanzaStart, tmpStopIndex + _ConditionalStanzaEndLength);
+          } else {
+            tmpStartIndex = -1;
+          }
+        }
+        return tmpKeepRecord;
+      };
+      module.exports = parseConditionals;
+    }, {}],
+    11: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1688,7 +1403,7 @@
         // TODO: Discuss what should happen on collisions.
         resolveAddressMappings(pManyfestSchemaDescriptors, pAddressMapping) {
           if (typeof pManyfestSchemaDescriptors != 'object') {
-            this.logError(`Attempted to resolve address mapping but the descriptor was not an object.`);
+            this.logError("Attempted to resolve address mapping but the descriptor was not an object.");
             return false;
           }
           if (typeof pAddressMapping != 'object') {
@@ -1741,7 +1456,7 @@
         }
         mergeAddressMappings(pManyfestSchemaDescriptorsDestination, pManyfestSchemaDescriptorsSource) {
           if (typeof pManyfestSchemaDescriptorsSource != 'object' || typeof pManyfestSchemaDescriptorsDestination != 'object') {
-            this.logError(`Attempted to merge two schema descriptors but both were not objects.`);
+            this.logError("Attempted to merge two schema descriptors but both were not objects.");
             return false;
           }
           let tmpSource = JSON.parse(JSON.stringify(pManyfestSchemaDescriptorsSource));
@@ -1759,14 +1474,13 @@
       }
       module.exports = ManyfestSchemaManipulation;
     }, {
-      "./Manyfest-LogToConsole.js": 7
+      "./Manyfest-LogToConsole.js": 4
     }],
-    14: [function (require, module, exports) {
+    12: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
-      let libPrecedent = require('precedent');
       let libHashTranslation = require('./Manyfest-HashTranslation.js');
       let libObjectAddressCheckAddressExists = require('./Manyfest-ObjectAddress-CheckAddressExists.js');
       let libObjectAddressGetValue = require('./Manyfest-ObjectAddress-GetValue.js');
@@ -1859,17 +1573,17 @@
         // Load a manifest from an object
         loadManifest(pManifest) {
           if (typeof pManifest !== 'object') {
-            this.logError(`(${this.scope}) Error loading manifest; expecting an object but parameter was type ${typeof pManifest}.`);
+            this.logError("(".concat(this.scope, ") Error loading manifest; expecting an object but parameter was type ").concat(typeof pManifest, "."));
           }
           let tmpManifest = typeof pManifest == 'object' ? pManifest : {};
           if (tmpManifest.hasOwnProperty('Scope')) {
             if (typeof tmpManifest.Scope === 'string') {
               this.scope = tmpManifest.Scope;
             } else {
-              this.logError(`(${this.scope}) Error loading scope from manifest; expecting a string but property was type ${typeof tmpManifest.Scope}.`, tmpManifest);
+              this.logError("(".concat(this.scope, ") Error loading scope from manifest; expecting a string but property was type ").concat(typeof tmpManifest.Scope, "."), tmpManifest);
             }
           } else {
-            this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`, tmpManifest);
+            this.logError("(".concat(this.scope, ") Error loading scope from manifest object.  Property \"Scope\" does not exist in the root of the object."), tmpManifest);
           }
           if (tmpManifest.hasOwnProperty('Descriptors')) {
             if (typeof tmpManifest.Descriptors === 'object') {
@@ -1878,10 +1592,10 @@
                 this.addDescriptor(tmpDescriptionAddresses[i], tmpManifest.Descriptors[tmpDescriptionAddresses[i]]);
               }
             } else {
-              this.logError(`(${this.scope}) Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ${typeof tmpManifest.Descriptors}.`, tmpManifest);
+              this.logError("(".concat(this.scope, ") Error loading description object from manifest object.  Expecting an object in 'Manifest.Descriptors' but the property was type ").concat(typeof tmpManifest.Descriptors, "."), tmpManifest);
             }
           } else {
-            this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, tmpManifest);
+            this.logError("(".concat(this.scope, ") Error loading object description from manifest object.  Property \"Descriptors\" does not exist in the root of the Manifest object."), tmpManifest);
           }
         }
 
@@ -1922,7 +1636,7 @@
             }
             return true;
           } else {
-            this.logError(`(${this.scope}) Error loading object descriptor for address '${pAddress}' from manifest object.  Expecting an object but property was type ${typeof pDescriptor}.`);
+            this.logError("(".concat(this.scope, ") Error loading object descriptor for address '").concat(pAddress, "' from manifest object.  Expecting an object but property was type ").concat(typeof pDescriptor, "."));
             return false;
           }
         }
@@ -2029,11 +1743,11 @@
           };
           if (typeof pObject !== 'object') {
             tmpValidationData.Error = true;
-            tmpValidationData.Errors.push(`Expected passed in object to be type object but was passed in ${typeof pObject}`);
+            tmpValidationData.Errors.push("Expected passed in object to be type object but was passed in ".concat(typeof pObject));
           }
           let addValidationError = (pAddress, pErrorMessage) => {
             tmpValidationData.Error = true;
-            tmpValidationData.Errors.push(`Element at address "${pAddress}" ${pErrorMessage}.`);
+            tmpValidationData.Errors.push("Element at address \"".concat(pAddress, "\" ").concat(pErrorMessage, "."));
           };
 
           // Now enumerate through the values and check for anomalies based on the schema
@@ -2056,40 +1770,40 @@
               switch (tmpDescriptor.DataType.toString().trim().toLowerCase()) {
                 case 'string':
                   if (tmpElementType != 'string') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   }
                   break;
                 case 'number':
                   if (tmpElementType != 'number') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   }
                   break;
                 case 'integer':
                   if (tmpElementType != 'number') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   } else {
                     let tmpValueString = tmpValue.toString();
                     if (tmpValueString.indexOf('.') > -1) {
                       // TODO: Is this an error?
-                      addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but has a decimal point in the number.`);
+                      addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but has a decimal point in the number."));
                     }
                   }
                   break;
                 case 'float':
                   if (tmpElementType != 'number') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   }
                   break;
                 case 'DateTime':
                   let tmpValueDate = new Date(tmpValue);
                   if (tmpValueDate.toString() == 'Invalid Date') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is not parsable as a Date by Javascript`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is not parsable as a Date by Javascript"));
                   }
                 default:
                   // Check if this is a string, in the default case
                   // Note this is only when a DataType is specified and it is an unrecognized data type.
                   if (tmpElementType != 'string') {
-                    addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} (which auto-converted to String because it was unrecognized) but is of the type ${tmpElementType}`);
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " (which auto-converted to String because it was unrecognized) but is of the type ").concat(tmpElementType));
                   }
                   break;
               }
@@ -2155,15 +1869,14 @@
       ;
       module.exports = Manyfest;
     }, {
-      "./Manyfest-HashTranslation.js": 6,
-      "./Manyfest-LogToConsole.js": 7,
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 8,
-      "./Manyfest-ObjectAddress-DeleteValue.js": 9,
-      "./Manyfest-ObjectAddress-GetValue.js": 10,
-      "./Manyfest-ObjectAddress-SetValue.js": 11,
-      "./Manyfest-ObjectAddressGeneration.js": 12,
-      "./Manyfest-SchemaManipulation.js": 13,
-      "precedent": 1
+      "./Manyfest-HashTranslation.js": 3,
+      "./Manyfest-LogToConsole.js": 4,
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5,
+      "./Manyfest-ObjectAddress-DeleteValue.js": 6,
+      "./Manyfest-ObjectAddress-GetValue.js": 7,
+      "./Manyfest-ObjectAddress-SetValue.js": 8,
+      "./Manyfest-ObjectAddressGeneration.js": 9,
+      "./Manyfest-SchemaManipulation.js": 11
     }]
-  }, {}, [4])(4);
+  }, {}, [1])(1);
 });

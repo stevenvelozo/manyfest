@@ -2,8 +2,8 @@
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
-let libPrecedent = require('precedent');
 let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
+let fParseConditionals = require(`../source/Manyfest-ParseConditionals.js`)
 
 /**
 * Object Address Resolver - DeleteValue
@@ -34,73 +34,12 @@ class ManyfestObjectAddressResolverDeleteValue
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 
 		this.cleanWrapCharacters = fCleanWrapCharacters;
-		this.precedent = new libPrecedent();
-
-		this.precedent.addPattern('<<~?', '?~>>',
-			(pMagicSearchExpression, pData) =>
-				{
-					if (typeof(pMagicSearchExpression) !== 'string')
-					{
-						return false;
-					}
-					// This expects a comma separated expression:
-					//     Some.Address.In.The.Object,==,Search Term to Match
-					let tmpMagicComparisonPatternSet = pMagicSearchExpression.split(',');
-
-					let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
-					let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
-					let tmpSearchValue = tmpMagicComparisonPatternSet[2];
-
-					switch(tmpSearchComparator)
-					{
-						case '!=':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) != tmpSearchValue);
-							break;
-						case '<':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) < tmpSearchValue);
-							break;
-						case '>':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) > tmpSearchValue);
-							break;
-						case '<=':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) <= tmpSearchValue);
-							break;
-						case '>=':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) >= tmpSearchValue);
-							break;
-						case '===':
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue);
-							break;
-						case '==':
-						default:
-							pData.KeepRecord = (this.getValueAtAddress(pData.Record, tmpSearchAddress) == tmpSearchValue);
-							break;
-					}
-				});
 	}
 
 	// TODO: Dry me
 	checkFilters(pAddress, pRecord)
 	{
-		let tmpPrecedent = new libPrecedent();
-		// If we don't copy the string, precedent takes it out for good.
-		// TODO: Consider adding a "don't replace" option for precedent
-		let tmpAddress = pAddress;
-
-		// This allows the magic filtration with solver configuration
-		// TODO: We could pass more state in (e.g. parent address, object, etc.)
-		// TODO: Discuss this metaprogramming AT LENGTH
-		let tmpFilterState = (
-			{
-				Record: pRecord,
-				KeepRecord: true
-			});
-
-			// This is about as complex as it gets.
-
-		this.precedent.parseString(tmpAddress, tmpFilterState);
-
-		return tmpFilterState.KeepRecord;
+		return fParseConditionals(this, pAddress, pRecord);
 	}
 
 	// Delete the value of an element at an address

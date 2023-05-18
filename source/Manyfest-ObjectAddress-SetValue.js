@@ -2,7 +2,6 @@
 * @author <steven@velozo.com>
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
-let libPrecedent = require('precedent');
 let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 
 /**
