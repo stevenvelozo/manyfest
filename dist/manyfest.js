@@ -1,5 +1,8 @@
 "use strict";
 
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 (function (f) {
   if (typeof exports === "object" && typeof module !== "undefined") {
     module.exports = f();
@@ -48,6 +51,60 @@
   }()({
     1: [function (require, module, exports) {
       /**
+      * Fable Core Pre-initialization Service Base
+      *
+      * For a couple services, we need to be able to instantiate them before the Fable object is fully initialized.
+      * This is a base class for those services.
+      *
+      * @author <steven@velozo.com>
+      */
+
+      class FableCoreServiceProviderBase {
+        constructor(pOptions, pServiceHash) {
+          this.fable = false;
+          this.options = typeof pOptions === 'object' ? pOptions : {};
+          this.serviceType = 'Unknown';
+
+          // The hash will be a non-standard UUID ... the UUID service uses this base class!
+          this.UUID = "CORESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
+          this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
+        }
+        // After fable is initialized, it would be expected to be wired in as a normal service.
+        connectFable(pFable) {
+          this.fable = pFable;
+          return true;
+        }
+      }
+      _defineProperty(FableCoreServiceProviderBase, "isFableService", true);
+      module.exports = FableCoreServiceProviderBase;
+    }, {}],
+    2: [function (require, module, exports) {
+      /**
+      * Fable Service Base
+      * @author <steven@velozo.com>
+      */
+
+      class FableServiceProviderBase {
+        constructor(pFable, pOptions, pServiceHash) {
+          this.fable = pFable;
+          this.options = typeof pOptions === 'object' ? pOptions : typeof pFable === 'object' && !pFable.isFable ? pFable : {};
+          this.serviceType = 'Unknown';
+          if (typeof pFable.getUUID == 'function') {
+            this.UUID = pFable.getUUID();
+          } else {
+            this.UUID = "NoFABLESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
+          }
+          this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
+        }
+      }
+      _defineProperty(FableServiceProviderBase, "isFableService", true);
+      module.exports = FableServiceProviderBase;
+      module.exports.CoreServiceProviderBase = require('./Fable-ServiceProviderBase-Preinit.js');
+    }, {
+      "./Fable-ServiceProviderBase-Preinit.js": 1
+    }],
+    3: [function (require, module, exports) {
+      /**
       * @author <steven@velozo.com>
       */
 
@@ -60,9 +117,9 @@
       if (typeof window === 'object') window.Manyfest = libManyfest;
       module.exports = libManyfest;
     }, {
-      "./Manyfest.js": 12
+      "./Manyfest.js": 14
     }],
-    2: [function (require, module, exports) {
+    4: [function (require, module, exports) {
       // When a boxed property is passed in, it should have quotes of some
       // kind around it.
       //
@@ -87,7 +144,7 @@
       };
       module.exports = cleanWrapCharacters;
     }, {}],
-    3: [function (require, module, exports) {
+    5: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -171,9 +228,9 @@
       }
       module.exports = ManyfestHashTranslation;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 6
     }],
-    4: [function (require, module, exports) {
+    6: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -189,7 +246,7 @@
       };
       module.exports = logToConsole;
     }, {}],
-    5: [function (require, module, exports) {
+    7: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -378,9 +435,9 @@
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 6
     }],
-    6: [function (require, module, exports) {
+    8: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -686,11 +743,11 @@
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 10,
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "../source/Manyfest-ParseConditionals.js": 12,
+      "./Manyfest-CleanWrapCharacters.js": 4,
+      "./Manyfest-LogToConsole.js": 6
     }],
-    7: [function (require, module, exports) {
+    9: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1024,11 +1081,11 @@
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 10,
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "../source/Manyfest-ParseConditionals.js": 12,
+      "./Manyfest-CleanWrapCharacters.js": 4,
+      "./Manyfest-LogToConsole.js": 6
     }],
-    8: [function (require, module, exports) {
+    10: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1212,10 +1269,10 @@
       ;
       module.exports = ManyfestObjectAddressSetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-CleanWrapCharacters.js": 4,
+      "./Manyfest-LogToConsole.js": 6
     }],
-    9: [function (require, module, exports) {
+    11: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1323,9 +1380,9 @@
       ;
       module.exports = ManyfestObjectAddressGeneration;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 6
     }],
-    10: [function (require, module, exports) {
+    12: [function (require, module, exports) {
       // Given a string, parse out any conditional expressions and set whether or not to keep the record.
       //
       // For instance:
@@ -1402,7 +1459,7 @@
       };
       module.exports = parseConditionals;
     }, {}],
-    11: [function (require, module, exports) {
+    13: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1511,12 +1568,13 @@
       }
       module.exports = ManyfestSchemaManipulation;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 6
     }],
-    12: [function (require, module, exports) {
+    14: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
+      const libFableServiceProviderBase = require('fable-serviceproviderbase');
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
       let libHashTranslation = require('./Manyfest-HashTranslation.js');
       let libObjectAddressCheckAddressExists = require('./Manyfest-ObjectAddress-CheckAddressExists.js');
@@ -1526,7 +1584,7 @@
       let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
       let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
       const _DefaultConfiguration = {
-        Scope: 'Default',
+        Scope: 'DEFAULT',
         Descriptors: {}
       };
 
@@ -1535,20 +1593,26 @@
       *
       * @class Manyfest
       */
-      class Manyfest {
-        constructor(pManifest, pInfoLog, pErrorLog, pOptions) {
+      class Manyfest extends libFableServiceProviderBase {
+        constructor(pFable, pManifest, pServiceHash) {
+          if (pFable === undefined) {
+            super({});
+          } else {
+            super(pFable, pManifest, pServiceHash);
+          }
+          this.serviceType = 'Manifest';
+
           // Wire in logging
-          this.logInfo = typeof pInfoLog === 'function' ? pInfoLog : libSimpleLog;
-          this.logError = typeof pErrorLog === 'function' ? pErrorLog : libSimpleLog;
+          this.logInfo = libSimpleLog;
+          this.logError = libSimpleLog;
 
           // Create an object address resolver and map in the functions
           this.objectAddressCheckAddressExists = new libObjectAddressCheckAddressExists(this.logInfo, this.logError);
           this.objectAddressGetValue = new libObjectAddressGetValue(this.logInfo, this.logError);
           this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
           this.objectAddressDeleteValue = new libObjectAddressDeleteValue(this.logInfo, this.logError);
-          this.options = {
-            strict: false,
-            defaultValues: {
+          if (!this.options.hasOwnProperty('defaultValues')) {
+            this.options.defaultValues = {
               "String": "",
               "Number": 0,
               "Float": 0.0,
@@ -1559,8 +1623,11 @@
               "Array": [],
               "Object": {},
               "Null": null
-            }
-          };
+            };
+          }
+          if (!this.options.hasOwnProperty('strict')) {
+            this.options.strict = false;
+          }
           this.scope = undefined;
           this.elementAddresses = undefined;
           this.elementHashes = undefined;
@@ -1570,8 +1637,8 @@
           // So solvers can use their own state
           this.dataSolverState = undefined;
           this.reset();
-          if (typeof pManifest === 'object') {
-            this.loadManifest(pManifest);
+          if (typeof this.options === 'object') {
+            this.loadManifest(this.options);
           }
           this.schemaManipulations = new libSchemaManipulation(this.logInfo, this.logError);
           this.objectAddressGeneration = new libObjectAddressGeneration(this.logInfo, this.logError);
@@ -1613,6 +1680,12 @@
             this.logError("(".concat(this.scope, ") Error loading manifest; expecting an object but parameter was type ").concat(typeof pManifest, "."));
           }
           let tmpManifest = typeof pManifest == 'object' ? pManifest : {};
+          let tmpDescriptorKeys = Object.keys(_DefaultConfiguration);
+          for (let i = 0; i < tmpDescriptorKeys.length; i++) {
+            if (!tmpManifest.hasOwnProperty(tmpDescriptorKeys[i])) {
+              tmpManifest[tmpDescriptorKeys[i]] = JSON.parse(JSON.stringify(_DefaultConfiguration[tmpDescriptorKeys[i]]));
+            }
+          }
           if (tmpManifest.hasOwnProperty('Scope')) {
             if (typeof tmpManifest.Scope === 'string') {
               this.scope = tmpManifest.Scope;
@@ -1906,14 +1979,15 @@
       ;
       module.exports = Manyfest;
     }, {
-      "./Manyfest-HashTranslation.js": 3,
-      "./Manyfest-LogToConsole.js": 4,
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5,
-      "./Manyfest-ObjectAddress-DeleteValue.js": 6,
-      "./Manyfest-ObjectAddress-GetValue.js": 7,
-      "./Manyfest-ObjectAddress-SetValue.js": 8,
-      "./Manyfest-ObjectAddressGeneration.js": 9,
-      "./Manyfest-SchemaManipulation.js": 11
+      "./Manyfest-HashTranslation.js": 5,
+      "./Manyfest-LogToConsole.js": 6,
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 7,
+      "./Manyfest-ObjectAddress-DeleteValue.js": 8,
+      "./Manyfest-ObjectAddress-GetValue.js": 9,
+      "./Manyfest-ObjectAddress-SetValue.js": 10,
+      "./Manyfest-ObjectAddressGeneration.js": 11,
+      "./Manyfest-SchemaManipulation.js": 13,
+      "fable-serviceproviderbase": 2
     }]
-  }, {}, [1])(1);
+  }, {}, [3])(3);
 });

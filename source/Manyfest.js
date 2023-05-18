@@ -1,6 +1,8 @@
 /**
 * @author <steven@velozo.com>
 */
+const libFableServiceProviderBase = require('fable-serviceproviderbase');
+
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 
 let libHashTranslation = require('./Manyfest-HashTranslation.js');
@@ -11,21 +13,31 @@ let libObjectAddressDeleteValue = require('./Manyfest-ObjectAddress-DeleteValue.
 let libObjectAddressGeneration = require('./Manyfest-ObjectAddressGeneration.js');
 let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 
-const _DefaultConfiguration = { Scope:'Default', Descriptors: {} }
-
+const _DefaultConfiguration = { Scope:'DEFAULT', Descriptors: {} }
 
 /**
 * Manyfest object address-based descriptions and manipulations.
 *
 * @class Manyfest
 */
-class Manyfest
+class Manyfest extends libFableServiceProviderBase
 {
-	constructor(pManifest, pInfoLog, pErrorLog, pOptions)
+	constructor(pFable, pManifest, pServiceHash)
 	{
+		if (pFable === undefined)
+		{
+			super({});
+		}
+		else
+		{
+			super(pFable, pManifest, pServiceHash);
+		}
+
+        this.serviceType = 'Manifest';
+
 		// Wire in logging
-		this.logInfo = (typeof(pInfoLog) === 'function') ? pInfoLog : libSimpleLog;
-		this.logError = (typeof(pErrorLog) === 'function') ? pErrorLog : libSimpleLog;
+		this.logInfo = libSimpleLog;
+		this.logError = libSimpleLog;
 
 		// Create an object address resolver and map in the functions
 		this.objectAddressCheckAddressExists = new libObjectAddressCheckAddressExists(this.logInfo, this.logError);
@@ -33,23 +45,26 @@ class Manyfest
 		this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
 		this.objectAddressDeleteValue = new libObjectAddressDeleteValue(this.logInfo, this.logError);
 
-		this.options = (
-			{
-				strict: false,
-				defaultValues:
-					{
-						"String": "",
-						"Number": 0,
-						"Float": 0.0,
-						"Integer": 0,
-						"Boolean": false,
-						"Binary": 0,
-						"DateTime": 0,
-						"Array": [],
-						"Object": {},
-						"Null": null
-					}
-			});
+		if (!this.options.hasOwnProperty('defaultValues'))
+		{
+			this.options.defaultValues = (
+				{
+					"String": "",
+					"Number": 0,
+					"Float": 0.0,
+					"Integer": 0,
+					"Boolean": false,
+					"Binary": 0,
+					"DateTime": 0,
+					"Array": [],
+					"Object": {},
+					"Null": null
+				});
+		}
+		if (!this.options.hasOwnProperty('strict'))
+		{
+			this.options.strict = false;
+		}
 
 		this.scope = undefined;
 		this.elementAddresses = undefined;
@@ -62,9 +77,9 @@ class Manyfest
 
 		this.reset();
 
-		if (typeof(pManifest) === 'object')
+		if (typeof(this.options) === 'object')
 		{
-			this.loadManifest(pManifest);
+			this.loadManifest(this.options);
 		}
 
 		this.schemaManipulations = new libSchemaManipulation(this.logInfo, this.logError);
@@ -117,6 +132,16 @@ class Manyfest
 		}
 
 		let tmpManifest = (typeof(pManifest) == 'object') ? pManifest : {};
+
+		let tmpDescriptorKeys = Object.keys(_DefaultConfiguration);
+
+		for (let i = 0; i < tmpDescriptorKeys.length; i++)
+		{
+			if (!tmpManifest.hasOwnProperty(tmpDescriptorKeys[i]))
+			{
+				tmpManifest[tmpDescriptorKeys[i]] = JSON.parse(JSON.stringify(_DefaultConfiguration[tmpDescriptorKeys[i]]));
+			}
+		}
 
 		if (tmpManifest.hasOwnProperty('Scope'))
 		{

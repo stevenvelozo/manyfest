@@ -71,31 +71,6 @@ suite
 						fTestComplete();
 					}
 				);
-				test
-				(
-					'Pass in a custom logger.',
-					(fTestComplete)=>
-					{
-						let tmpLogState = [];
-						let fWriteLog = (pLogLine, pLogObject) =>
-						{
-							tmpLogState.push(pLogLine);
-						};
-
-						let _Manyfest = new libManyfest(undefined, fWriteLog, fWriteLog);
-						_Manyfest.logError('Error...');
-						Expect(tmpLogState.length)
-							.to.equal(1);
-						Expect(tmpLogState[0])
-							.to.equal('Error...');
-						_Manyfest.logInfo('Info...');
-						_Manyfest.logInfo();
-						Expect(tmpLogState.length)
-							.to.equal(3);
-
-						fTestComplete();
-					}
-				);
 			}
 		);
 	}
