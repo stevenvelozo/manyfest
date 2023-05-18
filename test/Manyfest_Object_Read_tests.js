@@ -12,6 +12,7 @@ var Expect = Chai.expect;
 let libManyfest = require('../source/Manyfest.js');
 
 let _SampleDataArchiveOrgFrankenberry = require('./Data-Archive-org-Frankenberry.json');
+let _SampleDataYahooWeather = require('./Data-Yahoo-Weather.json');
 
 suite
 (
@@ -100,9 +101,36 @@ suite
 		);
 		suite
 		(
-			'Advanced Read (with Arrays and Boxed Property addresses)',
+			'Advanced Read (with Arrays and Boxed Property and Backwards navigation addresses)',
 			()=>
 			{
+				test
+				(
+					'Access relative objects',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						// Traverse a relative address
+						let tmpVideoPointer = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'files[0]');
+						Expect(tmpVideoPointer.original).to.equal('frankerberry_countchockula_1971.0001.mpg');
+						// The .. means go back one level
+						let tmpDir = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'files[0]..dir');
+						Expect(tmpDir).to.equal("/7/items/FrankenberryCountChoculaTevevisionCommercial1971");
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Access relative objects complexly',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'location.city')).to.equal('Sunnyvale');
+						// The .. means go back one level
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'current_observation.wind...location.city')).to.equal('Sunnyvale');
+						fTestComplete();
+					}
+				);
 				test
 				(
 					'Access specific array elements',

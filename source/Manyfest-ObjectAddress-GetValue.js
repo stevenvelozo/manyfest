@@ -42,7 +42,7 @@ class ManyfestObjectAddressResolverGetValue
 	}
 
 	// Get the value of an element at an address
-	getValueAtAddress (pObject, pAddress, pParentAddress)
+	getValueAtAddress (pObject, pAddress, pParentAddress, pRootObject)
 	{
 		// Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)
 		if (typeof(pObject) != 'object') return undefined;
@@ -55,8 +55,53 @@ class ManyfestObjectAddressResolverGetValue
 			tmpParentAddress = pParentAddress;
 		}
 
+		// Set the root object to the passed-in object if it isn't set yet.  This is expected to be the root object.
+		let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
 		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
 		let tmpSeparatorIndex = pAddress.indexOf('.');
+
+		// Adding simple back-navigation in objects
+		if (tmpSeparatorIndex == 0)
+		{
+			// Given an address of "Bundle.Contract.IDContract...Project.IDProject" the ... would be interpreted as two back-navigations from IDContract.
+			// When the address is passed in, though, the first . is already eliminated.  So we can count the dots.
+			let tmpParentAddressParts = tmpParentAddress.split('.');
+
+			let tmpBackNavigationCount = 0;
+
+			// Count the number of dots
+			for (let i = 0; i < pAddress.length; i++)
+			{
+				if (pAddress.charAt(i) != '.')
+				{
+					break;
+				}
+				tmpBackNavigationCount++;
+			}
+
+			let tmpParentAddressLength = tmpParentAddressParts.length - tmpBackNavigationCount;
+
+			if (tmpParentAddressLength < 0)
+			{
+				// We are trying to back navigate more than we can.
+				// TODO: Should this be undefined or should we bank out at the bottom and try to go forward?
+				// This seems safest for now.
+				return undefined;
+			}
+			else
+			{
+				// We are trying to back navigate to a parent object.
+				// Recurse with the back-propagated parent address, and, the new address without the back-navigation dots.
+				let tmpRecurseAddress = pAddress.slice(tmpBackNavigationCount);
+				if (tmpParentAddressLength > 0)
+				{
+					tmpRecurseAddress = `${tmpParentAddressParts.slice(0, tmpParentAddressLength).join('.')}.${tmpRecurseAddress}`;
+				}
+				this.logInfo(`Back-navigation detected.  Recursing back to address [${tmpRecurseAddress}]`);
+				return this.getValueAtAddress(tmpRootObject, tmpRecurseAddress);
+			}
+		}
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
 		if (tmpSeparatorIndex == -1)
@@ -245,14 +290,14 @@ class ManyfestObjectAddressResolverGetValue
 					// Continue to manage the parent address for recursion
 					tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 					// Recurse directly into the subobject
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpParentAddress);
+					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpParentAddress, tmpRootObject);
 				}
 				else
 				{
 					// Continue to manage the parent address for recursion
 					tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 					// We parsed a valid number out of the boxed property name, so recurse into the array
-					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpParentAddress);
+					return this.getValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpParentAddress, tmpRootObject);
 				}
 			}
 			// The requirements to detect a boxed set element are:
@@ -280,7 +325,7 @@ class ManyfestObjectAddressResolverGetValue
 				for (let i = 0; i < tmpArrayProperty.length; i++)
 				{
 					let tmpPropertyParentAddress = `${tmpParentAddress}[${i}]`;
-					let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress);
+					let tmpValue = this.getValueAtAddress(pObject[tmpBoxedPropertyName][i], tmpNewAddress, tmpPropertyParentAddress, tmpRootObject);
 
 					tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;
 				}
@@ -311,7 +356,7 @@ class ManyfestObjectAddressResolverGetValue
 				for (let i = 0; i < tmpObjectPropertyKeys.length; i++)
 				{
 					let tmpPropertyParentAddress = `${tmpParentAddress}.${tmpObjectPropertyKeys[i]}`;
-					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
+					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress, tmpRootObject);
 
 					// The filtering is complex but allows config-based metaprogramming directly from schema
 					let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
@@ -335,7 +380,7 @@ class ManyfestObjectAddressResolverGetValue
 				// If there is already a subobject pass that to the recursive thingy
 				// Continue to manage the parent address for recursion
 				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
+				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress, tmpRootObject);
 			}
 			else
 			{
@@ -343,7 +388,7 @@ class ManyfestObjectAddressResolverGetValue
 				// Continue to manage the parent address for recursion
 				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 				pObject[tmpSubObjectName] = {};
-				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress);
+				return this.getValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, tmpParentAddress, tmpRootObject);
 			}
 		}
 	}

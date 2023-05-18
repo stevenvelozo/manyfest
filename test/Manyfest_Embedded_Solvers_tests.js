@@ -27,7 +27,7 @@ suite
 			{
 				test
 				(
-					'Underlying template processors should be able to filter sets.',
+					'Underlying template processor should be able to filter records and be fast.',
 					(fTestComplete)=>
 					{
 						let _Manyfest = new libManyfest();
@@ -41,6 +41,10 @@ suite
 						let tmpTestResult = templateParser(_Manyfest, tmpTestTemplate, tmpTestRecord);
 
 						Expect(tmpTestResult).to.equal(true);
+
+						tmpTestRecord.Name = 'Bob';
+
+						Expect(templateParser(_Manyfest, tmpTestTemplate, tmpTestRecord)).to.equal(false);
 
 						return fTestComplete();
 					}

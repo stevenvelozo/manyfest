@@ -9,6 +9,8 @@
 //
 // The function does not need to alter the string -- just check the conditionals within.
 
+// TODO: Consider making this an es6 class
+
 // Let's use indexOf since it is apparently the fastest.
 const _ConditionalStanzaStart = '<<~?';
 const _ConditionalStanzaStartLength = _ConditionalStanzaStart.length;
