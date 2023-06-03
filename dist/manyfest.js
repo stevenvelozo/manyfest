@@ -95,6 +95,11 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
             this.UUID = "NoFABLESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
           }
           this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
+
+          // Pull back a few things
+          this.log = this.fable.log;
+          this.servicesMap = this.fable.serviceMap;
+          this.services = this.fable.services;
         }
       }
       _defineProperty(FableServiceProviderBase, "isFableService", true);
@@ -104,22 +109,6 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       "./Fable-ServiceProviderBase-Preinit.js": 1
     }],
     3: [function (require, module, exports) {
-      /**
-      * @author <steven@velozo.com>
-      */
-
-      /**
-      * Manyfest browser shim loader
-      */
-
-      // Load the manyfest module into the browser global automatically.
-      var libManyfest = require('./Manyfest.js');
-      if (typeof window === 'object') window.Manyfest = libManyfest;
-      module.exports = libManyfest;
-    }, {
-      "./Manyfest.js": 14
-    }],
-    4: [function (require, module, exports) {
       // When a boxed property is passed in, it should have quotes of some
       // kind around it.
       //
@@ -144,7 +133,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       };
       module.exports = cleanWrapCharacters;
     }, {}],
-    5: [function (require, module, exports) {
+    4: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -228,9 +217,9 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       }
       module.exports = ManyfestHashTranslation;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    6: [function (require, module, exports) {
+    5: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -246,7 +235,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       };
       module.exports = logToConsole;
     }, {}],
-    7: [function (require, module, exports) {
+    6: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -435,9 +424,9 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    8: [function (require, module, exports) {
+    7: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -743,11 +732,11 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 12,
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "../source/Manyfest-ParseConditionals.js": 11,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    9: [function (require, module, exports) {
+    8: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1081,11 +1070,11 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 12,
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "../source/Manyfest-ParseConditionals.js": 11,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    10: [function (require, module, exports) {
+    9: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1269,10 +1258,10 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = ManyfestObjectAddressSetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    11: [function (require, module, exports) {
+    10: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1380,9 +1369,9 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = ManyfestObjectAddressGeneration;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    12: [function (require, module, exports) {
+    11: [function (require, module, exports) {
       // Given a string, parse out any conditional expressions and set whether or not to keep the record.
       //
       // For instance:
@@ -1459,7 +1448,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       };
       module.exports = parseConditionals;
     }, {}],
-    13: [function (require, module, exports) {
+    12: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1568,9 +1557,9 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       }
       module.exports = ManyfestSchemaManipulation;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    14: [function (require, module, exports) {
+    13: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1632,10 +1621,6 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           this.elementAddresses = undefined;
           this.elementHashes = undefined;
           this.elementDescriptors = undefined;
-          // This can cause a circular dependency chain, so it only gets initialized if the schema specifically calls for it.
-          this.dataSolvers = undefined;
-          // So solvers can use their own state
-          this.dataSolverState = undefined;
           this.reset();
           if (typeof this.options === 'object') {
             this.loadManifest(this.options);
@@ -1655,8 +1640,6 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           this.elementAddresses = [];
           this.elementHashes = {};
           this.elementDescriptors = {};
-          this.dataSolvers = undefined;
-          this.dataSolverState = {};
         }
         clone() {
           // Make a copy of the options in-place
@@ -1707,17 +1690,24 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           } else {
             this.logError("(".concat(this.scope, ") Error loading object description from manifest object.  Property \"Descriptors\" does not exist in the root of the Manifest object."), tmpManifest);
           }
+          if (tmpManifest.hasOwnProperty('HashTranslations')) {
+            if (typeof tmpManifest.HashTranslations === 'object') {
+              for (let i = 0; i < tmpManifest.HashTranslations.length; i++) {
+                // Each translation is 
+              }
+            }
+          }
         }
 
         // Serialize the Manifest to a string
-        // TODO: Should this also serialize the translation table?
         serialize() {
           return JSON.stringify(this.getManifest());
         }
         getManifest() {
           return {
             Scope: this.scope,
-            Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors))
+            Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors)),
+            HashTranslations: JSON.parse(JSON.stringify(this.hashTranslations.translationTable))
           };
         }
 
@@ -1979,15 +1969,15 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       ;
       module.exports = Manyfest;
     }, {
-      "./Manyfest-HashTranslation.js": 5,
-      "./Manyfest-LogToConsole.js": 6,
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 7,
-      "./Manyfest-ObjectAddress-DeleteValue.js": 8,
-      "./Manyfest-ObjectAddress-GetValue.js": 9,
-      "./Manyfest-ObjectAddress-SetValue.js": 10,
-      "./Manyfest-ObjectAddressGeneration.js": 11,
-      "./Manyfest-SchemaManipulation.js": 13,
+      "./Manyfest-HashTranslation.js": 4,
+      "./Manyfest-LogToConsole.js": 5,
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 6,
+      "./Manyfest-ObjectAddress-DeleteValue.js": 7,
+      "./Manyfest-ObjectAddress-GetValue.js": 8,
+      "./Manyfest-ObjectAddress-SetValue.js": 9,
+      "./Manyfest-ObjectAddressGeneration.js": 10,
+      "./Manyfest-SchemaManipulation.js": 12,
       "fable-serviceproviderbase": 2
     }]
-  }, {}, [3])(3);
+  }, {}, [13])(13);
 });

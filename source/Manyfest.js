@@ -70,10 +70,6 @@ class Manyfest extends libFableServiceProviderBase
 		this.elementAddresses = undefined;
 		this.elementHashes = undefined;
 		this.elementDescriptors = undefined;
-		// This can cause a circular dependency chain, so it only gets initialized if the schema specifically calls for it.
-		this.dataSolvers = undefined;
-		// So solvers can use their own state
-		this.dataSolverState = undefined;
 
 		this.reset();
 
@@ -99,8 +95,6 @@ class Manyfest extends libFableServiceProviderBase
 		this.elementAddresses = [];
 		this.elementHashes = {};
 		this.elementDescriptors = {};
-		this.dataSolvers = undefined;
-		this.dataSolverState = {};
 	}
 
 	clone()
@@ -178,10 +172,20 @@ class Manyfest extends libFableServiceProviderBase
 		{
 			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, tmpManifest);
 		}
+
+		if (tmpManifest.hasOwnProperty('HashTranslations'))
+		{
+			if (typeof(tmpManifest.HashTranslations) === 'object')
+			{
+				for (let i = 0; i < tmpManifest.HashTranslations.length; i++)
+				{
+					// Each translation is 
+				}
+			}
+		}
 	}
 
 	// Serialize the Manifest to a string
-	// TODO: Should this also serialize the translation table?
 	serialize()
 	{
 		return JSON.stringify(this.getManifest());
@@ -192,7 +196,8 @@ class Manyfest extends libFableServiceProviderBase
 		return (
 			{
 				Scope: this.scope,
-				Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors))
+				Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors)),
+				HashTranslations: JSON.parse(JSON.stringify(this.hashTranslations.translationTable))
 			});
 	}
 

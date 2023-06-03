@@ -110,6 +110,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
           this.UUID = "NoFABLESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
         }
         this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
+
+        // Pull back a few things
+        this.log = this.fable.log;
+        this.servicesMap = this.fable.serviceMap;
+        this.services = this.fable.services;
       });
       _defineProperty(FableServiceProviderBase, "isFableService", true);
       module.exports = FableServiceProviderBase;
@@ -118,22 +123,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       "./Fable-ServiceProviderBase-Preinit.js": 1
     }],
     3: [function (require, module, exports) {
-      /**
-      * @author <steven@velozo.com>
-      */
-
-      /**
-      * Manyfest browser shim loader
-      */
-
-      // Load the manyfest module into the browser global automatically.
-      var libManyfest = require('./Manyfest.js');
-      if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === 'object') window.Manyfest = libManyfest;
-      module.exports = libManyfest;
-    }, {
-      "./Manyfest.js": 14
-    }],
-    4: [function (require, module, exports) {
       // When a boxed property is passed in, it should have quotes of some
       // kind around it.
       //
@@ -158,7 +147,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       };
       module.exports = cleanWrapCharacters;
     }, {}],
-    5: [function (require, module, exports) {
+    4: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -259,9 +248,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       }();
       module.exports = ManyfestHashTranslation;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    6: [function (require, module, exports) {
+    5: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -277,7 +266,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       };
       module.exports = logToConsole;
     }, {}],
-    7: [function (require, module, exports) {
+    6: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -471,9 +460,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    8: [function (require, module, exports) {
+    7: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -786,11 +775,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 12,
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "../source/Manyfest-ParseConditionals.js": 11,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    9: [function (require, module, exports) {
+    8: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1131,11 +1120,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 12,
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "../source/Manyfest-ParseConditionals.js": 11,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    10: [function (require, module, exports) {
+    9: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1324,10 +1313,10 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = ManyfestObjectAddressSetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 4,
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    11: [function (require, module, exports) {
+    10: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1440,9 +1429,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = ManyfestObjectAddressGeneration;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    12: [function (require, module, exports) {
+    11: [function (require, module, exports) {
       // Given a string, parse out any conditional expressions and set whether or not to keep the record.
       //
       // For instance:
@@ -1519,7 +1508,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       };
       module.exports = parseConditionals;
     }, {}],
-    13: [function (require, module, exports) {
+    12: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1637,9 +1626,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       }();
       module.exports = ManyfestSchemaManipulation;
     }, {
-      "./Manyfest-LogToConsole.js": 6
+      "./Manyfest-LogToConsole.js": 5
     }],
-    14: [function (require, module, exports) {
+    13: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1705,10 +1694,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
           _this3.elementAddresses = undefined;
           _this3.elementHashes = undefined;
           _this3.elementDescriptors = undefined;
-          // This can cause a circular dependency chain, so it only gets initialized if the schema specifically calls for it.
-          _this3.dataSolvers = undefined;
-          // So solvers can use their own state
-          _this3.dataSolverState = undefined;
           _this3.reset();
           if (_typeof(_this3.options) === 'object') {
             _this3.loadManifest(_this3.options);
@@ -1731,8 +1716,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
             this.elementAddresses = [];
             this.elementHashes = {};
             this.elementDescriptors = {};
-            this.dataSolvers = undefined;
-            this.dataSolverState = {};
           }
         }, {
           key: "clone",
@@ -1789,10 +1772,16 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
             } else {
               this.logError("(".concat(this.scope, ") Error loading object description from manifest object.  Property \"Descriptors\" does not exist in the root of the Manifest object."), tmpManifest);
             }
+            if (tmpManifest.hasOwnProperty('HashTranslations')) {
+              if (_typeof(tmpManifest.HashTranslations) === 'object') {
+                for (var _i8 = 0; _i8 < tmpManifest.HashTranslations.length; _i8++) {
+                  // Each translation is 
+                }
+              }
+            }
           }
 
           // Serialize the Manifest to a string
-          // TODO: Should this also serialize the translation table?
         }, {
           key: "serialize",
           value: function serialize() {
@@ -1803,7 +1792,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
           value: function getManifest() {
             return {
               Scope: this.scope,
-              Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors))
+              Descriptors: JSON.parse(JSON.stringify(this.elementDescriptors)),
+              HashTranslations: JSON.parse(JSON.stringify(this.hashTranslations.translationTable))
             };
           }
 
@@ -2102,15 +2092,15 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
       ;
       module.exports = Manyfest;
     }, {
-      "./Manyfest-HashTranslation.js": 5,
-      "./Manyfest-LogToConsole.js": 6,
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 7,
-      "./Manyfest-ObjectAddress-DeleteValue.js": 8,
-      "./Manyfest-ObjectAddress-GetValue.js": 9,
-      "./Manyfest-ObjectAddress-SetValue.js": 10,
-      "./Manyfest-ObjectAddressGeneration.js": 11,
-      "./Manyfest-SchemaManipulation.js": 13,
+      "./Manyfest-HashTranslation.js": 4,
+      "./Manyfest-LogToConsole.js": 5,
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 6,
+      "./Manyfest-ObjectAddress-DeleteValue.js": 7,
+      "./Manyfest-ObjectAddress-GetValue.js": 8,
+      "./Manyfest-ObjectAddress-SetValue.js": 9,
+      "./Manyfest-ObjectAddressGeneration.js": 10,
+      "./Manyfest-SchemaManipulation.js": 12,
       "fable-serviceproviderbase": 2
     }]
-  }, {}, [3])(3);
+  }, {}, [13])(13);
 });
