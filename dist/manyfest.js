@@ -923,7 +923,11 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
               return pObject[tmpObjectPropertyName];
             } else {
               // Now is the point in recursion to return the value in the address
-              return pObject[pAddress];
+              if (typeof pObject[pAddress] != null) {
+                return pObject[pAddress];
+              } else {
+                return undefined;
+              }
             }
           } else {
             let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);

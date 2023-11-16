@@ -972,7 +972,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 return pObject[tmpObjectPropertyName];
               } else {
                 // Now is the point in recursion to return the value in the address
-                return pObject[pAddress];
+                if (_typeof(pObject[pAddress]) != null) {
+                  return pObject[pAddress];
+                } else {
+                  return undefined;
+                }
               }
             } else {
               var tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);

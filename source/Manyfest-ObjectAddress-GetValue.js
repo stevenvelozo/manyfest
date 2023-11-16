@@ -218,7 +218,14 @@ class ManyfestObjectAddressResolverGetValue
 			else
 			{
 				// Now is the point in recursion to return the value in the address
-				return pObject[pAddress];
+				if (typeof(pObject[pAddress]) != null)
+				{
+					return pObject[pAddress];
+				}
+				else
+				{
+					return undefined;
+				}
 			}
 		}
 		else
