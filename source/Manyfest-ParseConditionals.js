@@ -33,7 +33,7 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 			break;
 		case 'LNGT':
 		case 'LENGTH_GREATER_THAN':
-			switch(typeof(typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress))))
+			switch(typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress)))
 			{
 				case 'string':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue);
@@ -48,7 +48,7 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 			break;
 		case 'LNLT':
 		case 'LENGTH_LESS_THAN':
-			switch(typeof(typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress))))
+			switch(typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress)))
 			{
 				case 'string':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue);
@@ -108,7 +108,6 @@ const parseConditionals = (pManyfest, pAddress, pRecord) =>
 		2.  Find stop points within each start point
 		3. Check the conditional
 	*/
-
 	let tmpStartIndex = pAddress.indexOf(_ConditionalStanzaStart);
 
 	while (tmpStartIndex != -1)

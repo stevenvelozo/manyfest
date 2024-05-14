@@ -64,7 +64,8 @@ suite
                                         'files[]<<~?length,DNEX?~>><<~?source,==,original?~>>': {Name:'Original Files With a length Property', Hash:'OriginalFilesWithLength'},
 										'files[]<<~?thumbnail,EXISTS?~>>': {Name:'Thumbnail Bit is Explicitly Set', Hash:'ThumbnailExplicitlySet'},
 										'files[]<<~?thumbnail,TRUE?~>>': {Name:'Thumbnail Files', Hash:'ThumbnailFiles'},
-										'files[]<<~?thumbnail,FALSE?~>>': {Name:'Not Thumbnail Files', Hash:'NotThumbnailFiles'}
+										'files[]<<~?thumbnail,FALSE?~>>': {Name:'Not Thumbnail Files', Hash:'NotThumbnailFiles'},
+										'files[]<<~?format,LENGTH_LESS_THAN,8?~>>': {Name:'Short Format Files', Hash:'ShortFormatFiles'}
 									}
 							});
 
@@ -93,6 +94,10 @@ suite
 						let tmpExplicitlyExists = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'ThumbnailExplicitlySet');
 						Expect(tmpExplicitlyExists).to.be.an('array');
 						Expect(tmpExplicitlyExists.length).to.equal(2);
+
+						let tmpShortFormatFiles = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'ShortFormatFiles');
+						Expect(tmpShortFormatFiles).to.be.an('array');
+						Expect(tmpShortFormatFiles.length).to.equal(1);
 
 						fTestComplete();
 					}
