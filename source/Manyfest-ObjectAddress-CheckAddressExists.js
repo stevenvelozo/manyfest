@@ -23,11 +23,8 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 */
 class ManyfestObjectAddressResolverCheckAddressExists
 {
-	constructor(pInfoLog, pErrorLog)
+	constructor()
 	{
-		// Wire in logging
-		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
-		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 	}
 
 	// Check if an address exists.

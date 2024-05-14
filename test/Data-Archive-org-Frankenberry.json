@@ -127,7 +127,8 @@
             "crc32": "d9e1b316",
             "sha1": "4dab42952fe0405a3b7f80146636b33d7b1bd01e",
             "format": "Item Tile",
-            "rotation": "0"
+            "rotation": "0",
+            "thumbnail": true
         },
         {
             "name": "frankerberry_countchockula_1971.0001.gif",
@@ -151,7 +152,8 @@
             "sha1": "41162dc2d1a91b618124c84628d0c231544a02be",
             "length": "31.14",
             "height": "480",
-            "width": "640"
+            "width": "640",
+            "thumbnail": false
         },
         {
             "name": "frankerberry_countchockula_1971.0001.mpg.idx",

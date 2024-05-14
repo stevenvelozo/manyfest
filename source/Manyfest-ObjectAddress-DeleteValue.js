@@ -37,7 +37,7 @@ class ManyfestObjectAddressResolverDeleteValue
 	}
 
 	// TODO: Dry me
-	checkFilters(pAddress, pRecord)
+	checkRecordFilters(pAddress, pRecord)
 	{
 		return fParseConditionals(this, pAddress, pRecord);
 	}
@@ -151,7 +151,7 @@ class ManyfestObjectAddressResolverDeleteValue
 				for (let i = tmpInputArray.length - 1; i >= 0; i--)
 				{
 					// The filtering is complex but allows config-based metaprogramming directly from schema
-					let tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+					let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[i]);
 					if (tmpKeepRecord)
 					{
 						// Delete elements end to beginning
@@ -319,7 +319,7 @@ class ManyfestObjectAddressResolverDeleteValue
 					let tmpValue = this.deleteValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
 
 					// The filtering is complex but allows config-based metaprogramming directly from schema
-					let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
+					let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpValue);
 					if (tmpKeepRecord)
 					{
 						tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;

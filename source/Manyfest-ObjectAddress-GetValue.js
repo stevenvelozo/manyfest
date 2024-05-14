@@ -36,7 +36,7 @@ class ManyfestObjectAddressResolverGetValue
 		this.cleanWrapCharacters = fCleanWrapCharacters;
 	}
 
-	checkFilters(pAddress, pRecord)
+	checkRecordFilters(pAddress, pRecord)
 	{
 		return fParseConditionals(this, pAddress, pRecord);
 	}
@@ -193,7 +193,7 @@ class ManyfestObjectAddressResolverGetValue
 				for (let i = 0; i < tmpInputArray.length; i++)
 				{
 					// The filtering is complex but allows config-based metaprogramming directly from schema
-					let tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+					let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[i]);
 					if (tmpKeepRecord)
 					{
 						tmpOutputArray.push(tmpInputArray[i]);
@@ -366,7 +366,7 @@ class ManyfestObjectAddressResolverGetValue
 					let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress, tmpRootObject);
 
 					// The filtering is complex but allows config-based metaprogramming directly from schema
-					let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
+					let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpValue);
 					if (tmpKeepRecord)
 					{
 						tmpContainerObject[`${tmpPropertyParentAddress}.${tmpNewAddress}`] = tmpValue;

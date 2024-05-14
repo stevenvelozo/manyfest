@@ -1,8 +1,8 @@
 "use strict";
 
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 (function (f) {
   if (typeof exports === "object" && typeof module !== "undefined") {
     module.exports = f();
@@ -263,11 +263,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       * @class ManyfestObjectAddressResolverCheckAddressExists
       */
       class ManyfestObjectAddressResolverCheckAddressExists {
-        constructor(pInfoLog, pErrorLog) {
-          // Wire in logging
-          this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
-          this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
-        }
+        constructor() {}
 
         // Check if an address exists.
         //
@@ -466,7 +462,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
         }
 
         // TODO: Dry me
-        checkFilters(pAddress, pRecord) {
+        checkRecordFilters(pAddress, pRecord) {
           return fParseConditionals(this, pAddress, pRecord);
         }
 
@@ -565,7 +561,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
               // Count from the end to the beginning so splice doesn't %&%#$ up the array
               for (let i = tmpInputArray.length - 1; i >= 0; i--) {
                 // The filtering is complex but allows config-based metaprogramming directly from schema
-                let tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+                let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[i]);
                 if (tmpKeepRecord) {
                   // Delete elements end to beginning
                   tmpInputArray.splice(i, 1);
@@ -705,7 +701,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
                 let tmpValue = this.deleteValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress);
 
                 // The filtering is complex but allows config-based metaprogramming directly from schema
-                let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
+                let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpValue);
                 if (tmpKeepRecord) {
                   tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
                 }
@@ -774,7 +770,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.cleanWrapCharacters = fCleanWrapCharacters;
         }
-        checkFilters(pAddress, pRecord) {
+        checkRecordFilters(pAddress, pRecord) {
           return fParseConditionals(this, pAddress, pRecord);
         }
 
@@ -906,7 +902,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
               let tmpOutputArray = [];
               for (let i = 0; i < tmpInputArray.length; i++) {
                 // The filtering is complex but allows config-based metaprogramming directly from schema
-                let tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+                let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[i]);
                 if (tmpKeepRecord) {
                   tmpOutputArray.push(tmpInputArray[i]);
                 }
@@ -1047,7 +1043,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
                 let tmpValue = this.getValueAtAddress(pObject[tmpObjectPropertyName][tmpObjectPropertyKeys[i]], tmpNewAddress, tmpPropertyParentAddress, tmpRootObject);
 
                 // The filtering is complex but allows config-based metaprogramming directly from schema
-                let tmpKeepRecord = this.checkFilters(pAddress, tmpValue);
+                let tmpKeepRecord = this.checkRecordFilters(pAddress, tmpValue);
                 if (tmpKeepRecord) {
                   tmpContainerObject["".concat(tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = tmpValue;
                 }
@@ -1398,9 +1394,57 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       const _ConditionalStanzaEnd = '?~>>';
       const _ConditionalStanzaEndLength = _ConditionalStanzaEnd.length;
 
+      // Ugh dependency injection.  Can't wait to make these all fable services.
+      let libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
+
       // Test the condition of a value in a record
       const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pValue) => {
         switch (pSearchComparator) {
+          case 'TRUE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === true;
+            break;
+          case 'FALSE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false;
+            break;
+          case 'LNGT':
+          case 'LENGTH_GREATER_THAN':
+            switch (typeof typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
+              case 'string':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue;
+                break;
+              case 'object':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue;
+                break;
+              default:
+                return false;
+                break;
+            }
+            break;
+          case 'LNLT':
+          case 'LENGTH_LESS_THAN':
+            switch (typeof typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
+              case 'string':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue;
+                break;
+              case 'object':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue;
+                break;
+              default:
+                return false;
+                break;
+            }
+            break;
+          case 'FALSE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false;
+            break;
+          case 'EX':
+          case 'EXISTS':
+            return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+            break;
+          case 'DNEX':
+          case 'DOES_NOT_EXIST':
+            return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+            break;
           case '!=':
             return pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue;
             break;
@@ -1431,7 +1475,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
         /*
         	Algorithm is simple:
         		1.  Enuerate start points
-        		2.  Find stop points within each start point
+        	2.  Find stop points within each start point
         	3. Check the conditional
         */
 
@@ -1440,9 +1484,21 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           let tmpStopIndex = pAddress.indexOf(_ConditionalStanzaEnd, tmpStartIndex + _ConditionalStanzaStartLength);
           if (tmpStopIndex != -1) {
             let tmpMagicComparisonPatternSet = pAddress.substring(tmpStartIndex + _ConditionalStanzaStartLength, tmpStopIndex).split(',');
+
+            // The address to search for
             let tmpSearchAddress = tmpMagicComparisonPatternSet[0];
-            let tmpSearchComparator = tmpMagicComparisonPatternSet[1];
-            let tmpSearchValue = tmpMagicComparisonPatternSet[2];
+
+            // The copmparison expression (EXISTS as default)
+            let tmpSearchComparator = 'EXISTS';
+            if (tmpMagicComparisonPatternSet.length > 1) {
+              tmpSearchComparator = tmpMagicComparisonPatternSet[1];
+            }
+
+            // The value to search for
+            let tmpSearchValue = false;
+            if (tmpMagicComparisonPatternSet.length > 2) {
+              tmpSearchValue = tmpMagicComparisonPatternSet[2];
+            }
 
             // Process the piece
             tmpKeepRecord = tmpKeepRecord && testCondition(pManyfest, pRecord, tmpSearchAddress, tmpSearchComparator, tmpSearchValue);
@@ -1454,7 +1510,9 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
         return tmpKeepRecord;
       };
       module.exports = parseConditionals;
-    }, {}],
+    }, {
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5
+    }],
     11: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>

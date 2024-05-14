@@ -1,18 +1,18 @@
 "use strict";
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (f) {
   if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) === "object" && typeof module !== "undefined") {
@@ -95,7 +95,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           // The service hash is used to identify the specific instantiation of the service in the services map
           this.Hash = typeof pServiceHash === 'string' ? pServiceHash : !this.fable && typeof pOptions === 'string' ? pOptions : "".concat(this.UUID);
         }
-        _createClass(FableServiceProviderBase, [{
+        return _createClass(FableServiceProviderBase, [{
           key: "connectFable",
           value: function connectFable(pFable) {
             if (_typeof(pFable) !== 'object' || !pFable.isFable) {
@@ -118,7 +118,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             return true;
           }
         }]);
-        return FableServiceProviderBase;
       }();
       _defineProperty(FableServiceProviderBase, "isFableService", true);
       module.exports = FableServiceProviderBase;
@@ -180,7 +179,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog === 'function' ? pErrorLog : libSimpleLog;
           this.translationTable = {};
         }
-        _createClass(ManyfestHashTranslation, [{
+        return _createClass(ManyfestHashTranslation, [{
           key: "translationCount",
           value: function translationCount() {
             return Object.keys(this.translationTable).length;
@@ -248,7 +247,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
           }
         }]);
-        return ManyfestHashTranslation;
       }();
       module.exports = ManyfestHashTranslation;
     }, {
@@ -295,11 +293,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressResolverCheckAddressExists
       */
       var ManyfestObjectAddressResolverCheckAddressExists = /*#__PURE__*/function () {
-        function ManyfestObjectAddressResolverCheckAddressExists(pInfoLog, pErrorLog) {
+        function ManyfestObjectAddressResolverCheckAddressExists() {
           _classCallCheck(this, ManyfestObjectAddressResolverCheckAddressExists);
-          // Wire in logging
-          this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
-          this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
         }
 
         // Check if an address exists.
@@ -308,7 +303,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         // whether the element/property is actually there or not (it returns
         // undefined whether the property exists or not).  This function checks for
         // existance and returns true or false dependent.
-        _createClass(ManyfestObjectAddressResolverCheckAddressExists, [{
+        return _createClass(ManyfestObjectAddressResolverCheckAddressExists, [{
           key: "checkAddressExists",
           value: function checkAddressExists(pObject, pAddress) {
             // TODO: Should these throw an error?
@@ -459,7 +454,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
           }
         }]);
-        return ManyfestObjectAddressResolverCheckAddressExists;
       }();
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
@@ -504,9 +498,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         }
 
         // TODO: Dry me
-        _createClass(ManyfestObjectAddressResolverDeleteValue, [{
-          key: "checkFilters",
-          value: function checkFilters(pAddress, pRecord) {
+        return _createClass(ManyfestObjectAddressResolverDeleteValue, [{
+          key: "checkRecordFilters",
+          value: function checkRecordFilters(pAddress, pRecord) {
             return fParseConditionals(this, pAddress, pRecord);
           }
 
@@ -607,7 +601,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 // Count from the end to the beginning so splice doesn't %&%#$ up the array
                 for (var i = tmpInputArray.length - 1; i >= 0; i--) {
                   // The filtering is complex but allows config-based metaprogramming directly from schema
-                  var tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[i]);
+                  var tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[i]);
                   if (tmpKeepRecord) {
                     // Delete elements end to beginning
                     tmpInputArray.splice(i, 1);
@@ -747,7 +741,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   var _tmpValue = this.deleteValueAtAddress(pObject[_tmpObjectPropertyName][tmpObjectPropertyKeys[_i2]], tmpNewAddress, _tmpPropertyParentAddress);
 
                   // The filtering is complex but allows config-based metaprogramming directly from schema
-                  var _tmpKeepRecord = this.checkFilters(pAddress, _tmpValue);
+                  var _tmpKeepRecord = this.checkRecordFilters(pAddress, _tmpValue);
                   if (_tmpKeepRecord) {
                     _tmpContainerObject["".concat(_tmpPropertyParentAddress, ".").concat(tmpNewAddress)] = _tmpValue;
                   }
@@ -774,7 +768,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
           }
         }]);
-        return ManyfestObjectAddressResolverDeleteValue;
       }();
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
@@ -819,9 +812,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.cleanWrapCharacters = fCleanWrapCharacters;
         }
-        _createClass(ManyfestObjectAddressResolverGetValue, [{
-          key: "checkFilters",
-          value: function checkFilters(pAddress, pRecord) {
+        return _createClass(ManyfestObjectAddressResolverGetValue, [{
+          key: "checkRecordFilters",
+          value: function checkRecordFilters(pAddress, pRecord) {
             return fParseConditionals(this, pAddress, pRecord);
           }
 
@@ -955,7 +948,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 var tmpOutputArray = [];
                 for (var _i3 = 0; _i3 < tmpInputArray.length; _i3++) {
                   // The filtering is complex but allows config-based metaprogramming directly from schema
-                  var tmpKeepRecord = this.checkFilters(pAddress, tmpInputArray[_i3]);
+                  var tmpKeepRecord = this.checkRecordFilters(pAddress, tmpInputArray[_i3]);
                   if (tmpKeepRecord) {
                     tmpOutputArray.push(tmpInputArray[_i3]);
                   }
@@ -1096,7 +1089,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   var _tmpValue2 = this.getValueAtAddress(pObject[_tmpObjectPropertyName2][tmpObjectPropertyKeys[_i5]], tmpNewAddress, _tmpPropertyParentAddress2, tmpRootObject);
 
                   // The filtering is complex but allows config-based metaprogramming directly from schema
-                  var _tmpKeepRecord2 = this.checkFilters(pAddress, _tmpValue2);
+                  var _tmpKeepRecord2 = this.checkRecordFilters(pAddress, _tmpValue2);
                   if (_tmpKeepRecord2) {
                     _tmpContainerObject2["".concat(_tmpPropertyParentAddress2, ".").concat(tmpNewAddress)] = _tmpValue2;
                   }
@@ -1123,7 +1116,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
           }
         }]);
-        return ManyfestObjectAddressResolverGetValue;
       }();
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
@@ -1167,7 +1159,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         }
 
         // Set the value of an element at an address
-        _createClass(ManyfestObjectAddressSetValue, [{
+        return _createClass(ManyfestObjectAddressSetValue, [{
           key: "setValueAtAddress",
           value: function setValueAtAddress(pObject, pAddress, pValue) {
             // Make sure pObject is an object
@@ -1316,7 +1308,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
           }
         }]);
-        return ManyfestObjectAddressSetValue;
       }();
       ;
       module.exports = ManyfestObjectAddressSetValue;
@@ -1369,7 +1360,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         //
         // This will return a mega set of key:value pairs with all possible schema
         // permutations and default values (when not an object) and everything else.
-        _createClass(ManyfestObjectAddressGeneration, [{
+        return _createClass(ManyfestObjectAddressGeneration, [{
           key: "generateAddressses",
           value: function generateAddressses(pObject, pBaseAddress, pSchema) {
             var tmpBaseAddress = typeof pBaseAddress == 'string' ? pBaseAddress : '';
@@ -1432,7 +1423,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             return tmpSchema;
           }
         }]);
-        return ManyfestObjectAddressGeneration;
       }();
       ;
       module.exports = ManyfestObjectAddressGeneration;
@@ -1459,9 +1449,57 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       var _ConditionalStanzaEnd = '?~>>';
       var _ConditionalStanzaEndLength = _ConditionalStanzaEnd.length;
 
+      // Ugh dependency injection.  Can't wait to make these all fable services.
+      var libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
+
       // Test the condition of a value in a record
       var testCondition = function testCondition(pManyfest, pRecord, pSearchAddress, pSearchComparator, pValue) {
         switch (pSearchComparator) {
+          case 'TRUE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === true;
+            break;
+          case 'FALSE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false;
+            break;
+          case 'LNGT':
+          case 'LENGTH_GREATER_THAN':
+            switch (_typeof(_typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress)))) {
+              case 'string':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue;
+                break;
+              case 'object':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue;
+                break;
+              default:
+                return false;
+                break;
+            }
+            break;
+          case 'LNLT':
+          case 'LENGTH_LESS_THAN':
+            switch (_typeof(_typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress)))) {
+              case 'string':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue;
+                break;
+              case 'object':
+                return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue;
+                break;
+              default:
+                return false;
+                break;
+            }
+            break;
+          case 'FALSE':
+            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false;
+            break;
+          case 'EX':
+          case 'EXISTS':
+            return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+            break;
+          case 'DNEX':
+          case 'DOES_NOT_EXIST':
+            return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+            break;
           case '!=':
             return pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue;
             break;
@@ -1492,7 +1530,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         /*
         	Algorithm is simple:
         		1.  Enuerate start points
-        		2.  Find stop points within each start point
+        	2.  Find stop points within each start point
         	3. Check the conditional
         */
 
@@ -1501,9 +1539,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           var tmpStopIndex = pAddress.indexOf(_ConditionalStanzaEnd, tmpStartIndex + _ConditionalStanzaStartLength);
           if (tmpStopIndex != -1) {
             var tmpMagicComparisonPatternSet = pAddress.substring(tmpStartIndex + _ConditionalStanzaStartLength, tmpStopIndex).split(',');
+
+            // The address to search for
             var tmpSearchAddress = tmpMagicComparisonPatternSet[0];
-            var tmpSearchComparator = tmpMagicComparisonPatternSet[1];
-            var tmpSearchValue = tmpMagicComparisonPatternSet[2];
+
+            // The copmparison expression (EXISTS as default)
+            var tmpSearchComparator = 'EXISTS';
+            if (tmpMagicComparisonPatternSet.length > 1) {
+              tmpSearchComparator = tmpMagicComparisonPatternSet[1];
+            }
+
+            // The value to search for
+            var tmpSearchValue = false;
+            if (tmpMagicComparisonPatternSet.length > 2) {
+              tmpSearchValue = tmpMagicComparisonPatternSet[2];
+            }
 
             // Process the piece
             tmpKeepRecord = tmpKeepRecord && testCondition(pManyfest, pRecord, tmpSearchAddress, tmpSearchComparator, tmpSearchValue);
@@ -1515,7 +1565,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         return tmpKeepRecord;
       };
       module.exports = parseConditionals;
-    }, {}],
+    }, {
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5
+    }],
     11: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
@@ -1553,7 +1605,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         // NOTE: This mutates the schema object permanently, altering the base hash.
         //       If there is a collision with an existing address, it can lead to overwrites.
         // TODO: Discuss what should happen on collisions.
-        _createClass(ManyfestSchemaManipulation, [{
+        return _createClass(ManyfestSchemaManipulation, [{
           key: "resolveAddressMappings",
           value: function resolveAddressMappings(pManyfestSchemaDescriptors, pAddressMapping) {
             if (_typeof(pManyfestSchemaDescriptors) != 'object') {
@@ -1630,7 +1682,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             return tmpNewManyfestSchemaDescriptors;
           }
         }]);
-        return ManyfestSchemaManipulation;
       }();
       module.exports = ManyfestSchemaManipulation;
     }, {
@@ -1660,15 +1711,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class Manyfest
       */
       var Manyfest = /*#__PURE__*/function (_libFableServiceProvi) {
-        _inherits(Manyfest, _libFableServiceProvi);
-        var _super = _createSuper(Manyfest);
         function Manyfest(pFable, pManifest, pServiceHash) {
           var _this3;
           _classCallCheck(this, Manyfest);
           if (pFable === undefined) {
-            _this3 = _super.call(this, {});
+            _this3 = _callSuper(this, Manyfest, [{}]);
           } else {
-            _this3 = _super.call(this, pFable, pManifest, pServiceHash);
+            _this3 = _callSuper(this, Manyfest, [pFable, pManifest, pServiceHash]);
           }
           _this3.serviceType = 'Manifest';
 
@@ -1709,7 +1758,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           _this3.schemaManipulations = new libSchemaManipulation(_this3.logInfo, _this3.logError);
           _this3.objectAddressGeneration = new libObjectAddressGeneration(_this3.logInfo, _this3.logError);
           _this3.hashTranslations = new libHashTranslation(_this3.logInfo, _this3.logError);
-          return _possibleConstructorReturn(_this3);
+          return _assertThisInitialized(_this3);
         }
 
         /*************************************************************************
@@ -1717,7 +1766,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
          */
 
         // Reset critical manifest properties
-        _createClass(Manyfest, [{
+        _inherits(Manyfest, _libFableServiceProvi);
+        return _createClass(Manyfest, [{
           key: "reset",
           value: function reset() {
             this.scope = 'DEFAULT';
@@ -2095,7 +2145,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             return tmpObject;
           }
         }]);
-        return Manyfest;
       }(libFableServiceProviderBase);
       ;
       module.exports = Manyfest;

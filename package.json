@@ -44,10 +44,10 @@
         ]
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.12"
+        "fable-serviceproviderbase": "^3.0.13"
     },
     "devDependencies": {
-        "quackage": "^1.0.25"
+        "quackage": "^1.0.29"
     },
     "author": "steven velozo <steven@velozo.com>",
     "license": "MIT",
