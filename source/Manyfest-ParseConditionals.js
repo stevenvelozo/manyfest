@@ -61,9 +61,6 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 					break;
 			}
 			break;
-		case 'FALSE':
-			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false);
-			break;
 		case 'EX':
 		case 'EXISTS':
 			return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
