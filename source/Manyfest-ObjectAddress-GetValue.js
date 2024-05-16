@@ -3,7 +3,9 @@
 */
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
-let fParseConditionals = require(`../source/Manyfest-ParseConditionals.js`)
+let fParseConditionals = require(`../source/Manyfest-ParseConditionals.js`);
+
+let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 
 /**
 * Object Address Resolver - GetValue
@@ -58,15 +60,15 @@ class ManyfestObjectAddressResolverGetValue
 		// Set the root object to the passed-in object if it isn't set yet.  This is expected to be the root object.
 		let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
 
-		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
-		let tmpSeparatorIndex = pAddress.indexOf('.');
+		// DONE: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
+		let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
 		// Adding simple back-navigation in objects
-		if (tmpSeparatorIndex == 0)
+		if (tmpAddressPartBeginning == '')
 		{
 			// Given an address of "Bundle.Contract.IDContract...Project.IDProject" the ... would be interpreted as two back-navigations from IDContract.
 			// When the address is passed in, though, the first . is already eliminated.  So we can count the dots.
-			let tmpParentAddressParts = tmpParentAddress.split('.');
+			let tmpParentAddressParts = _MockFable.DataFormat.stringGetSegments(tmpParentAddress);
 
 			let tmpBackNavigationCount = 0;
 
@@ -104,8 +106,10 @@ class ManyfestObjectAddressResolverGetValue
 		}
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-		if (tmpSeparatorIndex == -1)
+		if (tmpAddressPartBeginning.length == pAddress.length)
 		{
+			// TODO: Optimize this by having these calls only happen when the previous fails.
+			// TODO: Alternatively look for all markers in one pass?
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
 			let tmpBracketStopIndex = pAddress.indexOf(']');
@@ -114,6 +118,58 @@ class ManyfestObjectAddressResolverGetValue
 			// Note this will not work with a bracket in the same address box set
 			let tmpObjectTypeMarkerIndex = pAddress.indexOf('{}');
 
+
+			// Check if there is a function somewhere in the address... parenthesis start should only be in a function
+			let tmpFunctionStartIndex = pAddress.indexOf('(');
+
+			// NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+			// Functions look like this
+			// 		MyFunction()
+			// 		MyFunction(Some.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+			//
+			// This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+			// To heck with that.  This is a simple function call.
+			//
+			// The requirements to detect a function are:
+			//    1) The start bracket is after character 0
+			if ((tmpFunctionStartIndex > 0)
+			//    2) The end bracket is after the start bracket
+				&& (_MockFable.DataFormat.stringCountEnclosures(pAddress) > 0))
+			{
+				let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
+
+				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				{
+					// The address suggests it is a function, but it is not.
+					return false;
+				}
+
+				// Now see if the function has arguments.
+				// Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+				let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(pAddress.substring(tmpFunctionAddress.length), 0), ',');
+				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
+				{
+					// No arguments... just call the function (bound to the scope of the object it is contained withing)
+					return pObject[tmpFunctionAddress].apply(pObject);
+				}
+				else
+				{
+					let tmpArgumentValues = [];
+
+					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
+					// Now get the value for each argument
+					for (let i = 0; i < tmpFunctionArguments.length; i++)
+					{
+						// Resolve the values for each subsequent entry
+						tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+					}
+
+					return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+				}
+			}
 			// Boxed elements look like this:
 			// 		MyValues[10]
 			// 		MyValues['Name']
@@ -123,7 +179,7 @@ class ManyfestObjectAddressResolverGetValue
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
 			// The requirements to detect a boxed element are:
 			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			else if ((tmpBracketStartIndex > 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data
@@ -197,6 +253,7 @@ class ManyfestObjectAddressResolverGetValue
 					if (tmpKeepRecord)
 					{
 						tmpOutputArray.push(tmpInputArray[i]);
+
 					}
 				}
 
@@ -230,14 +287,69 @@ class ManyfestObjectAddressResolverGetValue
 		}
 		else
 		{
-			let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-			let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+			//let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
+			//let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+			let tmpSubObjectName = tmpAddressPartBeginning;
+			let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length+1);
 
 			// BOXED ELEMENTS
 			// Test if the tmpNewAddress is an array or object
 			// Check if it's a boxed property
 			let tmpBracketStartIndex = tmpSubObjectName.indexOf('[');
 			let tmpBracketStopIndex = tmpSubObjectName.indexOf(']');
+
+			// Check if there is a function somewhere in the address... parenthesis start should only be in a function
+			let tmpFunctionStartIndex = tmpSubObjectName.indexOf('(');
+
+			// NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+			// Functions look like this
+			// 		MyFunction()
+			// 		MyFunction(Some.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+			//
+			// This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+			// To heck with that.  This is a simple function call.
+			//
+			// The requirements to detect a function are:
+			//    1) The start bracket is after character 0
+			if ((tmpFunctionStartIndex > 0)
+			//    2) The end bracket is after the start bracket
+				&& (_MockFable.DataFormat.stringCountEnclosures(tmpSubObjectName) > 0))
+			{
+				let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
+				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
+
+				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				{
+					// The address suggests it is a function, but it is not.
+					return false;
+				}
+
+				// Now see if the function has arguments.
+				// Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+				let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
+				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
+				{
+					// No arguments... just call the function (bound to the scope of the object it is contained withing)
+					return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+				}
+				else
+				{
+					let tmpArgumentValues = [];
+
+					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
+					// Now get the value for each argument
+					for (let i = 0; i < tmpFunctionArguments.length; i++)
+					{
+						// Resolve the values for each subsequent entry
+						tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+					}
+
+					return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+				}
+			}
 			// Boxed elements look like this:
 			// 		MyValues[42]
 			// 		MyValues['Color']
@@ -247,7 +359,7 @@ class ManyfestObjectAddressResolverGetValue
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
 			// The requirements to detect a boxed element are:
 			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			else if ((tmpBracketStartIndex > 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data

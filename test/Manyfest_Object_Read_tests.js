@@ -194,6 +194,87 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Access Functions',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						let tmpComplexObject = (
+						{
+							"Name": "Yadda",
+							"TheFunction": (pValue) => { return `Value is: ${pValue}`; }
+						});
+
+						Expect(_Manyfest.getValueAtAddress(tmpComplexObject, 'Name'))
+							.to.equal('Yadda');
+
+						Expect(_Manyfest.getValueAtAddress(tmpComplexObject, 'TheFunction()'))
+							.to.equal('Value is: undefined');
+
+						Expect(_Manyfest.getValueAtAddress(tmpComplexObject, 'TheFunction(Name)'))
+							.to.equal('Value is: Yadda');
+
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Complex Functions that Mutate State and deal with Parameters',
+					(fTestComplete)=>
+					{
+						// Create a compmlex mock object to check metadata on.
+						let _MockObject = (
+							{
+								"Name": "Yadda",
+								"TheFunction": (pValue) => { return `Value is: ${pValue}`; },
+								"ComplexFunction": (pValue, pOutput) => { return `Value is: ${pValue} and would output as ${pOutput}`; },
+								"Behaviors": 
+									{
+										"Value": 0,
+										"Increment": function () 
+											{
+												this.Value++; return this.Value;
+											},
+										"SillyObject": function()
+										{
+											return { Cost: 1.00, Name: 'Beanie Baby', Stores: ['Aberdeen', 'Seattle', 'Tacoma'] }
+										},
+										"FormatOutput": function () { return `My magic value is: ${this.Value}`; }
+									},
+								"Manyfest":
+									{
+										Scope:'Function.Mock',
+										Descriptors:
+											{
+												"metadata.creator":
+													{
+														Name:'Creator',
+														Hash:'Creator'
+													}
+											}
+									},
+								"Data": _SampleDataArchiveOrgFrankenberry
+							});
+						let _Manyfest = new libManyfest(_MockObject.Manyfest);
+
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Name')).to.equal('Yadda');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction()')).to.equal('Value is: undefined');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction(Name)')).to.equal('Value is: Yadda');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction(Name,Name)')).to.equal('Value is: Yadda and would output as Yadda');
+
+						// This is stupid but works
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction(Name,TheFunction(Manyfest.Descriptors["metadata.creator"].Hash))'))
+							.to.equal('Value is: Yadda and would output as Value is: Creator');
+
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.Increment()'))
+							.to.equal(1);
+
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.SillyObject().Stores[0]')).to.equal('Aberdeen');
+
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}

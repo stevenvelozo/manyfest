@@ -235,8 +235,6 @@ class ManyfestObjectAddressResolverDeleteValue
 				{
 					return false;
 				}
-
-
 				//This is a bracketed value
 				//    4) If the middle part is *only* a number (no single, double or backtick quotes) it is an array element,
 				//       otherwise we will try to reat it as a dynamic object property.

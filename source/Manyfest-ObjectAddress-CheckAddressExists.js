@@ -1,7 +1,12 @@
 /**
 * @author <steven@velozo.com>
 */
-let libSimpleLog = require('./Manyfest-LogToConsole.js');
+const libSimpleLog = require('./Manyfest-LogToConsole.js');
+// This is for resolving functions mid-address
+const libGetObjectValue = require('./Manyfest-ObjectAddress-GetValue.js');
+
+// TODO: Just until this is a fable service.
+let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 
 /**
 * Object Address Resolver
@@ -25,6 +30,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 {
 	constructor()
 	{
+		this.getObjectValueClass = new libGetObjectValue(libSimpleLog, libSimpleLog);
 	}
 
 	// Check if an address exists.
@@ -33,7 +39,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 	// whether the element/property is actually there or not (it returns
 	// undefined whether the property exists or not).  This function checks for
 	// existance and returns true or false dependent.
-	checkAddressExists (pObject, pAddress)
+	checkAddressExists (pObject, pAddress, pRootObject)
 	{
 		// TODO: Should these throw an error?
 		// Make sure pObject is an object
@@ -41,15 +47,51 @@ class ManyfestObjectAddressResolverCheckAddressExists
 		// Make sure pAddress is a string
 		if (typeof(pAddress) != 'string') return false;
 
-		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
-		let tmpSeparatorIndex = pAddress.indexOf('.');
+		// Set the root object to the passed-in object if it isn't set yet.  This is expected to be the root object.
+		// NOTE: This was added to support functions mid-stream
+		let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
+		// DONE: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
+		let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-		if (tmpSeparatorIndex == -1)
+		if (tmpAddressPartBeginning.length == pAddress.length)
 		{
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
 			let tmpBracketStopIndex = pAddress.indexOf(']');
+
+			// Check if there is a function somewhere in the address... parenthesis start should only be in a function
+			let tmpFunctionStartIndex = pAddress.indexOf('(');
+
+			// NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+			// Functions look like this
+			// 		MyFunction()
+			// 		MyFunction(Some.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+			//
+			// This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+			// To heck with that.  This is a simple function call.
+			//
+			// The requirements to detect a function are:
+			//    1) The start bracket is after character 0
+			if ((tmpFunctionStartIndex > 0)
+			//    2) The end bracket is after the start bracket
+				&& (_MockFable.DataFormat.stringCountEnclosures(pAddress) > 0))
+			{
+				let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
+
+				if ((pObject.hasOwnProperty(tmpFunctionAddress)) && (typeof(pObject[tmpFunctionAddress]) == 'function'))
+				{
+					return true;
+				}
+				else
+				{
+					// The address suggests it is a function, but it is not.
+					return false;
+				}
+			}
 			// Boxed elements look like this:
 			// 		MyValues[10]
 			// 		MyValues['Name']
@@ -59,7 +101,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
 			// The requirements to detect a boxed element are:
 			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			else if ((tmpBracketStartIndex > 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data
@@ -117,13 +159,67 @@ class ManyfestObjectAddressResolverCheckAddressExists
 		}
 		else
 		{
-			let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-			let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+			let tmpSubObjectName = tmpAddressPartBeginning;
+			let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length+1);
 
 			// Test if the tmpNewAddress is an array or object
 			// Check if it's a boxed property
 			let tmpBracketStartIndex = tmpSubObjectName.indexOf('[');
 			let tmpBracketStopIndex = tmpSubObjectName.indexOf(']');
+
+			// Check if there is a function somewhere in the address... parenthesis start should only be in a function
+			let tmpFunctionStartIndex = tmpSubObjectName.indexOf('(');
+
+			// NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+			// Functions look like this
+			// 		MyFunction()
+			// 		MyFunction(Some.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address)
+			// 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+			//
+			// This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+			// To heck with that.  This is a simple function call.
+			//
+			// The requirements to detect a function are:
+			//    1) The start bracket is after character 0
+			if ((tmpFunctionStartIndex > 0)
+			//    2) The end bracket is after the start bracket
+				&& (_MockFable.DataFormat.stringCountEnclosures(tmpSubObjectName) > 0))
+			{
+				let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
+				//tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
+
+				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				{
+					// The address suggests it is a function, but it is not.
+					return false;
+				}
+
+				// Now see if the function has arguments.
+				// Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+				let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
+				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
+				{
+					// No arguments... just call the function (bound to the scope of the object it is contained withing)
+					return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+				}
+				else
+				{
+					let tmpArgumentValues = [];
+
+					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
+					// Now get the value for each argument
+					for (let i = 0; i < tmpFunctionArguments.length; i++)
+					{
+						// Resolve the values for each subsequent entry
+						// NOTE: This is where the resolves get really tricky.  Recursion within recursion.  Programming gom jabbar, yo.
+						tmpArgumentValues.push(this.getObjectValueClass.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+					}
+
+					return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+				}
+			}
 			// Boxed elements look like this:
 			// 		MyValues[42]
 			// 		MyValues['Color']
@@ -133,7 +229,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
 			// The requirements to detect a boxed element are:
 			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			else if ((tmpBracketStartIndex > 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data
@@ -177,12 +273,12 @@ class ManyfestObjectAddressResolverCheckAddressExists
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
 					// Recurse directly into the subobject
-					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress);
+					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpRootObject);
 				}
 				else
 				{
 					// We parsed a valid number out of the boxed property name, so recurse into the array
-					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress);
+					return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpRootObject);
 				}
 			}
 
@@ -195,13 +291,13 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			else if (pObject.hasOwnProperty(tmpSubObjectName))
 			{
 				// If there is already a subobject pass that to the recursive thingy
-				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
+				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);
 			}
 			else
 			{
 				// Create a subobject and then pass that
 				pObject[tmpSubObjectName] = {};
-				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
+				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);
 			}
 		}
 	}

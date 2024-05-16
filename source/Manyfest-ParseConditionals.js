@@ -18,7 +18,7 @@ const _ConditionalStanzaEnd = '?~>>';
 const _ConditionalStanzaEndLength = _ConditionalStanzaEnd.length;
 
 // Ugh dependency injection.  Can't wait to make these all fable services.
-let libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
+//let libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
 
 // Test the condition of a value in a record
 const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pValue) =>
@@ -61,14 +61,15 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 					break;
 			}
 			break;
-		case 'EX':
-		case 'EXISTS':
-			return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
-			break;
-		case 'DNEX':
-		case 'DOES_NOT_EXIST':
-			return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
-			break;
+		// TODO: Welcome to dependency hell.  This fixes itself when we move to fable services.
+		// case 'EX':
+		// case 'EXISTS':
+		// 	return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+		// 	break;
+		// case 'DNEX':
+		// case 'DOES_NOT_EXIST':
+		// 	return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+		// 	break;
 		case '!=':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue);
 			break;
