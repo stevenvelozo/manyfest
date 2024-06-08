@@ -12,6 +12,7 @@ var Expect = Chai.expect;
 let libManyfest = require('../source/Manyfest.js');
 
 let _SampleDataArchiveOrgFrankenberry = require('./Data-Archive-org-Frankenberry.json');
+let _SampleDataFruits = require('./Data-Fruits.json');
 
 suite
 (
@@ -109,6 +110,24 @@ suite
 							});
 						let tmpFileSet = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata.creator[]');
 						Expect(tmpFileSet).to.equal(false);
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Arrays in sub-objects.',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest(
+							{
+								Scope:'Archive.org',
+								Descriptors: {}
+							});
+
+						Expect(_Manyfest.getValueAtAddress(_SampleDataFruits, 'FruityVice[3].name')).to.equal('Tomato');
+						Expect(_Manyfest.getValueAtAddress({Fruit:_SampleDataFruits}, 'Fruit.FruityVice[3].name')).to.equal('Tomato');
+
+
 						fTestComplete();
 					}
 				);
