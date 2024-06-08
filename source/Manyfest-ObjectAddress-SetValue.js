@@ -186,15 +186,15 @@ class ManyfestObjectAddressSetValue
 
 			// If there is an object property already named for the sub object, but it isn't an object
 			// then the system can't set the value in there.  Error and abort!
-			if (pObject.hasOwnProperty(tmpSubObjectName) && typeof(pObject[tmpSubObjectName]) !== 'object')
+			if ((tmpSubObjectName in pObject) && typeof(pObject[tmpSubObjectName]) !== 'object')
 			{
-				if (!pObject.hasOwnProperty('__ERROR'))
+				if (!('__ERROR' in pObject))
 					pObject['__ERROR'] = {};
 				// Put it in an error object so data isn't lost
 				pObject['__ERROR'][pAddress] = pValue;
 				return false;
 			}
-			else if (pObject.hasOwnProperty(tmpSubObjectName))
+			else if (tmpSubObjectName in pObject)
 			{
 				// If there is already a subobject pass that to the recursive thingy
 				return this.setValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, pValue);

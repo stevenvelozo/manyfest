@@ -1,6 +1,6 @@
 {
     "name": "manyfest",
-    "version": "1.0.31",
+    "version": "1.0.32",
     "description": "JSON Object Manifest for Data Description and Parsing",
     "main": "source/Manyfest.js",
     "scripts": {

@@ -62,7 +62,7 @@ class ManyfestHashTranslation
 
     removeTranslationHash(pTranslationHash)
     {
-        if (this.translationTable.hasOwnProperty(pTranslationHash))
+        if (pTranslationHash in this.translationTable)
         {
             delete this.translationTable[pTranslationHash];
         }
@@ -103,7 +103,7 @@ class ManyfestHashTranslation
 
     translate(pTranslation)
     {
-        if (this.translationTable.hasOwnProperty(pTranslation))
+        if (pTranslation in this.translationTable)
         {
             return this.translationTable[pTranslation];
         }

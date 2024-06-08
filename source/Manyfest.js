@@ -45,7 +45,7 @@ class Manyfest extends libFableServiceProviderBase
 		this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
 		this.objectAddressDeleteValue = new libObjectAddressDeleteValue(this.logInfo, this.logError);
 
-		if (!this.options.hasOwnProperty('defaultValues'))
+		if (!('defaultValues' in this.options))
 		{
 			this.options.defaultValues = (
 				{
@@ -61,7 +61,7 @@ class Manyfest extends libFableServiceProviderBase
 					"Null": null
 				});
 		}
-		if (!this.options.hasOwnProperty('strict'))
+		if (!('strict' in this.options))
 		{
 			this.options.strict = false;
 		}
@@ -131,13 +131,13 @@ class Manyfest extends libFableServiceProviderBase
 
 		for (let i = 0; i < tmpDescriptorKeys.length; i++)
 		{
-			if (!tmpManifest.hasOwnProperty(tmpDescriptorKeys[i]))
+			if (!(tmpDescriptorKeys[i] in tmpManifest))
 			{
 				tmpManifest[tmpDescriptorKeys[i]] = JSON.parse(JSON.stringify(_DefaultConfiguration[tmpDescriptorKeys[i]]));
 			}
 		}
 
-		if (tmpManifest.hasOwnProperty('Scope'))
+		if ('Scope' in tmpManifest)
 		{
 			if (typeof(tmpManifest.Scope) === 'string')
 			{
@@ -153,7 +153,7 @@ class Manyfest extends libFableServiceProviderBase
 			this.logError(`(${this.scope}) Error loading scope from manifest object.  Property "Scope" does not exist in the root of the object.`, tmpManifest);
 		}
 
-		if (tmpManifest.hasOwnProperty('Descriptors'))
+		if ('Descriptors' in tmpManifest)
 		{
 			if (typeof(tmpManifest.Descriptors) === 'object')
 			{
@@ -173,7 +173,7 @@ class Manyfest extends libFableServiceProviderBase
 			this.logError(`(${this.scope}) Error loading object description from manifest object.  Property "Descriptors" does not exist in the root of the Manifest object.`, tmpManifest);
 		}
 
-		if (tmpManifest.hasOwnProperty('HashTranslations'))
+		if ('HashTranslations' in tmpManifest)
 		{
 			if (typeof(tmpManifest.HashTranslations) === 'object')
 			{
@@ -207,12 +207,12 @@ class Manyfest extends libFableServiceProviderBase
 		if (typeof(pDescriptor) === 'object')
 		{
 			// Add the Address into the Descriptor if it doesn't exist:
-			if (!pDescriptor.hasOwnProperty('Address'))
+			if (!('Address' in pDescriptor))
 			{
 				pDescriptor.Address = pAddress;
 			}
 
-			if (!this.elementDescriptors.hasOwnProperty(pAddress))
+			if (!(pAddress in this.elementDescriptors))
 			{
 				this.elementAddresses.push(pAddress);
 			}
@@ -223,7 +223,7 @@ class Manyfest extends libFableServiceProviderBase
 			// Always add the address as a hash
 			this.elementHashes[pAddress] = pAddress;
 
-			if (pDescriptor.hasOwnProperty('Hash'))
+			if ('Hash' in pDescriptor)
 			{
 				// TODO: Check if this is a good idea or not..
 				//       Collisions are bound to happen with both representations of the address/hash in here and developers being able to create their own hashes.
@@ -284,8 +284,8 @@ class Manyfest extends libFableServiceProviderBase
 	{
 		let tmpAddress = undefined;
 
-		let tmpInElementHashTable = this.elementHashes.hasOwnProperty(pHash);
-		let tmpInTranslationTable = this.hashTranslations.translationTable.hasOwnProperty(pHash);
+		let tmpInElementHashTable = (pHash in this.elementHashes);
+		let tmpInTranslationTable = (pHash in this.hashTranslations.translationTable);
 
 		// The most straightforward: the hash exists, no translations.
 		if (tmpInElementHashTable && !tmpInTranslationTable)
@@ -293,7 +293,7 @@ class Manyfest extends libFableServiceProviderBase
 			tmpAddress = this.elementHashes[pHash];
 		}
 		// There is a translation from one hash to another, and, the elementHashes contains the pointer end
-		else if (tmpInTranslationTable && this.elementHashes.hasOwnProperty(this.hashTranslations.translate(pHash)))
+		else if (tmpInTranslationTable && (this.hashTranslations.translate(pHash) in this.elementHashes))
 		{
 			tmpAddress = this.elementHashes[this.hashTranslations.translate(pHash)];
 		}
@@ -477,7 +477,7 @@ class Manyfest extends libFableServiceProviderBase
 			return undefined;
 		}
 
-		if (pDescriptor.hasOwnProperty('Default'))
+		if ('Default' in pDescriptor)
 		{
 			return pDescriptor.Default;
 		}
@@ -485,8 +485,8 @@ class Manyfest extends libFableServiceProviderBase
 		{
 			// Default to a null if it doesn't have a type specified.
 			// This will ensure a placeholder is created but isn't misinterpreted.
-			let tmpDataType = (pDescriptor.hasOwnProperty('DataType')) ? pDescriptor.DataType : 'String';
-			if (this.options.defaultValues.hasOwnProperty(tmpDataType))
+			let tmpDataType = ('DataType' in pDescriptor) ? pDescriptor.DataType : 'String';
+			if (tmpDataType in this.options.defaultValues)
 			{
 				return this.options.defaultValues[tmpDataType];
 			}
@@ -505,7 +505,7 @@ class Manyfest extends libFableServiceProviderBase
 			// This just sets up a simple filter to see if there is a default set.
 			(pDescriptor) =>
 			{
-				return pDescriptor.hasOwnProperty('Default');
+				return ('Default' in pDescriptor);
 			});
 	}
 

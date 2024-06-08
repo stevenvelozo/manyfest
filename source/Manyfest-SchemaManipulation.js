@@ -55,7 +55,7 @@ class ManyfestSchemaManipulation
 		tmpManyfestAddresses.forEach(
 			(pAddress) =>
 			{
-				if (pManyfestSchemaDescriptors[pAddress].hasOwnProperty('Hash'))
+				if ('Hash' in pManyfestSchemaDescriptors[pAddress])
 				{
 					tmpHashMapping[pManyfestSchemaDescriptors[pAddress].Hash] = pAddress;
 				}
@@ -71,11 +71,11 @@ class ManyfestSchemaManipulation
 				let tmpDescriptor = false;
 
 				// See if there is a matching descriptor either by Address directly or Hash
-				if (pManyfestSchemaDescriptors.hasOwnProperty(pInputAddress))
+				if (pInputAddress in pManyfestSchemaDescriptors)
 				{
 					tmpOldDescriptorAddress = pInputAddress;
 				}
-				else if (tmpHashMapping.hasOwnProperty(pInputAddress))
+				else if (pInputAddress in tmpHashMapping)
 				{
 					tmpOldDescriptorAddress = tmpHashMapping[pInputAddress];
 				}
@@ -124,7 +124,7 @@ class ManyfestSchemaManipulation
 		tmpDescriptorAddresses.forEach(
 			(pDescriptorAddress) =>
 			{
-				if (!tmpNewManyfestSchemaDescriptors.hasOwnProperty(pDescriptorAddress))
+				if (!(pDescriptorAddress in tmpNewManyfestSchemaDescriptors))
 				{
 					tmpNewManyfestSchemaDescriptors[pDescriptorAddress] = tmpSource[pDescriptorAddress];
 				}

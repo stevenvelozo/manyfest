@@ -490,11 +490,11 @@ class ManyfestObjectAddressResolverGetValue
 
 			// If there is an object property already named for the sub object, but it isn't an object
 			// then the system can't set the value in there.  Error and abort!
-			if (pObject.hasOwnProperty(tmpSubObjectName) && typeof(pObject[tmpSubObjectName]) !== 'object')
+			if ((tmpSubObjectName in pObject) && typeof(pObject[tmpSubObjectName]) !== 'object')
 			{
 				return undefined;
 			}
-			else if (pObject.hasOwnProperty(tmpSubObjectName))
+			else if (tmpSubObjectName in pObject)
 			{
 				// If there is already a subobject pass that to the recursive thingy
 				// Continue to manage the parent address for recursion

@@ -42,7 +42,7 @@ suite
 
 						Expect(tmpDefaultObject.Name)
 							.to.equal('Jane Doe');
-						Expect(tmpDefaultObject.hasOwnProperty('IDAnimal'))
+						Expect('IDAnimal' in tmpDefaultObject)
 							.to.equal(false);
 
 						fTestComplete();
@@ -67,7 +67,7 @@ suite
 
 						Expect(tmpDefaultObject.Name)
 							.to.equal('Jane Doe');
-						Expect(tmpDefaultObject.hasOwnProperty('IDAnimal'))
+						Expect('IDAnimal' in tmpDefaultObject)
 							.to.equal(true);
 						Expect(tmpDefaultObject.IDAnimal)
 							.to.equal(0);
@@ -94,7 +94,7 @@ suite
 
 						Expect(tmpDefaultObject.Name)
 							.to.equal(undefined);
-						Expect(tmpDefaultObject.hasOwnProperty('IDAnimal'))
+						Expect('IDAnimal' in tmpDefaultObject)
 							.to.equal(true);
 						Expect(tmpDefaultObject.IDAnimal)
 							.to.equal(0);
@@ -123,7 +123,7 @@ suite
 
 						animalManyfest.populateDefaults(tmpObject, true);
 
-						Expect(tmpObject.hasOwnProperty('IDAnimal'))
+						Expect('IDAnimal' in tmpObject)
 							.to.equal(false);
 
 						// Because we told it to force overwrites, it should overwrite the Name.

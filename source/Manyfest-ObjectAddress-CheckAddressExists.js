@@ -82,7 +82,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			{
 				let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
 
-				if ((pObject.hasOwnProperty(tmpFunctionAddress)) && (typeof(pObject[tmpFunctionAddress]) == 'function'))
+				if (((tmpFunctionAddress in pObject)) && (typeof(pObject[tmpFunctionAddress]) == 'function'))
 				{
 					return true;
 				}
@@ -143,7 +143,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
 					// Check if the property exists.
-					return pObject[tmpBoxedPropertyName].hasOwnProperty(tmpBoxedPropertyReference);
+					return (tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName]);
 				}
 				else
 				{
@@ -154,7 +154,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			else
 			{
 				// Check if the property exists
-				return pObject.hasOwnProperty(pAddress);
+				return (pAddress in pObject);
 			}
 		}
 		else
@@ -284,11 +284,11 @@ class ManyfestObjectAddressResolverCheckAddressExists
 
 			// If there is an object property already named for the sub object, but it isn't an object
 			// then the system can't set the value in there.  Error and abort!
-			if (pObject.hasOwnProperty(tmpSubObjectName) && typeof(pObject[tmpSubObjectName]) !== 'object')
+			if ((tmpSubObjectName in pObject) && typeof(pObject[tmpSubObjectName]) !== 'object')
 			{
 				return false;
 			}
-			else if (pObject.hasOwnProperty(tmpSubObjectName))
+			else if (tmpSubObjectName in pObject)
 			{
 				// If there is already a subobject pass that to the recursive thingy
 				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);

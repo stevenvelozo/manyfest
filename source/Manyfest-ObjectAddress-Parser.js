@@ -46,13 +46,13 @@ module.exports = {
 				tmpSegmentCount++;
 			}
 			// IF This is the start of an enclosure
-			else if (tmpEnclosureStartSymbolMap.hasOwnProperty(tmpString[i]))
+			else if (tmpString[i] in tmpEnclosureStartSymbolMap)
 			{
 				// Add it to the stack!
 				tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
 			}
 			// IF This is the end of an enclosure
-			else if (tmpEnclosureEndSymbolMap.hasOwnProperty(tmpString[i])
+			else if ((tmpString[i] in tmpEnclosureEndSymbolMap)
 				// AND it matches the current nest level symbol
 				&& tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1])
 			{
@@ -100,13 +100,13 @@ module.exports = {
 				return tmpString.substring(0, i);
 			}
 			// IF This is the start of an enclosure
-			else if (tmpEnclosureStartSymbolMap.hasOwnProperty(tmpString[i]))
+			else if (tmpString[i] in tmpEnclosureStartSymbolMap)
 			{
 				// Add it to the stack!
 				tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
 			}
 			// IF This is the end of an enclosure
-			else if (tmpEnclosureEndSymbolMap.hasOwnProperty(tmpString[i])
+			else if ((tmpString[i] in tmpEnclosureEndSymbolMap)
 				// AND it matches the current nest level symbol
 				&& tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1])
 			{
@@ -158,13 +158,13 @@ module.exports = {
 				tmpCurrentSegmentStart = i+1;
 			}
 			// IF This is the start of an enclosure
-			else if (tmpEnclosureStartSymbolMap.hasOwnProperty(tmpString[i]))
+			else if (tmpString[i] in tmpEnclosureStartSymbolMap)
 			{
 				// Add it to the stack!
 				tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
 			}
 			// IF This is the end of an enclosure
-			else if (tmpEnclosureEndSymbolMap.hasOwnProperty(tmpString[i])
+			else if ((tmpString[i] in tmpEnclosureEndSymbolMap)
 				// AND it matches the current nest level symbol
 				&& tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1])
 			{

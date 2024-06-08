@@ -184,7 +184,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           });
         }
         removeTranslationHash(pTranslationHash) {
-          if (this.translationTable.hasOwnProperty(pTranslationHash)) {
+          if (pTranslationHash in this.translationTable) {
             delete this.translationTable[pTranslationHash];
           }
         }
@@ -211,7 +211,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           this.translationTable = {};
         }
         translate(pTranslation) {
-          if (this.translationTable.hasOwnProperty(pTranslation)) {
+          if (pTranslation in this.translationTable) {
             return this.translationTable[pTranslation];
           } else {
             return pTranslation;
@@ -242,7 +242,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       /**
       * @author <steven@velozo.com>
       */
-      let libSimpleLog = require('./Manyfest-LogToConsole.js');
+      const libSimpleLog = require('./Manyfest-LogToConsole.js');
+      // This is for resolving functions mid-address
+      const libGetObjectValue = require('./Manyfest-ObjectAddress-GetValue.js');
+
+      // TODO: Just until this is a fable service.
+      let _MockFable = {
+        DataFormat: require('./Manyfest-ObjectAddress-Parser.js')
+      };
 
       /**
       * Object Address Resolver
@@ -263,7 +270,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       * @class ManyfestObjectAddressResolverCheckAddressExists
       */
       class ManyfestObjectAddressResolverCheckAddressExists {
-        constructor() {}
+        constructor() {
+          this.getObjectValueClass = new libGetObjectValue(libSimpleLog, libSimpleLog);
+        }
 
         // Check if an address exists.
         //
@@ -271,21 +280,52 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         // whether the element/property is actually there or not (it returns
         // undefined whether the property exists or not).  This function checks for
         // existance and returns true or false dependent.
-        checkAddressExists(pObject, pAddress) {
+        checkAddressExists(pObject, pAddress, pRootObject) {
           // TODO: Should these throw an error?
           // Make sure pObject is an object
           if (typeof pObject != 'object') return false;
           // Make sure pAddress is a string
           if (typeof pAddress != 'string') return false;
 
-          // TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
-          let tmpSeparatorIndex = pAddress.indexOf('.');
+          // Set the root object to the passed-in object if it isn't set yet.  This is expected to be the root object.
+          // NOTE: This was added to support functions mid-stream
+          let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
+
+          // DONE: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
+          let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
           // This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-          if (tmpSeparatorIndex == -1) {
+          if (tmpAddressPartBeginning.length == pAddress.length) {
             // Check if the address refers to a boxed property
             let tmpBracketStartIndex = pAddress.indexOf('[');
             let tmpBracketStopIndex = pAddress.indexOf(']');
+
+            // Check if there is a function somewhere in the address... parenthesis start should only be in a function
+            let tmpFunctionStartIndex = pAddress.indexOf('(');
+
+            // NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+            // Functions look like this
+            // 		MyFunction()
+            // 		MyFunction(Some.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+            //
+            // This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+            // To heck with that.  This is a simple function call.
+            //
+            // The requirements to detect a function are:
+            //    1) The start bracket is after character 0
+            if (tmpFunctionStartIndex > 0
+            //    2) The end bracket is after the start bracket
+            && _MockFable.DataFormat.stringCountEnclosures(pAddress) > 0) {
+              let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
+              if (tmpFunctionAddress in pObject && typeof pObject[tmpFunctionAddress] == 'function') {
+                return true;
+              } else {
+                // The address suggests it is a function, but it is not.
+                return false;
+              }
+            }
             // Boxed elements look like this:
             // 		MyValues[10]
             // 		MyValues['Name']
@@ -295,7 +335,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             // When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
             // The requirements to detect a boxed element are:
             //    1) The start bracket is after character 0
-            if (tmpBracketStartIndex > 0
+            else if (tmpBracketStartIndex > 0
             //    2) The end bracket has something between them
             && tmpBracketStopIndex > tmpBracketStartIndex
             //    3) There is data
@@ -333,23 +373,69 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
                 // Check if the property exists.
-                return pObject[tmpBoxedPropertyName].hasOwnProperty(tmpBoxedPropertyReference);
+                return tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName];
               } else {
                 // Use the new in operator to see if the element is in the array
                 return tmpBoxedPropertyNumber in pObject[tmpBoxedPropertyName];
               }
             } else {
               // Check if the property exists
-              return pObject.hasOwnProperty(pAddress);
+              return pAddress in pObject;
             }
           } else {
-            let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-            let tmpNewAddress = pAddress.substring(tmpSeparatorIndex + 1);
+            let tmpSubObjectName = tmpAddressPartBeginning;
+            let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length + 1);
 
             // Test if the tmpNewAddress is an array or object
             // Check if it's a boxed property
             let tmpBracketStartIndex = tmpSubObjectName.indexOf('[');
             let tmpBracketStopIndex = tmpSubObjectName.indexOf(']');
+
+            // Check if there is a function somewhere in the address... parenthesis start should only be in a function
+            let tmpFunctionStartIndex = tmpSubObjectName.indexOf('(');
+
+            // NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+            // Functions look like this
+            // 		MyFunction()
+            // 		MyFunction(Some.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+            //
+            // This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+            // To heck with that.  This is a simple function call.
+            //
+            // The requirements to detect a function are:
+            //    1) The start bracket is after character 0
+            if (tmpFunctionStartIndex > 0
+            //    2) The end bracket is after the start bracket
+            && _MockFable.DataFormat.stringCountEnclosures(tmpSubObjectName) > 0) {
+              let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
+              //tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
+
+              if (!typeof pObject[tmpFunctionAddress] == 'function') {
+                // The address suggests it is a function, but it is not.
+                return false;
+              }
+
+              // Now see if the function has arguments.
+              // Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+              let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
+              if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
+                // No arguments... just call the function (bound to the scope of the object it is contained withing)
+                return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+              } else {
+                let tmpArgumentValues = [];
+                let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
+
+                // Now get the value for each argument
+                for (let i = 0; i < tmpFunctionArguments.length; i++) {
+                  // Resolve the values for each subsequent entry
+                  // NOTE: This is where the resolves get really tricky.  Recursion within recursion.  Programming gom jabbar, yo.
+                  tmpArgumentValues.push(this.getObjectValueClass.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                }
+                return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+              }
+            }
             // Boxed elements look like this:
             // 		MyValues[42]
             // 		MyValues['Color']
@@ -359,7 +445,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             // When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
             // The requirements to detect a boxed element are:
             //    1) The start bracket is after character 0
-            if (tmpBracketStartIndex > 0
+            else if (tmpBracketStartIndex > 0
             //    2) The end bracket has something between them
             && tmpBracketStopIndex > tmpBracketStartIndex
             //    3) There is data
@@ -398,24 +484,24 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
                 // Recurse directly into the subobject
-                return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress);
+                return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, tmpRootObject);
               } else {
                 // We parsed a valid number out of the boxed property name, so recurse into the array
-                return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress);
+                return this.checkAddressExists(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, tmpRootObject);
               }
             }
 
             // If there is an object property already named for the sub object, but it isn't an object
             // then the system can't set the value in there.  Error and abort!
-            if (pObject.hasOwnProperty(tmpSubObjectName) && typeof pObject[tmpSubObjectName] !== 'object') {
+            if (tmpSubObjectName in pObject && typeof pObject[tmpSubObjectName] !== 'object') {
               return false;
-            } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
+            } else if (tmpSubObjectName in pObject) {
               // If there is already a subobject pass that to the recursive thingy
-              return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
+              return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);
             } else {
               // Create a subobject and then pass that
               pObject[tmpSubObjectName] = {};
-              return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress);
+              return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);
             }
           }
         }
@@ -423,7 +509,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 4,
+      "./Manyfest-ObjectAddress-GetValue.js": 7,
+      "./Manyfest-ObjectAddress-Parser.js": 8
     }],
     6: [function (require, module, exports) {
       /**
@@ -631,7 +719,6 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               if (typeof pObject[tmpBoxedPropertyName] != 'object') {
                 return false;
               }
-
               //This is a bracketed value
               //    4) If the middle part is *only* a number (no single, double or backtick quotes) it is an array element,
               //       otherwise we will try to reat it as a dynamic object property.
@@ -711,9 +798,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
             // If there is an object property already named for the sub object, but it isn't an object
             // then the system can't set the value in there.  Error and abort!
-            if (pObject.hasOwnProperty(tmpSubObjectName) && typeof pObject[tmpSubObjectName] !== 'object') {
+            if (tmpSubObjectName in pObject && typeof pObject[tmpSubObjectName] !== 'object') {
               return undefined;
-            } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
+            } else if (tmpSubObjectName in pObject) {
               // If there is already a subobject pass that to the recursive thingy
               // Continue to manage the parent address for recursion
               tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
@@ -731,7 +818,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 10,
+      "../source/Manyfest-ParseConditionals.js": 11,
       "./Manyfest-CleanWrapCharacters.js": 2,
       "./Manyfest-LogToConsole.js": 4
     }],
@@ -742,6 +829,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       let libSimpleLog = require('./Manyfest-LogToConsole.js');
       let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
       let fParseConditionals = require("../source/Manyfest-ParseConditionals.js");
+      let _MockFable = {
+        DataFormat: require('./Manyfest-ObjectAddress-Parser.js')
+      };
 
       /**
       * Object Address Resolver - GetValue
@@ -789,14 +879,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           // Set the root object to the passed-in object if it isn't set yet.  This is expected to be the root object.
           let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
 
-          // TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
-          let tmpSeparatorIndex = pAddress.indexOf('.');
+          // DONE: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
+          let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
           // Adding simple back-navigation in objects
-          if (tmpSeparatorIndex == 0) {
+          if (tmpAddressPartBeginning == '') {
             // Given an address of "Bundle.Contract.IDContract...Project.IDProject" the ... would be interpreted as two back-navigations from IDContract.
             // When the address is passed in, though, the first . is already eliminated.  So we can count the dots.
-            let tmpParentAddressParts = tmpParentAddress.split('.');
+            let tmpParentAddressParts = _MockFable.DataFormat.stringGetSegments(tmpParentAddress);
             let tmpBackNavigationCount = 0;
 
             // Count the number of dots
@@ -825,7 +915,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           }
 
           // This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-          if (tmpSeparatorIndex == -1) {
+          if (tmpAddressPartBeginning.length == pAddress.length) {
+            // TODO: Optimize this by having these calls only happen when the previous fails.
+            // TODO: Alternatively look for all markers in one pass?
             // Check if the address refers to a boxed property
             let tmpBracketStartIndex = pAddress.indexOf('[');
             let tmpBracketStopIndex = pAddress.indexOf(']');
@@ -834,6 +926,48 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             // Note this will not work with a bracket in the same address box set
             let tmpObjectTypeMarkerIndex = pAddress.indexOf('{}');
 
+            // Check if there is a function somewhere in the address... parenthesis start should only be in a function
+            let tmpFunctionStartIndex = pAddress.indexOf('(');
+
+            // NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+            // Functions look like this
+            // 		MyFunction()
+            // 		MyFunction(Some.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+            //
+            // This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+            // To heck with that.  This is a simple function call.
+            //
+            // The requirements to detect a function are:
+            //    1) The start bracket is after character 0
+            if (tmpFunctionStartIndex > 0
+            //    2) The end bracket is after the start bracket
+            && _MockFable.DataFormat.stringCountEnclosures(pAddress) > 0) {
+              let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
+              if (!typeof pObject[tmpFunctionAddress] == 'function') {
+                // The address suggests it is a function, but it is not.
+                return false;
+              }
+
+              // Now see if the function has arguments.
+              // Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+              let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(pAddress.substring(tmpFunctionAddress.length), 0), ',');
+              if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
+                // No arguments... just call the function (bound to the scope of the object it is contained withing)
+                return pObject[tmpFunctionAddress].apply(pObject);
+              } else {
+                let tmpArgumentValues = [];
+                let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
+
+                // Now get the value for each argument
+                for (let i = 0; i < tmpFunctionArguments.length; i++) {
+                  // Resolve the values for each subsequent entry
+                  tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                }
+                return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+              }
+            }
             // Boxed elements look like this:
             // 		MyValues[10]
             // 		MyValues['Name']
@@ -843,7 +977,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             // When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
             // The requirements to detect a boxed element are:
             //    1) The start bracket is after character 0
-            if (tmpBracketStartIndex > 0
+            else if (tmpBracketStartIndex > 0
             //    2) The end bracket has something between them
             && tmpBracketStopIndex > tmpBracketStartIndex
             //    3) There is data
@@ -926,14 +1060,60 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               }
             }
           } else {
-            let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-            let tmpNewAddress = pAddress.substring(tmpSeparatorIndex + 1);
+            //let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
+            //let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+            let tmpSubObjectName = tmpAddressPartBeginning;
+            let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length + 1);
 
             // BOXED ELEMENTS
             // Test if the tmpNewAddress is an array or object
             // Check if it's a boxed property
             let tmpBracketStartIndex = tmpSubObjectName.indexOf('[');
             let tmpBracketStopIndex = tmpSubObjectName.indexOf(']');
+
+            // Check if there is a function somewhere in the address... parenthesis start should only be in a function
+            let tmpFunctionStartIndex = tmpSubObjectName.indexOf('(');
+
+            // NOTE THAT FUNCTIONS MUST RESOLVE FIRST
+            // Functions look like this
+            // 		MyFunction()
+            // 		MyFunction(Some.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address)
+            // 		MyFunction(Some.Address,Some.Other.Address,Some.Third.Address)
+            //
+            // This could be enhanced to allow purely numeric and string values to be passed to the function.  For now,
+            // To heck with that.  This is a simple function call.
+            //
+            // The requirements to detect a function are:
+            //    1) The start bracket is after character 0
+            if (tmpFunctionStartIndex > 0
+            //    2) The end bracket is after the start bracket
+            && _MockFable.DataFormat.stringCountEnclosures(tmpSubObjectName) > 0) {
+              let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
+              tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
+              if (!typeof pObject[tmpFunctionAddress] == 'function') {
+                // The address suggests it is a function, but it is not.
+                return false;
+              }
+
+              // Now see if the function has arguments.
+              // Implementation notes: * ARGUMENTS MUST SHARE THE SAME ROOT OBJECT CONTEXT *
+              let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
+              if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
+                // No arguments... just call the function (bound to the scope of the object it is contained withing)
+                return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+              } else {
+                let tmpArgumentValues = [];
+                let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
+
+                // Now get the value for each argument
+                for (let i = 0; i < tmpFunctionArguments.length; i++) {
+                  // Resolve the values for each subsequent entry
+                  tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                }
+                return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+              }
+            }
             // Boxed elements look like this:
             // 		MyValues[42]
             // 		MyValues['Color']
@@ -943,7 +1123,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             // When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
             // The requirements to detect a boxed element are:
             //    1) The start bracket is after character 0
-            if (tmpBracketStartIndex > 0
+            else if (tmpBracketStartIndex > 0
             //    2) The end bracket has something between them
             && tmpBracketStopIndex > tmpBracketStartIndex
             //    3) There is data
@@ -1053,9 +1233,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
             // If there is an object property already named for the sub object, but it isn't an object
             // then the system can't set the value in there.  Error and abort!
-            if (pObject.hasOwnProperty(tmpSubObjectName) && typeof pObject[tmpSubObjectName] !== 'object') {
+            if (tmpSubObjectName in pObject && typeof pObject[tmpSubObjectName] !== 'object') {
               return undefined;
-            } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
+            } else if (tmpSubObjectName in pObject) {
               // If there is already a subobject pass that to the recursive thingy
               // Continue to manage the parent address for recursion
               tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
@@ -1073,11 +1253,266 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 10,
+      "../source/Manyfest-ParseConditionals.js": 11,
       "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 4,
+      "./Manyfest-ObjectAddress-Parser.js": 8
     }],
     8: [function (require, module, exports) {
+      // TODO: This is an inelegant solution to delay the rewrite of Manyfest.
+
+      // Fable 3.0 has a service for data formatting that deals well with nested enclosures.
+
+      // The Manyfest library predates fable 3.0 and the services structure of it, so the functions
+      // are more or less pure javascript and as functional as they can be made to be.
+
+      // Until we shift Manyfest to be a fable service, these three functions were pulled out of
+      // fable to aid in parsing functions with nested enclosures.
+
+      module.exports = {
+        /**
+         * Count the number of segments in a string, respecting enclosures
+         * 
+         * @param {string} pString 
+         * @param {string} pSeparator 
+         * @param {object} pEnclosureStartSymbolMap 
+         * @param {object} pEnclosureEndSymbolMap 
+         * @returns the count of segments in the string as a number
+         */
+        stringCountSegments: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) => {
+          let tmpString = typeof pString == 'string' ? pString : '';
+          let tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
+          let tmpEnclosureStartSymbolMap = typeof pEnclosureStartSymbolMap == 'object' ? pEnclosureStart : {
+            '{': 0,
+            '[': 1,
+            '(': 2
+          };
+          let tmpEnclosureEndSymbolMap = typeof pEnclosureEndSymbolMap == 'object' ? pEnclosureEnd : {
+            '}': 0,
+            ']': 1,
+            ')': 2
+          };
+          if (pString.length < 1) {
+            return 0;
+          }
+          let tmpSegmentCount = 1;
+          let tmpEnclosureStack = [];
+          for (let i = 0; i < tmpString.length; i++) {
+            // IF This is the start of a segment
+            if (tmpString[i] == tmpSeparator
+            // AND we are not in a nested portion of the string
+            && tmpEnclosureStack.length == 0) {
+              // Increment the segment count
+              tmpSegmentCount++;
+            }
+            // IF This is the start of an enclosure
+            else if (tmpString[i] in tmpEnclosureStartSymbolMap) {
+              // Add it to the stack!
+              tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
+            }
+            // IF This is the end of an enclosure
+            else if (tmpString[i] in tmpEnclosureEndSymbolMap
+            // AND it matches the current nest level symbol
+            && tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1]) {
+              // Pop it off the stack!
+              tmpEnclosureStack.pop();
+            }
+          }
+          return tmpSegmentCount;
+        },
+        /**
+         * Get the first segment in a string, respecting enclosures
+         * 
+         * @param {string} pString 
+         * @param {string} pSeparator 
+         * @param {object} pEnclosureStartSymbolMap 
+         * @param {object} pEnclosureEndSymbolMap 
+         * @returns the first segment in the string as a string
+         */
+        stringGetFirstSegment: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) => {
+          let tmpString = typeof pString == 'string' ? pString : '';
+          let tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
+          let tmpEnclosureStartSymbolMap = typeof pEnclosureStartSymbolMap == 'object' ? pEnclosureStart : {
+            '{': 0,
+            '[': 1,
+            '(': 2
+          };
+          let tmpEnclosureEndSymbolMap = typeof pEnclosureEndSymbolMap == 'object' ? pEnclosureEnd : {
+            '}': 0,
+            ']': 1,
+            ')': 2
+          };
+          if (pString.length < 1) {
+            return 0;
+          }
+          let tmpEnclosureStack = [];
+          for (let i = 0; i < tmpString.length; i++) {
+            // IF This is the start of a segment
+            if (tmpString[i] == tmpSeparator
+            // AND we are not in a nested portion of the string
+            && tmpEnclosureStack.length == 0) {
+              // Return the segment
+              return tmpString.substring(0, i);
+            }
+            // IF This is the start of an enclosure
+            else if (tmpString[i] in tmpEnclosureStartSymbolMap) {
+              // Add it to the stack!
+              tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
+            }
+            // IF This is the end of an enclosure
+            else if (tmpString[i] in tmpEnclosureEndSymbolMap
+            // AND it matches the current nest level symbol
+            && tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1]) {
+              // Pop it off the stack!
+              tmpEnclosureStack.pop();
+            }
+          }
+          return tmpString;
+        },
+        /**
+         * Get all segments in a string, respecting enclosures
+         * 
+         * @param {string} pString 
+         * @param {string} pSeparator 
+         * @param {object} pEnclosureStartSymbolMap 
+         * @param {object} pEnclosureEndSymbolMap 
+         * @returns the first segment in the string as a string
+         */
+        stringGetSegments: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) => {
+          let tmpString = typeof pString == 'string' ? pString : '';
+          let tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
+          let tmpEnclosureStartSymbolMap = typeof pEnclosureStartSymbolMap == 'object' ? pEnclosureStart : {
+            '{': 0,
+            '[': 1,
+            '(': 2
+          };
+          let tmpEnclosureEndSymbolMap = typeof pEnclosureEndSymbolMap == 'object' ? pEnclosureEnd : {
+            '}': 0,
+            ']': 1,
+            ')': 2
+          };
+          let tmpCurrentSegmentStart = 0;
+          let tmpSegmentList = [];
+          if (pString.length < 1) {
+            return tmpSegmentList;
+          }
+          let tmpEnclosureStack = [];
+          for (let i = 0; i < tmpString.length; i++) {
+            // IF This is the start of a segment
+            if (tmpString[i] == tmpSeparator
+            // AND we are not in a nested portion of the string
+            && tmpEnclosureStack.length == 0) {
+              // Return the segment
+              tmpSegmentList.push(tmpString.substring(tmpCurrentSegmentStart, i));
+              tmpCurrentSegmentStart = i + 1;
+            }
+            // IF This is the start of an enclosure
+            else if (tmpString[i] in tmpEnclosureStartSymbolMap) {
+              // Add it to the stack!
+              tmpEnclosureStack.push(tmpEnclosureStartSymbolMap[tmpString[i]]);
+            }
+            // IF This is the end of an enclosure
+            else if (tmpString[i] in tmpEnclosureEndSymbolMap
+            // AND it matches the current nest level symbol
+            && tmpEnclosureEndSymbolMap[tmpString[i]] == tmpEnclosureStack[tmpEnclosureStack.length - 1]) {
+              // Pop it off the stack!
+              tmpEnclosureStack.pop();
+            }
+          }
+          if (tmpCurrentSegmentStart < tmpString.length) {
+            tmpSegmentList.push(tmpString.substring(tmpCurrentSegmentStart));
+          }
+          return tmpSegmentList;
+        },
+        /**
+         * Count the number of enclosures in a string based on the start and end characters.
+         *
+         * If no start or end characters are specified, it will default to parentheses.  If the string is not a string, it will return 0.
+         *
+         * @param {string} pString
+         * @param {string} pEnclosureStart
+         * @param {string} pEnclosureEnd
+         * @returns the count of full in the string
+         */
+        stringCountEnclosures: (pString, pEnclosureStart, pEnclosureEnd) => {
+          let tmpString = typeof pString == 'string' ? pString : '';
+          let tmpEnclosureStart = typeof pEnclosureStart == 'string' ? pEnclosureStart : '(';
+          let tmpEnclosureEnd = typeof pEnclosureEnd == 'string' ? pEnclosureEnd : ')';
+          let tmpEnclosureCount = 0;
+          let tmpEnclosureDepth = 0;
+          for (let i = 0; i < tmpString.length; i++) {
+            // This is the start of an enclosure
+            if (tmpString[i] == tmpEnclosureStart) {
+              if (tmpEnclosureDepth == 0) {
+                tmpEnclosureCount++;
+              }
+              tmpEnclosureDepth++;
+            } else if (tmpString[i] == tmpEnclosureEnd) {
+              tmpEnclosureDepth--;
+            }
+          }
+          return tmpEnclosureCount;
+        },
+        /**
+         * Get the value of the enclosure at the specified index.
+         *
+         * If the index is not a number, it will default to 0.  If the string is not a string, it will return an empty string.  If the enclosure is not found, it will return an empty string.  If the enclosure
+         *
+         * @param {string} pString
+         * @param {number} pEnclosureIndexToGet
+         * @param {string} pEnclosureStart
+         * @param {string}} pEnclosureEnd
+         * @returns {string}
+         */
+        stringGetEnclosureValueByIndex: (pString, pEnclosureIndexToGet, pEnclosureStart, pEnclosureEnd) => {
+          let tmpString = typeof pString == 'string' ? pString : '';
+          let tmpEnclosureIndexToGet = typeof pEnclosureIndexToGet == 'number' ? pEnclosureIndexToGet : 0;
+          let tmpEnclosureStart = typeof pEnclosureStart == 'string' ? pEnclosureStart : '(';
+          let tmpEnclosureEnd = typeof pEnclosureEnd == 'string' ? pEnclosureEnd : ')';
+          let tmpEnclosureCount = 0;
+          let tmpEnclosureDepth = 0;
+          let tmpMatchedEnclosureIndex = false;
+          let tmpEnclosedValueStartIndex = 0;
+          let tmpEnclosedValueEndIndex = 0;
+          for (let i = 0; i < tmpString.length; i++) {
+            // This is the start of an enclosure
+            if (tmpString[i] == tmpEnclosureStart) {
+              tmpEnclosureDepth++;
+
+              // Only count enclosures at depth 1, but still this parses both pairs of all of them.
+              if (tmpEnclosureDepth == 1) {
+                tmpEnclosureCount++;
+                if (tmpEnclosureIndexToGet == tmpEnclosureCount - 1) {
+                  // This is the start of *the* enclosure
+                  tmpMatchedEnclosureIndex = true;
+                  tmpEnclosedValueStartIndex = i;
+                }
+              }
+            }
+            // This is the end of an enclosure
+            else if (tmpString[i] == tmpEnclosureEnd) {
+              tmpEnclosureDepth--;
+
+              // Again, only count enclosures at depth 1, but still this parses both pairs of all of them.
+              if (tmpEnclosureDepth == 0 && tmpMatchedEnclosureIndex && tmpEnclosedValueEndIndex <= tmpEnclosedValueStartIndex) {
+                tmpEnclosedValueEndIndex = i;
+                tmpMatchedEnclosureIndex = false;
+              }
+            }
+          }
+          if (tmpEnclosureCount <= tmpEnclosureIndexToGet) {
+            // Return an empty string if the enclosure is not found
+            return '';
+          }
+          if (tmpEnclosedValueEndIndex > 0 && tmpEnclosedValueEndIndex > tmpEnclosedValueStartIndex) {
+            return tmpString.substring(tmpEnclosedValueStartIndex + 1, tmpEnclosedValueEndIndex);
+          } else {
+            return tmpString.substring(tmpEnclosedValueStartIndex + 1);
+          }
+        }
+      };
+    }, {}],
+    9: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1242,12 +1677,12 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
             // If there is an object property already named for the sub object, but it isn't an object
             // then the system can't set the value in there.  Error and abort!
-            if (pObject.hasOwnProperty(tmpSubObjectName) && typeof pObject[tmpSubObjectName] !== 'object') {
-              if (!pObject.hasOwnProperty('__ERROR')) pObject['__ERROR'] = {};
+            if (tmpSubObjectName in pObject && typeof pObject[tmpSubObjectName] !== 'object') {
+              if (!('__ERROR' in pObject)) pObject['__ERROR'] = {};
               // Put it in an error object so data isn't lost
               pObject['__ERROR'][pAddress] = pValue;
               return false;
-            } else if (pObject.hasOwnProperty(tmpSubObjectName)) {
+            } else if (tmpSubObjectName in pObject) {
               // If there is already a subobject pass that to the recursive thingy
               return this.setValueAtAddress(pObject[tmpSubObjectName], tmpNewAddress, pValue);
             } else {
@@ -1264,7 +1699,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       "./Manyfest-CleanWrapCharacters.js": 2,
       "./Manyfest-LogToConsole.js": 4
     }],
-    9: [function (require, module, exports) {
+    10: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1374,7 +1809,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     }, {
       "./Manyfest-LogToConsole.js": 4
     }],
-    10: [function (require, module, exports) {
+    11: [function (require, module, exports) {
       // Given a string, parse out any conditional expressions and set whether or not to keep the record.
       //
       // For instance:
@@ -1395,7 +1830,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       const _ConditionalStanzaEndLength = _ConditionalStanzaEnd.length;
 
       // Ugh dependency injection.  Can't wait to make these all fable services.
-      let libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
+      //let libObjectAddressCheckAddressExists = new (require('./Manyfest-ObjectAddress-CheckAddressExists.js'))();
 
       // Test the condition of a value in a record
       const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pValue) => {
@@ -1408,7 +1843,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             break;
           case 'LNGT':
           case 'LENGTH_GREATER_THAN':
-            switch (typeof typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
+            switch (typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
               case 'string':
                 return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue;
                 break;
@@ -1422,7 +1857,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             break;
           case 'LNLT':
           case 'LENGTH_LESS_THAN':
-            switch (typeof typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
+            switch (typeof pManyfest.getValueAtAddress(pRecord, pSearchAddress)) {
               case 'string':
                 return pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue;
                 break;
@@ -1434,17 +1869,15 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 break;
             }
             break;
-          case 'FALSE':
-            return pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false;
-            break;
-          case 'EX':
-          case 'EXISTS':
-            return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
-            break;
-          case 'DNEX':
-          case 'DOES_NOT_EXIST':
-            return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
-            break;
+          // TODO: Welcome to dependency hell.  This fixes itself when we move to fable services.
+          // case 'EX':
+          // case 'EXISTS':
+          // 	return libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+          // 	break;
+          // case 'DNEX':
+          // case 'DOES_NOT_EXIST':
+          // 	return !libObjectAddressCheckAddressExists.checkAddressExists(pRecord, pSearchAddress);
+          // 	break;
           case '!=':
             return pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue;
             break;
@@ -1478,7 +1911,6 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         	2.  Find stop points within each start point
         	3. Check the conditional
         */
-
         let tmpStartIndex = pAddress.indexOf(_ConditionalStanzaStart);
         while (tmpStartIndex != -1) {
           let tmpStopIndex = pAddress.indexOf(_ConditionalStanzaEnd, tmpStartIndex + _ConditionalStanzaStartLength);
@@ -1510,10 +1942,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         return tmpKeepRecord;
       };
       module.exports = parseConditionals;
-    }, {
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5
-    }],
-    11: [function (require, module, exports) {
+    }, {}],
+    12: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1563,7 +1993,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           let tmpManyfestAddresses = Object.keys(pManyfestSchemaDescriptors);
           let tmpHashMapping = {};
           tmpManyfestAddresses.forEach(pAddress => {
-            if (pManyfestSchemaDescriptors[pAddress].hasOwnProperty('Hash')) {
+            if ('Hash' in pManyfestSchemaDescriptors[pAddress]) {
               tmpHashMapping[pManyfestSchemaDescriptors[pAddress].Hash] = pAddress;
             }
           });
@@ -1574,9 +2004,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             let tmpDescriptor = false;
 
             // See if there is a matching descriptor either by Address directly or Hash
-            if (pManyfestSchemaDescriptors.hasOwnProperty(pInputAddress)) {
+            if (pInputAddress in pManyfestSchemaDescriptors) {
               tmpOldDescriptorAddress = pInputAddress;
-            } else if (tmpHashMapping.hasOwnProperty(pInputAddress)) {
+            } else if (pInputAddress in tmpHashMapping) {
               tmpOldDescriptorAddress = tmpHashMapping[pInputAddress];
             }
 
@@ -1613,7 +2043,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           // The first passed-in set of descriptors takes precedence.
           let tmpDescriptorAddresses = Object.keys(tmpSource);
           tmpDescriptorAddresses.forEach(pDescriptorAddress => {
-            if (!tmpNewManyfestSchemaDescriptors.hasOwnProperty(pDescriptorAddress)) {
+            if (!(pDescriptorAddress in tmpNewManyfestSchemaDescriptors)) {
               tmpNewManyfestSchemaDescriptors[pDescriptorAddress] = tmpSource[pDescriptorAddress];
             }
           });
@@ -1624,7 +2054,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     }, {
       "./Manyfest-LogToConsole.js": 4
     }],
-    12: [function (require, module, exports) {
+    13: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1665,7 +2095,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           this.objectAddressGetValue = new libObjectAddressGetValue(this.logInfo, this.logError);
           this.objectAddressSetValue = new libObjectAddressSetValue(this.logInfo, this.logError);
           this.objectAddressDeleteValue = new libObjectAddressDeleteValue(this.logInfo, this.logError);
-          if (!this.options.hasOwnProperty('defaultValues')) {
+          if (!('defaultValues' in this.options)) {
             this.options.defaultValues = {
               "String": "",
               "Number": 0,
@@ -1679,7 +2109,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               "Null": null
             };
           }
-          if (!this.options.hasOwnProperty('strict')) {
+          if (!('strict' in this.options)) {
             this.options.strict = false;
           }
           this.scope = undefined;
@@ -1730,11 +2160,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           let tmpManifest = typeof pManifest == 'object' ? pManifest : {};
           let tmpDescriptorKeys = Object.keys(_DefaultConfiguration);
           for (let i = 0; i < tmpDescriptorKeys.length; i++) {
-            if (!tmpManifest.hasOwnProperty(tmpDescriptorKeys[i])) {
+            if (!(tmpDescriptorKeys[i] in tmpManifest)) {
               tmpManifest[tmpDescriptorKeys[i]] = JSON.parse(JSON.stringify(_DefaultConfiguration[tmpDescriptorKeys[i]]));
             }
           }
-          if (tmpManifest.hasOwnProperty('Scope')) {
+          if ('Scope' in tmpManifest) {
             if (typeof tmpManifest.Scope === 'string') {
               this.scope = tmpManifest.Scope;
             } else {
@@ -1743,7 +2173,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           } else {
             this.logError("(".concat(this.scope, ") Error loading scope from manifest object.  Property \"Scope\" does not exist in the root of the object."), tmpManifest);
           }
-          if (tmpManifest.hasOwnProperty('Descriptors')) {
+          if ('Descriptors' in tmpManifest) {
             if (typeof tmpManifest.Descriptors === 'object') {
               let tmpDescriptionAddresses = Object.keys(tmpManifest.Descriptors);
               for (let i = 0; i < tmpDescriptionAddresses.length; i++) {
@@ -1755,7 +2185,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           } else {
             this.logError("(".concat(this.scope, ") Error loading object description from manifest object.  Property \"Descriptors\" does not exist in the root of the Manifest object."), tmpManifest);
           }
-          if (tmpManifest.hasOwnProperty('HashTranslations')) {
+          if ('HashTranslations' in tmpManifest) {
             if (typeof tmpManifest.HashTranslations === 'object') {
               for (let i = 0; i < tmpManifest.HashTranslations.length; i++) {
                 // Each translation is 
@@ -1780,10 +2210,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         addDescriptor(pAddress, pDescriptor) {
           if (typeof pDescriptor === 'object') {
             // Add the Address into the Descriptor if it doesn't exist:
-            if (!pDescriptor.hasOwnProperty('Address')) {
+            if (!('Address' in pDescriptor)) {
               pDescriptor.Address = pAddress;
             }
-            if (!this.elementDescriptors.hasOwnProperty(pAddress)) {
+            if (!(pAddress in this.elementDescriptors)) {
               this.elementAddresses.push(pAddress);
             }
 
@@ -1792,7 +2222,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
             // Always add the address as a hash
             this.elementHashes[pAddress] = pAddress;
-            if (pDescriptor.hasOwnProperty('Hash')) {
+            if ('Hash' in pDescriptor) {
               // TODO: Check if this is a good idea or not..
               //       Collisions are bound to happen with both representations of the address/hash in here and developers being able to create their own hashes.
               this.elementHashes[pDescriptor.Hash] = pAddress;
@@ -1836,15 +2266,15 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         // Turn a hash into an address, factoring in the translation table.
         resolveHashAddress(pHash) {
           let tmpAddress = undefined;
-          let tmpInElementHashTable = this.elementHashes.hasOwnProperty(pHash);
-          let tmpInTranslationTable = this.hashTranslations.translationTable.hasOwnProperty(pHash);
+          let tmpInElementHashTable = (pHash in this.elementHashes);
+          let tmpInTranslationTable = (pHash in this.hashTranslations.translationTable);
 
           // The most straightforward: the hash exists, no translations.
           if (tmpInElementHashTable && !tmpInTranslationTable) {
             tmpAddress = this.elementHashes[pHash];
           }
           // There is a translation from one hash to another, and, the elementHashes contains the pointer end
-          else if (tmpInTranslationTable && this.elementHashes.hasOwnProperty(this.hashTranslations.translate(pHash))) {
+          else if (tmpInTranslationTable && this.hashTranslations.translate(pHash) in this.elementHashes) {
             tmpAddress = this.elementHashes[this.hashTranslations.translate(pHash)];
           }
           // Use the level of indirection only in the Translation Table
@@ -1982,13 +2412,13 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           if (typeof pDescriptor != 'object') {
             return undefined;
           }
-          if (pDescriptor.hasOwnProperty('Default')) {
+          if ('Default' in pDescriptor) {
             return pDescriptor.Default;
           } else {
             // Default to a null if it doesn't have a type specified.
             // This will ensure a placeholder is created but isn't misinterpreted.
-            let tmpDataType = pDescriptor.hasOwnProperty('DataType') ? pDescriptor.DataType : 'String';
-            if (this.options.defaultValues.hasOwnProperty(tmpDataType)) {
+            let tmpDataType = 'DataType' in pDescriptor ? pDescriptor.DataType : 'String';
+            if (tmpDataType in this.options.defaultValues) {
               return this.options.defaultValues[tmpDataType];
             } else {
               // give up and return null
@@ -2002,7 +2432,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           return this.populateObject(pObject, pOverwriteProperties,
           // This just sets up a simple filter to see if there is a default set.
           pDescriptor => {
-            return pDescriptor.hasOwnProperty('Default');
+            return 'Default' in pDescriptor;
           });
         }
 
@@ -2039,10 +2469,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       "./Manyfest-ObjectAddress-CheckAddressExists.js": 5,
       "./Manyfest-ObjectAddress-DeleteValue.js": 6,
       "./Manyfest-ObjectAddress-GetValue.js": 7,
-      "./Manyfest-ObjectAddress-SetValue.js": 8,
-      "./Manyfest-ObjectAddressGeneration.js": 9,
-      "./Manyfest-SchemaManipulation.js": 11,
+      "./Manyfest-ObjectAddress-SetValue.js": 9,
+      "./Manyfest-ObjectAddressGeneration.js": 10,
+      "./Manyfest-SchemaManipulation.js": 12,
       "fable-serviceproviderbase": 1
     }]
-  }, {}, [12])(12);
+  }, {}, [13])(13);
 });
