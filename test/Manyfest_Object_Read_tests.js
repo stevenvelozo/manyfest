@@ -262,10 +262,18 @@ suite
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction()')).to.equal('Value is: undefined');
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction(Name)')).to.equal('Value is: Yadda');
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction(Name,Name)')).to.equal('Value is: Yadda and would output as Yadda');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction("Barney")')).to.equal('Value is: Barney');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'TheFunction("0")')).to.equal('Value is: 0');
 
 						// This is stupid but works
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction(Name,TheFunction(Manyfest.Descriptors["metadata.creator"].Hash))'))
 							.to.equal('Value is: Yadda and would output as Value is: Creator');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction("Jim",TheFunction("Janet"))'))
+							.to.equal('Value is: Jim and would output as Value is: Janet');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction("Jet","Janet")'))
+							.to.equal('Value is: Jet and would output as Janet');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ComplexFunction("Jim",TheFunction(Manyfest.Descriptors["metadata.creator"].Hash))'))
+							.to.equal('Value is: Jim and would output as Value is: Creator');
 
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.Increment()'))
 							.to.equal(1);

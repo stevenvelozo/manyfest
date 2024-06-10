@@ -963,7 +963,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 // Now get the value for each argument
                 for (let i = 0; i < tmpFunctionArguments.length; i++) {
                   // Resolve the values for each subsequent entry
-                  tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                  // Check if the argument value is a string literal or a reference to an address
+                  if (tmpFunctionArguments[i].length >= 2 && (tmpFunctionArguments[i].charAt(0) == '"' || tmpFunctionArguments[i].charAt(0) == "'" || tmpFunctionArguments[i].charAt(0) == "`") && (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == '"' || tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == "'" || tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == "`")) {
+                    // This is a string literal
+                    tmpArgumentValues.push(tmpFunctionArguments[i].substring(1, tmpFunctionArguments[i].length - 1));
+                  } else {
+                    // This is a hash address
+                    tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                  }
                 }
                 return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
               }
@@ -1109,7 +1116,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 // Now get the value for each argument
                 for (let i = 0; i < tmpFunctionArguments.length; i++) {
                   // Resolve the values for each subsequent entry
-                  tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                  // Check if the argument value is a string literal or a reference to an address
+                  if (tmpFunctionArguments[i].length >= 2 && (tmpFunctionArguments[i].charAt(0) == '"' || tmpFunctionArguments[i].charAt(0) == "'" || tmpFunctionArguments[i].charAt(0) == "`") && (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == '"' || tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == "'" || tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length - 1) == "`")) {
+                    // This is a string literal
+                    tmpArgumentValues.push(tmpFunctionArguments[i].substring(1, tmpFunctionArguments[i].length - 1));
+                  } else {
+                    // This is a hash address
+                    tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+                  }
                 }
                 return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
               }

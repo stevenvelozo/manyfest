@@ -1008,7 +1008,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   // Now get the value for each argument
                   for (var _i3 = 0; _i3 < tmpFunctionArguments.length; _i3++) {
                     // Resolve the values for each subsequent entry
-                    tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject2, tmpFunctionArguments[_i3]));
+                    // Check if the argument value is a string literal or a reference to an address
+                    if (tmpFunctionArguments[_i3].length >= 2 && (tmpFunctionArguments[_i3].charAt(0) == '"' || tmpFunctionArguments[_i3].charAt(0) == "'" || tmpFunctionArguments[_i3].charAt(0) == "`") && (tmpFunctionArguments[_i3].charAt(tmpFunctionArguments[_i3].length - 1) == '"' || tmpFunctionArguments[_i3].charAt(tmpFunctionArguments[_i3].length - 1) == "'" || tmpFunctionArguments[_i3].charAt(tmpFunctionArguments[_i3].length - 1) == "`")) {
+                      // This is a string literal
+                      tmpArgumentValues.push(tmpFunctionArguments[_i3].substring(1, tmpFunctionArguments[_i3].length - 1));
+                    } else {
+                      // This is a hash address
+                      tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject2, tmpFunctionArguments[_i3]));
+                    }
                   }
                   return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
                 }
@@ -1154,7 +1161,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                   // Now get the value for each argument
                   for (var _i5 = 0; _i5 < _tmpFunctionArguments.length; _i5++) {
                     // Resolve the values for each subsequent entry
-                    _tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject3, _tmpFunctionArguments[_i5]));
+                    // Check if the argument value is a string literal or a reference to an address
+                    if (_tmpFunctionArguments[_i5].length >= 2 && (_tmpFunctionArguments[_i5].charAt(0) == '"' || _tmpFunctionArguments[_i5].charAt(0) == "'" || _tmpFunctionArguments[_i5].charAt(0) == "`") && (_tmpFunctionArguments[_i5].charAt(_tmpFunctionArguments[_i5].length - 1) == '"' || _tmpFunctionArguments[_i5].charAt(_tmpFunctionArguments[_i5].length - 1) == "'" || _tmpFunctionArguments[_i5].charAt(_tmpFunctionArguments[_i5].length - 1) == "`")) {
+                      // This is a string literal
+                      _tmpArgumentValues.push(_tmpFunctionArguments[_i5].substring(1, _tmpFunctionArguments[_i5].length - 1));
+                    } else {
+                      // This is a hash address
+                      _tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject3, _tmpFunctionArguments[_i5]));
+                    }
                   }
                   return this.getValueAtAddress(pObject[_tmpFunctionAddress2].apply(pObject, _tmpArgumentValues), tmpNewAddress, tmpParentAddress, _tmpRootObject3);
                 }
