@@ -2115,6 +2115,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               "Number": 0,
               "Float": 0.0,
               "Integer": 0,
+              "PreciseNumber": "0.0",
               "Boolean": false,
               "Binary": 0,
               "DateTime": 0,
@@ -2137,6 +2138,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           this.schemaManipulations = new libSchemaManipulation(this.logInfo, this.logError);
           this.objectAddressGeneration = new libObjectAddressGeneration(this.logInfo, this.logError);
           this.hashTranslations = new libHashTranslation(this.logInfo, this.logError);
+          this.numberRegex = /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
         }
 
         /*************************************************************************
@@ -2382,6 +2384,13 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                     addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   }
                   break;
+                case "precisenumber":
+                  if (tmpElementType != 'string') {
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
+                  } else if (!this.numberRegex.test(tmpValue)) {
+                    addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is not a valid number"));
+                  }
+                  break;
                 case 'number':
                   if (tmpElementType != 'number') {
                     addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
@@ -2403,7 +2412,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                     addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is of the type ").concat(tmpElementType));
                   }
                   break;
-                case 'DateTime':
+                case 'datetime':
                   let tmpValueDate = new Date(tmpValue);
                   if (tmpValueDate.toString() == 'Invalid Date') {
                     addValidationError(tmpDescriptor.Address, "has a DataType ".concat(tmpDescriptor.DataType, " but is not parsable as a Date by Javascript"));
