@@ -53,6 +53,7 @@ class Manyfest extends libFableServiceProviderBase
 					"Number": 0,
 					"Float": 0.0,
 					"Integer": 0,
+					"PreciseNumber": "0.0",
 					"Boolean": false,
 					"Binary": 0,
 					"DateTime": 0,
@@ -82,6 +83,8 @@ class Manyfest extends libFableServiceProviderBase
 		this.objectAddressGeneration = new libObjectAddressGeneration(this.logInfo, this.logError);
 
 		this.hashTranslations = new libHashTranslation(this.logInfo, this.logError);
+
+		this.numberRegex = /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
 	}
 
 	/*************************************************************************
@@ -417,6 +420,17 @@ class Manyfest extends libFableServiceProviderBase
 						}
 						break;
 
+					case "precisenumber":
+						if (tmpElementType != 'string')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						else if (!this.numberRegex.test(tmpValue))
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is not a valid number`);
+						}
+						break;
+
 					case 'number':
 						if (tmpElementType != 'number')
 						{
@@ -447,7 +461,7 @@ class Manyfest extends libFableServiceProviderBase
 						}
 						break;
 
-					case 'DateTime':
+					case 'datetime':
 						let tmpValueDate = new Date(tmpValue);
 						if (tmpValueDate.toString() == 'Invalid Date')
 						{

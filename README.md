@@ -130,6 +130,7 @@ String | A pretty basic string
 Integer | An integer number
 Float | A floating point number; does not require a decimal point
 Number | A number of any type
+PreciseNumber | An arbitrary precision number, stored in a string
 Boolean | A boolean value represented by the JSON true or false
 Binary | A boolean value represented as 1 or 0
 YesNo | A boolean value represented as Y or N
