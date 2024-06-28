@@ -152,7 +152,25 @@ class ManyfestObjectAddressResolverGetValue
 				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
 				{
 					// No arguments... just call the function (bound to the scope of the object it is contained withing)
-					return pObject[tmpFunctionAddress].apply(pObject);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return pObject[tmpFunctionAddress].apply(pObject);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							console.log(`Error in getValueAtAddress calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						console.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 				else
 				{
@@ -185,7 +203,25 @@ class ManyfestObjectAddressResolverGetValue
 						}
 					}
 
-					return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							console.log(`Error in getValueAtAddress calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						console.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 			}
 			// Boxed elements look like this:
@@ -350,7 +386,25 @@ class ManyfestObjectAddressResolverGetValue
 				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
 				{
 					// No arguments... just call the function (bound to the scope of the object it is contained withing)
-					return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							console.log(`Error in getValueAtAddress calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						console.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 				else
 				{
@@ -383,7 +437,25 @@ class ManyfestObjectAddressResolverGetValue
 						}
 					}
 
-					return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							console.log(`Error in getValueAtAddress calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						console.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 			}
 			// Boxed elements look like this:

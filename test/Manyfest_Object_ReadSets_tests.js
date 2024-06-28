@@ -44,6 +44,8 @@ suite
 						let tmpFileSet = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'FileSet');
 						Expect(Array.isArray(tmpFileSet)).to.equal(true);
 						let tmpFileSizes = _Manyfest.getValueByHash(_SampleDataArchiveOrgFrankenberry, 'FileSizes');
+						Expect(Object.keys(tmpFileSizes).length).to.equal(17);
+						let tmpQuantities = _Manyfest.getValueByHash({cores:[100,300,45,10,1]}, 'cores[]');
 						fTestComplete();
 					}
 				);

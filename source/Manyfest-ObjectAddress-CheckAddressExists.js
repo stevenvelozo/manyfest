@@ -201,7 +201,25 @@ class ManyfestObjectAddressResolverCheckAddressExists
 				if ((tmpFunctionArguments.length == 0) || (tmpFunctionArguments[0] == ''))
 				{
 					// No arguments... just call the function (bound to the scope of the object it is contained withing)
-					return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							libSimpleLog.log(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						libSimpleLog.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 				else
 				{
@@ -217,7 +235,26 @@ class ManyfestObjectAddressResolverCheckAddressExists
 						tmpArgumentValues.push(this.getObjectValueClass.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
 					}
 
-					return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+					//return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+					if (tmpFunctionAddress in pObject)
+					{
+						try
+						{
+							return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+						}
+						catch(pError)
+						{
+							// The function call failed, so the address doesn't exist
+							libSimpleLog.log(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							return false;
+						}
+					}
+					else
+					{
+						// The function doesn't exist, so the address doesn't exist
+						libSimpleLog.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						return false;
+					}
 				}
 			}
 			// Boxed elements look like this:

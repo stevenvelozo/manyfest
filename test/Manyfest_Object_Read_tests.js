@@ -240,6 +240,7 @@ suite
 										{
 											return { Cost: 1.00, Name: 'Beanie Baby', Stores: ['Aberdeen', 'Seattle', 'Tacoma'] }
 										},
+										"BrokenObject": function() { throw new Error('This is a thrown error message!'); },
 										"FormatOutput": function () { return `My magic value is: ${this.Value}`; }
 									},
 								"Manyfest":
@@ -279,6 +280,8 @@ suite
 							.to.equal(1);
 
 						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.SillyObject().Stores[0]')).to.equal('Aberdeen');
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.SillyFUNCTIONNOTFOUND().Stores[0]')).to.equal(false);
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Behaviors.BrokenObject().Stores[0]')).to.equal(false);
 
 						fTestComplete();
 					}
