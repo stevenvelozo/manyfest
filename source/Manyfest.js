@@ -332,6 +332,12 @@ class Manyfest extends libFableServiceProviderBase
 	// Get the value of an element at an address
 	getValueAtAddress (pObject, pAddress)
 	{
+		let tmpLintedAddress = pAddress.trim();
+		if (tmpLintedAddress == '')
+		{
+			this.logError(`(${this.scope}) Error getting value at address; address is an empty string.`, pObject);
+			return undefined;
+		}
 		let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
 
 		if (typeof(tmpValue) == 'undefined')

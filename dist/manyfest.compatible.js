@@ -455,7 +455,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 var tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(_tmpFunctionAddress.length), 0), ',');
                 if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
                   // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                  return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+                  if (_tmpFunctionAddress in pObject) {
+                    try {
+                      return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      libSimpleLog.log("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    libSimpleLog.log("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 } else {
                   var tmpArgumentValues = [];
                   var _tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -466,7 +478,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                     // NOTE: This is where the resolves get really tricky.  Recursion within recursion.  Programming gom jabbar, yo.
                     tmpArgumentValues.push(this.getObjectValueClass.getValueAtAddress(_tmpRootObject, tmpFunctionArguments[i]));
                   }
-                  return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, _tmpRootObject);
+
+                  //return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+                  if (_tmpFunctionAddress in pObject) {
+                    try {
+                      return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, _tmpRootObject);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      libSimpleLog.log("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    libSimpleLog.log("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 }
               }
               // Boxed elements look like this:
@@ -1000,7 +1026,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 var tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(pAddress.substring(tmpFunctionAddress.length), 0), ',');
                 if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
                   // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                  return pObject[tmpFunctionAddress].apply(pObject);
+                  if (tmpFunctionAddress in pObject) {
+                    try {
+                      return pObject[tmpFunctionAddress].apply(pObject);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 } else {
                   var tmpArgumentValues = [];
                   var _tmpRootObject2 = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -1017,7 +1055,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                       tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject2, tmpFunctionArguments[_i3]));
                     }
                   }
-                  return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+                  if (tmpFunctionAddress in pObject) {
+                    try {
+                      return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 }
               }
               // Boxed elements look like this:
@@ -1153,7 +1203,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 var _tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(_tmpFunctionAddress2.length), 0), ',');
                 if (_tmpFunctionArguments.length == 0 || _tmpFunctionArguments[0] == '') {
                   // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                  return this.getValueAtAddress(pObject[_tmpFunctionAddress2].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                  if (_tmpFunctionAddress2 in pObject) {
+                    try {
+                      return this.getValueAtAddress(pObject[_tmpFunctionAddress2].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      console.log("Error in getValueAtAddress calling function ".concat(_tmpFunctionAddress2, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    console.log("Function ".concat(_tmpFunctionAddress2, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 } else {
                   var _tmpArgumentValues = [];
                   var _tmpRootObject3 = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -1170,7 +1232,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                       _tmpArgumentValues.push(this.getValueAtAddress(_tmpRootObject3, _tmpFunctionArguments[_i5]));
                     }
                   }
-                  return this.getValueAtAddress(pObject[_tmpFunctionAddress2].apply(pObject, _tmpArgumentValues), tmpNewAddress, tmpParentAddress, _tmpRootObject3);
+                  if (_tmpFunctionAddress2 in pObject) {
+                    try {
+                      return this.getValueAtAddress(pObject[_tmpFunctionAddress2].apply(pObject, _tmpArgumentValues), tmpNewAddress, tmpParentAddress, _tmpRootObject3);
+                    } catch (pError) {
+                      // The function call failed, so the address doesn't exist
+                      console.log("Error in getValueAtAddress calling function ".concat(_tmpFunctionAddress2, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      return false;
+                    }
+                  } else {
+                    // The function doesn't exist, so the address doesn't exist
+                    console.log("Function ".concat(_tmpFunctionAddress2, " does not exist (address [").concat(pAddress, "])"));
+                    return false;
+                  }
                 }
               }
               // Boxed elements look like this:
@@ -2413,6 +2487,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         }, {
           key: "getValueAtAddress",
           value: function getValueAtAddress(pObject, pAddress) {
+            var tmpLintedAddress = pAddress.trim();
+            if (tmpLintedAddress == '') {
+              this.logError("(".concat(this.scope, ") Error getting value at address; address is an empty string."), pObject);
+              return undefined;
+            }
             var tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
             if (typeof tmpValue == 'undefined') {
               // Try to get a default if it exists

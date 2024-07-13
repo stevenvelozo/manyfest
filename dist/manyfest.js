@@ -422,7 +422,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
               if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
                 // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    libSimpleLog.log("Error calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  libSimpleLog.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               } else {
                 let tmpArgumentValues = [];
                 let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -433,7 +445,21 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                   // NOTE: This is where the resolves get really tricky.  Recursion within recursion.  Programming gom jabbar, yo.
                   tmpArgumentValues.push(this.getObjectValueClass.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
                 }
-                return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+
+                //return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return this.checkAddressExists(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpRootObject);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    libSimpleLog.log("Error calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  libSimpleLog.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               }
             }
             // Boxed elements look like this:
@@ -955,7 +981,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(pAddress.substring(tmpFunctionAddress.length), 0), ',');
               if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
                 // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                return pObject[tmpFunctionAddress].apply(pObject);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return pObject[tmpFunctionAddress].apply(pObject);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               } else {
                 let tmpArgumentValues = [];
                 let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -972,7 +1010,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                     tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
                   }
                 }
-                return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               }
             }
             // Boxed elements look like this:
@@ -1108,7 +1158,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               let tmpFunctionArguments = _MockFable.DataFormat.stringGetSegments(_MockFable.DataFormat.stringGetEnclosureValueByIndex(tmpSubObjectName.substring(tmpFunctionAddress.length), 0), ',');
               if (tmpFunctionArguments.length == 0 || tmpFunctionArguments[0] == '') {
                 // No arguments... just call the function (bound to the scope of the object it is contained withing)
-                return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               } else {
                 let tmpArgumentValues = [];
                 let tmpRootObject = typeof pRootObject == 'undefined' ? pObject : pRootObject;
@@ -1125,7 +1187,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                     tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
                   }
                 }
-                return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                if (tmpFunctionAddress in pObject) {
+                  try {
+                    return this.getValueAtAddress(pObject[tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, tmpParentAddress, tmpRootObject);
+                  } catch (pError) {
+                    // The function call failed, so the address doesn't exist
+                    console.log("Error in getValueAtAddress calling function ".concat(tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                    return false;
+                  }
+                } else {
+                  // The function doesn't exist, so the address doesn't exist
+                  console.log("Function ".concat(tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                  return false;
+                }
               }
             }
             // Boxed elements look like this:
@@ -2317,6 +2391,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
         // Get the value of an element at an address
         getValueAtAddress(pObject, pAddress) {
+          let tmpLintedAddress = pAddress.trim();
+          if (tmpLintedAddress == '') {
+            this.logError("(".concat(this.scope, ") Error getting value at address; address is an empty string."), pObject);
+            return undefined;
+          }
           let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
           if (typeof tmpValue == 'undefined') {
             // Try to get a default if it exists

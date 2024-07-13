@@ -38,6 +38,7 @@ suite
 							.to.equal('Franken Berry / Count Chocula : Tevevision Commercial 1971');
 						Expect(tmpTitle)
 							.to.equal(_SampleDataArchiveOrgFrankenberry.metadata.title);
+						let tmpNoAddress = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, '');
 						fTestComplete();
 					}
 				);
