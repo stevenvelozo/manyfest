@@ -44,6 +44,25 @@ suite
 				);
 				test
 				(
+					'Javascript null values should not cause errors..',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({ Scope:'Archive.org',	Descriptors: {'metadata.creator': {Name:'Creator', Hash:'Creator'}}});
+						let tmpNullSampleData = JSON.parse(JSON.stringify(_SampleDataArchiveOrgFrankenberry));
+						tmpNullSampleData.Noel = null;
+						let tmpNullValue = _Manyfest.getValueAtAddress(tmpNullSampleData, 'Noel');
+						let tmpNullValueOneDeep = _Manyfest.getValueAtAddress(tmpNullSampleData, 'Noel.SomeChildValue');
+						let tmpNullValueTwoDeep = _Manyfest.getValueAtAddress(tmpNullSampleData, 'Noel.SomeChildValue.SecondTier');
+						let tmpNullValueTwoDeepObject = _Manyfest.getValueAtAddress(tmpNullSampleData, 'Noel.SomeChildValue[SecondTier]');
+						let tmpNullValueTwoDeepArray = _Manyfest.getValueAtAddress(tmpNullSampleData, 'Noel.SomeChildValue.SecondTier[0]');
+						Expect(tmpNullValue).to.equal(null);
+						Expect(tmpNullValueOneDeep).to.equal(undefined);
+						Expect(tmpNullValueTwoDeep).to.equal(undefined);
+						fTestComplete();
+					}
+				);
+				test
+				(
 					'It should be trivial to access subproperties with a schema by hash.',
 					(fTestComplete)=>
 					{

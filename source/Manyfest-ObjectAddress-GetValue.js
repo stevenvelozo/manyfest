@@ -47,9 +47,19 @@ class ManyfestObjectAddressResolverGetValue
 	getValueAtAddress (pObject, pAddress, pParentAddress, pRootObject)
 	{
 		// Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)
-		if (typeof(pObject) != 'object') return undefined;
+		if (typeof(pObject) != 'object')
+		{
+			return undefined;
+		}
+		if (pObject === null)
+		{
+			return undefined;
+		}
 		// Make sure pAddress (the address we are resolving) is a string
-		if (typeof(pAddress) != 'string') return undefined;
+		if (typeof(pAddress) != 'string')
+		{
+			return undefined;
+		}
 		// Stash the parent address for later resolution
 		let tmpParentAddress = "";
 		if (typeof(pParentAddress) == 'string')
@@ -335,7 +345,7 @@ class ManyfestObjectAddressResolverGetValue
 				}
 				else
 				{
-					return undefined;
+					return null;
 				}
 			}
 		}
