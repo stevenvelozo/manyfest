@@ -58,6 +58,8 @@ suite
 						Expect(tmpNullValue).to.equal(null);
 						Expect(tmpNullValueOneDeep).to.equal(undefined);
 						Expect(tmpNullValueTwoDeep).to.equal(undefined);
+						Expect(tmpNullValueTwoDeepObject).to.equal(undefined);
+						Expect(tmpNullValueTwoDeepArray).to.equal(undefined);
 						fTestComplete();
 					}
 				);
