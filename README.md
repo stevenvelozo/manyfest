@@ -42,15 +42,15 @@ const libManyfest = require('Manyfest');
 
 // Construct a Manyfest with a few defined columns
 let animalManyfest = new libManyfest(
-    {
-        "Scope": "Animal",
-        "Descriptors":
-            {
-                "IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer", "Default":0 },
-                "Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
-                "Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." }
-            }
-    });
+	{
+		"Scope": "Animal",
+		"Descriptors":
+			{
+				"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer", "Default":0 },
+				"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
+				"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." }
+			}
+	});
 
 // Make up a cute and furry test creature
 let testAnimal = {IDAnimal:8675309, Name:'BatBrains', Type:'Lab', Color:'Brown'};
@@ -93,29 +93,29 @@ Let's use our Animal schema and extend it a little bit.  In this case, a new JSO
 
 ```javascript
 let animalManyfest = new libManyfest(
-    {
-        "Scope": "Animal",
-        "Descriptors":
-            {
-                "IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
-                "Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
-                "Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
-                "MedicalStats": 
-                    {
-                        "Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
-                    },
-                "MedicalStats.Temps.MinET": { "Name":"Minimum Environmental Temperature", "NameShort":"MinET", "Description":"Safest minimum temperature for this animal to survive in."},
-                "MedicalStats.Temps.MaxET": { "Name":"Maximum Environmental Temperature", "NameShort":"MaxET", "Description":"Safest maximum temperature for this animal to survive in."},
-                "MedicalStats.Temps.CET":
-                    {
-                        "Name":"Comfortable Environmental Temperature",
-                        "NameShort":"Comf Env Temp",
-                        "Hash":"ComfET",
-                        "DataType":"Float",
-                        "Description":"The most comfortable temperature for this animal to survive in."
-                    }
-            }
-    });
+	{
+		"Scope": "Animal",
+		"Descriptors":
+			{
+				"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+				"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
+				"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
+				"MedicalStats": 
+					{
+						"Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
+					},
+				"MedicalStats.Temps.MinET": { "Name":"Minimum Environmental Temperature", "NameShort":"MinET", "Description":"Safest minimum temperature for this animal to survive in."},
+				"MedicalStats.Temps.MaxET": { "Name":"Maximum Environmental Temperature", "NameShort":"MaxET", "Description":"Safest maximum temperature for this animal to survive in."},
+				"MedicalStats.Temps.CET":
+					{
+						"Name":"Comfortable Environmental Temperature",
+						"NameShort":"Comf Env Temp",
+						"Hash":"ComfET",
+						"DataType":"Float",
+						"Description":"The most comfortable temperature for this animal to survive in."
+					}
+			}
+	});
 ```
 
 Notice in this example, the addresses are more complex.  They have a dot syntax.  This notifies Manyfest that they are nested values.  Further, there is both a Name and a NameShort descriptor setup.  This gives us a framework for consistently referring to the data element both internally and to the user.  It is no longer a mystery what someAnimal.MedicalStats.Temps.CET means.  Developers, user interface designers, database engineers, product managers and other folks who work on the software side don't have to maintain a third body of documentation about what the data means.
@@ -135,9 +135,14 @@ Boolean | A boolean value represented by the JSON true or false
 Binary | A boolean value represented as 1 or 0
 YesNo | A boolean value represented as Y or N
 DateTime | A javascript date
+Key | A two-part Key with an Identifier and Globally Unique Identifier (ID and GUID)
 Array | A plain old javascript array
 Object | A plain old javascript object
 Null | A null value
+
+#### Keys
+
+Keys are a slightly more complex value type, in that they have configuration that defines cardinality.  The address is meant to point to one of two of the values (either the GUID or the ID).  There is a secondary parameter for the other.
 
 ## Reading and Writing Element Properties
 
@@ -221,15 +226,15 @@ const libManyfest = require('Manyfest');
 
 // Construct a Manyfest with a few defined columns
 let animalManyfest = new libManyfest(
-    {
-        "Scope": "Animal",
-        "Descriptors":
-            {
-                "IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
-                "Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
-                "Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." }
-            }
-    });
+	{
+		"Scope": "Animal",
+		"Descriptors":
+			{
+				"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
+				"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
+				"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." }
+			}
+	});
 ```
 
 The programmatic equivalent is the following code:
@@ -269,250 +274,250 @@ There is an API to access their data.  It's ... really messy, the data you get b
 
 ```JSON
 {
-    "created": 1664830085,
-    "d1": "ia600202.us.archive.org",
-    "d2": "ia800202.us.archive.org",
-    "dir": "/7/items/FrankenberryCountChoculaTevevisionCommercial1971",
-    "files": [
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000001.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336956",
-            "size": "838",
-            "md5": "e47269cd5a82db9594f265a65785ec12",
-            "crc32": "165c668b",
-            "sha1": "383303d9546c381267569ad4e33aff691f0bb8c7"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000004.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336957",
-            "size": "6843",
-            "md5": "c93fa52000ab4665e69b25c403e11aff",
-            "crc32": "9444e6f6",
-            "sha1": "716b4f9950b8147f51d3265f9c62ff86451308d5"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000009.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336957",
-            "size": "8388",
-            "md5": "30eb3eb4cbbdfa08d531a0a74da7c000",
-            "crc32": "be874a9e",
-            "sha1": "0c392d777609e967b6022be27edad678c5ae74e2"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000014.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336958",
-            "size": "5993",
-            "md5": "4e9ebc3d076bec8cf7dfe76795f8c769",
-            "crc32": "912ec98c",
-            "sha1": "01dc49c852e1bbb421199450dd902935c62b06de"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000019.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336958",
-            "size": "4951",
-            "md5": "59f190f0c5b0a048415b26412860b6dd",
-            "crc32": "a70a30b1",
-            "sha1": "a284af9757cb24d28f96ec88ec1b1c23a8cea9fe"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000024.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336959",
-            "size": "3383",
-            "md5": "be2a908acd563b896e7758b598295148",
-            "crc32": "ed467831",
-            "sha1": "94c001e72ebc86d837a78c61a004db9ab9d597bd"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000029.jpg",
-            "source": "derivative",
-            "format": "Thumbnail",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336960",
-            "size": "3503",
-            "md5": "c82199d09be07633000fd07b363dd8a3",
-            "crc32": "a1fd79cb",
-            "sha1": "2bc8e761edb24a441fa5906dda1c424e1f98a47a"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971_archive.torrent",
-            "source": "metadata",
-            "btih": "de6b371e7cc3c83db1cc08150500753eae533409",
-            "mtime": "1542761794",
-            "size": "4093",
-            "md5": "a275d3b4028cccb5bea8b47a88c838af",
-            "crc32": "5ffa7334",
-            "sha1": "af8222637b574cba1360d0ea77e231640ffd43c4",
-            "format": "Archive BitTorrent"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971_files.xml",
-            "source": "metadata",
-            "format": "Metadata",
-            "md5": "3a7e87b08bed1e203a5858b31352c110"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971_meta.xml",
-            "source": "metadata",
-            "format": "Metadata",
-            "mtime": "1542761793",
-            "size": "1371",
-            "md5": "0b9c9bf21b9a26aea43a2f735b404624",
-            "crc32": "41077288",
-            "sha1": "22e6f2c73bf63072f671d846355da2785db51dbd"
-        },
-        {
-            "name": "FrankenberryCountChoculaTevevisionCommercial1971_reviews.xml",
-            "source": "original",
-            "mtime": "1466898697",
-            "size": "620",
-            "md5": "260bfba5d696772445dcc7ff6e6d5bdb",
-            "crc32": "25ea3229",
-            "sha1": "7d541f18fcd5ad9c6e593afe5a80f18771f23b32",
-            "format": "Metadata"
-        },
-        {
-            "name": "__ia_thumb.jpg",
-            "source": "original",
-            "mtime": "1539115881",
-            "size": "7481",
-            "md5": "8cec324fa0016fd77cc04e6a4b2ebb00",
-            "crc32": "d9e1b316",
-            "sha1": "4dab42952fe0405a3b7f80146636b33d7b1bd01e",
-            "format": "Item Tile",
-            "rotation": "0"
-        },
-        {
-            "name": "frankerberry_countchockula_1971.0001.gif",
-            "source": "derivative",
-            "format": "Animated GIF",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336965",
-            "size": "101114",
-            "md5": "b78a13094030f104900eb996bafe2b7d",
-            "crc32": "6650cd8",
-            "sha1": "669798c037205cac14f70592deef6f7831b3d4a1"
-        },
-        {
-            "name": "frankerberry_countchockula_1971.0001.mpg",
-            "source": "original",
-            "format": "MPEG2",
-            "mtime": "1296335803",
-            "size": "31625216",
-            "md5": "762ba18b026b85b3f074523e7fcb4db0",
-            "crc32": "42347f78",
-            "sha1": "41162dc2d1a91b618124c84628d0c231544a02be",
-            "length": "31.14",
-            "height": "480",
-            "width": "640"
-        },
-        {
-            "name": "frankerberry_countchockula_1971.0001.mpg.idx",
-            "source": "derivative",
-            "format": "Video Index",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336956",
-            "size": "31141",
-            "md5": "49423e072726e4ea3cdd8ebdd26c7dfc",
-            "crc32": "ae969a68",
-            "sha1": "805782cd2d0f9002555816daadf3b8607e621f79"
-        },
-        {
-            "name": "frankerberry_countchockula_1971.0001.ogv",
-            "source": "derivative",
-            "format": "Ogg Video",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336994",
-            "size": "2248166",
-            "md5": "f1b933e97ce63594fb28a0a019ff3436",
-            "crc32": "a2a0e5e9",
-            "sha1": "a6bf0aec9f006baeca37c03f586686ebe685d59b",
-            "length": "31.15",
-            "height": "300",
-            "width": "400"
-        },
-        {
-            "name": "frankerberry_countchockula_1971.0001_512kb.mp4",
-            "source": "derivative",
-            "format": "512Kb MPEG4",
-            "original": "frankerberry_countchockula_1971.0001.mpg",
-            "mtime": "1296336977",
-            "size": "2378677",
-            "md5": "a7750839519c61ba3bb99fc66b32011d",
-            "crc32": "4dbd37c8",
-            "sha1": "3929314c192dec006fac2739bcb4730788e8c068",
-            "length": "31.13",
-            "height": "240",
-            "width": "320"
-        }
-    ],
-    "files_count": 17,
-    "item_last_updated": 1542761794,
-    "item_size": 36431778,
-    "metadata": {
-        "identifier": "FrankenberryCountChoculaTevevisionCommercial1971",
-        "title": "Franken Berry / Count Chocula : Tevevision Commercial 1971",
-        "creator": "General Mills",
-        "mediatype": "movies",
-        "collection": [
-            "classic_tv_commercials",
-            "television"
-        ],
-        "description": "Count Chocula and Franken Berry were both introduced in 1971. Boo Berry Cereal appeared in 1973 followed by Fruit Brute in 1974. Yummy Mummy appeared more than a decade later in 1988 - completing the the group known as the General Mills Monster Cereals.",
-        "subject": "Third Eye Cinema; Classic Television Commercials; animation; cartoons;General Mills",
-        "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/",
-        "publicdate": "2011-01-29 21:36:42",
-        "addeddate": "2011-01-29 21:35:38",
-        "uploader": "bolexman@msn.com",
-        "updater": [
-            "Bolexman",
-            "Bolexman",
-            "Jeff Kaplan"
-        ],
-        "updatedate": [
-            "2011-01-29 21:45:38",
-            "2011-01-29 21:55:46",
-            "2011-01-29 23:04:55"
-        ],
-        "sound": "sound",
-        "color": "color",
-        "runtime": "0:31",
-        "backup_location": "ia903608_22",
-        "ia_orig__runtime": "31 seconds"
-    },
-    "reviews": [
-        {
-            "reviewbody": "Sugar cereal cartoon Karloff and Lugosi argue self-importance pre Lorre ghost.  Interesting how kids still know the voices without any idea of the origins.",
-            "reviewtitle": "pre booberry",
-            "reviewer": "outofthebox",
-            "reviewdate": "2016-06-25 23:51:36",
-            "createdate": "2016-06-25 23:51:36",
-            "stars": "4"
-        }
-    ],
-    "server": "ia800202.us.archive.org",
-    "uniq": 1957612749,
-    "workable_servers": [
-        "ia800202.us.archive.org",
-        "ia600202.us.archive.org"
-    ]
+	"created": 1664830085,
+	"d1": "ia600202.us.archive.org",
+	"d2": "ia800202.us.archive.org",
+	"dir": "/7/items/FrankenberryCountChoculaTevevisionCommercial1971",
+	"files": [
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000001.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336956",
+			"size": "838",
+			"md5": "e47269cd5a82db9594f265a65785ec12",
+			"crc32": "165c668b",
+			"sha1": "383303d9546c381267569ad4e33aff691f0bb8c7"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000004.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336957",
+			"size": "6843",
+			"md5": "c93fa52000ab4665e69b25c403e11aff",
+			"crc32": "9444e6f6",
+			"sha1": "716b4f9950b8147f51d3265f9c62ff86451308d5"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000009.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336957",
+			"size": "8388",
+			"md5": "30eb3eb4cbbdfa08d531a0a74da7c000",
+			"crc32": "be874a9e",
+			"sha1": "0c392d777609e967b6022be27edad678c5ae74e2"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000014.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336958",
+			"size": "5993",
+			"md5": "4e9ebc3d076bec8cf7dfe76795f8c769",
+			"crc32": "912ec98c",
+			"sha1": "01dc49c852e1bbb421199450dd902935c62b06de"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000019.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336958",
+			"size": "4951",
+			"md5": "59f190f0c5b0a048415b26412860b6dd",
+			"crc32": "a70a30b1",
+			"sha1": "a284af9757cb24d28f96ec88ec1b1c23a8cea9fe"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000024.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336959",
+			"size": "3383",
+			"md5": "be2a908acd563b896e7758b598295148",
+			"crc32": "ed467831",
+			"sha1": "94c001e72ebc86d837a78c61a004db9ab9d597bd"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000029.jpg",
+			"source": "derivative",
+			"format": "Thumbnail",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336960",
+			"size": "3503",
+			"md5": "c82199d09be07633000fd07b363dd8a3",
+			"crc32": "a1fd79cb",
+			"sha1": "2bc8e761edb24a441fa5906dda1c424e1f98a47a"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971_archive.torrent",
+			"source": "metadata",
+			"btih": "de6b371e7cc3c83db1cc08150500753eae533409",
+			"mtime": "1542761794",
+			"size": "4093",
+			"md5": "a275d3b4028cccb5bea8b47a88c838af",
+			"crc32": "5ffa7334",
+			"sha1": "af8222637b574cba1360d0ea77e231640ffd43c4",
+			"format": "Archive BitTorrent"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971_files.xml",
+			"source": "metadata",
+			"format": "Metadata",
+			"md5": "3a7e87b08bed1e203a5858b31352c110"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971_meta.xml",
+			"source": "metadata",
+			"format": "Metadata",
+			"mtime": "1542761793",
+			"size": "1371",
+			"md5": "0b9c9bf21b9a26aea43a2f735b404624",
+			"crc32": "41077288",
+			"sha1": "22e6f2c73bf63072f671d846355da2785db51dbd"
+		},
+		{
+			"name": "FrankenberryCountChoculaTevevisionCommercial1971_reviews.xml",
+			"source": "original",
+			"mtime": "1466898697",
+			"size": "620",
+			"md5": "260bfba5d696772445dcc7ff6e6d5bdb",
+			"crc32": "25ea3229",
+			"sha1": "7d541f18fcd5ad9c6e593afe5a80f18771f23b32",
+			"format": "Metadata"
+		},
+		{
+			"name": "__ia_thumb.jpg",
+			"source": "original",
+			"mtime": "1539115881",
+			"size": "7481",
+			"md5": "8cec324fa0016fd77cc04e6a4b2ebb00",
+			"crc32": "d9e1b316",
+			"sha1": "4dab42952fe0405a3b7f80146636b33d7b1bd01e",
+			"format": "Item Tile",
+			"rotation": "0"
+		},
+		{
+			"name": "frankerberry_countchockula_1971.0001.gif",
+			"source": "derivative",
+			"format": "Animated GIF",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336965",
+			"size": "101114",
+			"md5": "b78a13094030f104900eb996bafe2b7d",
+			"crc32": "6650cd8",
+			"sha1": "669798c037205cac14f70592deef6f7831b3d4a1"
+		},
+		{
+			"name": "frankerberry_countchockula_1971.0001.mpg",
+			"source": "original",
+			"format": "MPEG2",
+			"mtime": "1296335803",
+			"size": "31625216",
+			"md5": "762ba18b026b85b3f074523e7fcb4db0",
+			"crc32": "42347f78",
+			"sha1": "41162dc2d1a91b618124c84628d0c231544a02be",
+			"length": "31.14",
+			"height": "480",
+			"width": "640"
+		},
+		{
+			"name": "frankerberry_countchockula_1971.0001.mpg.idx",
+			"source": "derivative",
+			"format": "Video Index",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336956",
+			"size": "31141",
+			"md5": "49423e072726e4ea3cdd8ebdd26c7dfc",
+			"crc32": "ae969a68",
+			"sha1": "805782cd2d0f9002555816daadf3b8607e621f79"
+		},
+		{
+			"name": "frankerberry_countchockula_1971.0001.ogv",
+			"source": "derivative",
+			"format": "Ogg Video",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336994",
+			"size": "2248166",
+			"md5": "f1b933e97ce63594fb28a0a019ff3436",
+			"crc32": "a2a0e5e9",
+			"sha1": "a6bf0aec9f006baeca37c03f586686ebe685d59b",
+			"length": "31.15",
+			"height": "300",
+			"width": "400"
+		},
+		{
+			"name": "frankerberry_countchockula_1971.0001_512kb.mp4",
+			"source": "derivative",
+			"format": "512Kb MPEG4",
+			"original": "frankerberry_countchockula_1971.0001.mpg",
+			"mtime": "1296336977",
+			"size": "2378677",
+			"md5": "a7750839519c61ba3bb99fc66b32011d",
+			"crc32": "4dbd37c8",
+			"sha1": "3929314c192dec006fac2739bcb4730788e8c068",
+			"length": "31.13",
+			"height": "240",
+			"width": "320"
+		}
+	],
+	"files_count": 17,
+	"item_last_updated": 1542761794,
+	"item_size": 36431778,
+	"metadata": {
+		"identifier": "FrankenberryCountChoculaTevevisionCommercial1971",
+		"title": "Franken Berry / Count Chocula : Tevevision Commercial 1971",
+		"creator": "General Mills",
+		"mediatype": "movies",
+		"collection": [
+			"classic_tv_commercials",
+			"television"
+		],
+		"description": "Count Chocula and Franken Berry were both introduced in 1971. Boo Berry Cereal appeared in 1973 followed by Fruit Brute in 1974. Yummy Mummy appeared more than a decade later in 1988 - completing the the group known as the General Mills Monster Cereals.",
+		"subject": "Third Eye Cinema; Classic Television Commercials; animation; cartoons;General Mills",
+		"licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/",
+		"publicdate": "2011-01-29 21:36:42",
+		"addeddate": "2011-01-29 21:35:38",
+		"uploader": "bolexman@msn.com",
+		"updater": [
+			"Bolexman",
+			"Bolexman",
+			"Jeff Kaplan"
+		],
+		"updatedate": [
+			"2011-01-29 21:45:38",
+			"2011-01-29 21:55:46",
+			"2011-01-29 23:04:55"
+		],
+		"sound": "sound",
+		"color": "color",
+		"runtime": "0:31",
+		"backup_location": "ia903608_22",
+		"ia_orig__runtime": "31 seconds"
+	},
+	"reviews": [
+		{
+			"reviewbody": "Sugar cereal cartoon Karloff and Lugosi argue self-importance pre Lorre ghost.  Interesting how kids still know the voices without any idea of the origins.",
+			"reviewtitle": "pre booberry",
+			"reviewer": "outofthebox",
+			"reviewdate": "2016-06-25 23:51:36",
+			"createdate": "2016-06-25 23:51:36",
+			"stars": "4"
+		}
+	],
+	"server": "ia800202.us.archive.org",
+	"uniq": 1957612749,
+	"workable_servers": [
+		"ia800202.us.archive.org",
+		"ia600202.us.archive.org"
+	]
 }
 ```
 
@@ -522,51 +527,51 @@ With just a small number of element descriptors, we can make this huge blob of J
 
 ```JSON
 {
-    "Scope": "Archive.org",
-    "Descriptors": {
-        "d1": {
-            "Hash": "Server",
-            "Name": "Server",
-            "Description": "The primary server to download these files from.",
-            "DataType": "String"
-        },
-        "d2": {
-            "Hash": "ServerAlternate",
-            "Name": "Alternate Server",
-            "Description": "The alternate server to download these files from.",
-            "DataType": "String"
-        },
-        "dir": {
-            "Hash": "Path",
-            "Name": "Server URL Path",
-            "NameShort": "Path",
-            "Description": "The path on the server where these files are located."
-        },
-        "metadata.identifier": {
-            "Hash": "GUID",
-            "Name": "Globally Unique Identifier",
-            "NameShort": "GUID",
-            "Description": "Archive.org unique identifier string."
-        },
-        "metadata.title": {
-            "Hash": "Title",
-            "Name": "Title",
-            "NameShort": "Title",
-            "Description": "The title of the media item."
-        },
-        "metadata.creator": {
-            "Hash": "Creator",
-            "Name": "Creator",
-            "NameShort": "Creator",
-            "Description": "The creator of the media item."
-        },
-        "metadata.mediatype": {
-            "Hash": "Type",
-            "Name": "Media Type",
-            "NameShort": "Type",
-            "Description": "The type of media item."
-        }
-    }
+	"Scope": "Archive.org",
+	"Descriptors": {
+		"d1": {
+			"Hash": "Server",
+			"Name": "Server",
+			"Description": "The primary server to download these files from.",
+			"DataType": "String"
+		},
+		"d2": {
+			"Hash": "ServerAlternate",
+			"Name": "Alternate Server",
+			"Description": "The alternate server to download these files from.",
+			"DataType": "String"
+		},
+		"dir": {
+			"Hash": "Path",
+			"Name": "Server URL Path",
+			"NameShort": "Path",
+			"Description": "The path on the server where these files are located."
+		},
+		"metadata.identifier": {
+			"Hash": "GUID",
+			"Name": "Globally Unique Identifier",
+			"NameShort": "GUID",
+			"Description": "Archive.org unique identifier string."
+		},
+		"metadata.title": {
+			"Hash": "Title",
+			"Name": "Title",
+			"NameShort": "Title",
+			"Description": "The title of the media item."
+		},
+		"metadata.creator": {
+			"Hash": "Creator",
+			"Name": "Creator",
+			"NameShort": "Creator",
+			"Description": "The creator of the media item."
+		},
+		"metadata.mediatype": {
+			"Hash": "Type",
+			"Name": "Media Type",
+			"NameShort": "Type",
+			"Description": "The type of media item."
+		}
+	}
 }
 ```
 
@@ -582,6 +587,102 @@ let _Schema = new libManyfest(schemaArchiveOrg);
 
 console.log(`The URL for "${_Schema.getValueByHash(dataArchiveOrg,'Title')}" is: ${_Schema.getValueByHash(dataArchiveOrg,'Server')}${_Schema.getValueByHash(dataArchiveOrg,'Path')}`);
 ```
-# Architectural TODO:
 
-Change the complex address resolution functions to leverage a single resolver that returns both `container` and `entry`.
+### A Manyfest Schema for Book records
+
+This shows a book record with an Author Key as well.
+
+```JSON
+{
+	"Scope": "Book",
+	"Descriptors": {
+		"GUIDBook": {
+			"Hash": "GUIDBook",
+			"Name": "Book GUID",
+			"DataType": "Key",
+			"KeyRepresentation": "GUID",
+			"GUIDAddress": "GUIDBook",
+			"IDAddress": "IDBook"
+		},
+		"IDBook": {
+			"Hash": "IDBook",
+			"Name": "Book Identifier",
+			"DataType": "Key",
+			"KeyRepresentation": "ID",
+			"GUIDAddress": "GUIDBook",
+			"IDAddress": "IDBook"
+		},
+		"Title": {
+			"Hash": "Title",
+			"Name": "Book Title",
+			"DataType": "String"
+		},
+		"IDAuthor": {
+			"Hash": "Book_IDAuthor",
+			"Name": "Book Primary Author",
+			"DataType": "Key",
+			"KeyRepresentation": "ID",
+			"GUIDAddress": "GUIDAuthor",
+			"IDAddress": "IDAuthor"
+		},
+	}
+}
+```
+
+Because we expect only one scope to be the controlling scope for a particular key pair, we can use the key pair presence as a mechnism for resolution of IDs to GUIDs when they aren't natural.
+
+What does this mean in practice?
+
+If we have the following Book record:
+
+```JSON
+{
+	"GUIDBook": "SCIFI-000-Dune",
+	"Title": "Dune",
+	"GUIDAuthor": "AUTHOR-FRANK-HERBERT"
+}
+```
+
+And the following Author record:
+
+```JSON
+{
+	"GUIDAuthor": "AUTHOR-FRANK-HERBERT",
+	"IDAuthor": 1001,
+	"Name": "Frank Herbert"
+}
+```
+
+
+#### This gives rise to the need for a "Key" data type which is a tuple
+
+The tuple will be a GUID or ID, but will represent both.  As long as only one entity in the controlling scope (the Book table for instance) to have *both* the ID and the GUID, this can be used to make that the source of record for the Key.  This allows lookups back and forth between GUID and ID.
+
+1. Author is the cannonical source for finding the GUIDAuthor->IDAuthor connection, and vice versa.  Because it is the only record shape in the model space that contains both.
+2. GUIDAuthor is not in the Descriptors as a secondary address, but IDAuthor is.  GUIDAuthor is, though, resolvable from the IDAuthor GUIDAddress property.
+3. This means we want to treat the "GUIDAuthor"/"IDAuthor" pairing as a single entry in a manyfest, which is a departure from how the rest of them operate.
+
+## BELOW WILL BE IN Pict
+
+## Record "Sieve"s
+
+Sometimes we want to take a record from a source shape, and translate it into a destination shape.  This can be done with an implicit sieve or an explicit sieve.
+
+### Handy Assertions for Working with a Sieve
+
+* A record is a single object without loops.
+* A record is part of a RecordSet.
+* A record has an RecordSet key (e.g. "Users", "Projects", "Books", etc.).
+* A record may have an Entity key (e.g. "Users", "Projects", "Books", etc.).
+* The difference between RecordSet and Entity is that an Entity is a Record associated with a Key is expected to be stored in an Entity Storage System of some kind whereas a RecordSet Record might be abstract.
+* A Record has a Key which represents a GUID and Identifier.
+* GUIDs are RecordSet scoped strings that are unique to a Record.
+* Identifiers are RecordSet Storage scoped strings or numbers that are unique to a Record.
+* There is only one cannonical provider of each Record Entity
+* When creating a sieve instance, we are going to migrate sets of records from one schema to another.
+
+### Implicit Sieve
+
+An implicit sieve embeds the configuration for Projection(s) within the current recordset.  There is a Projection array, each of which has an entry for basic record projections.  This should be good enough for simple transformation operations.
+
+Each of these Projections come as a simple record shape with templated expressions.
