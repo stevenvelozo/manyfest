@@ -141,9 +141,9 @@ suite
 						// Test a middle of address boxed object property
 						let tmpEmbeddedObjectBracket = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata["synthesizer"].author');
 						Expect(tmpEmbeddedObjectBracket).to.equal('The chocula himself');
-						// Test a middle of address boxed object property
-						let tmpEmbeddedObjectBracketMissing = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata["chef"].author');
-						Expect(tmpEmbeddedObjectBracketMissing).to.be.undefined;
+						// Test a middle of address boxed object property where the boxed object is missing
+						let tmpEmbeddedObjectBracketMissingMidTierObject = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata["chef"].author');
+						Expect(tmpEmbeddedObjectBracketMissingMidTierObject).to.be.undefined;
 						fTestComplete();
 					}
 				);
