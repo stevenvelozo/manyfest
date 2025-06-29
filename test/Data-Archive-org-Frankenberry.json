@@ -227,6 +227,12 @@
         "color": "color",
         "runtime": "0:31",
         "backup_location": "ia903608_22",
+		"synthesizer": {
+			"name": "Manyfest",
+			"version": "1.0.38",
+			"description": "JSON Object Manifest for Data Description and Parsing",
+			"author": "The chocula himself"
+		},
         "ia_orig__runtime": "31 seconds"
     },
     "reviews": [

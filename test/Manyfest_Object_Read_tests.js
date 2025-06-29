@@ -138,6 +138,12 @@ suite
 						// The .. means go back one level
 						let tmpDir = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'files[0]..dir');
 						Expect(tmpDir).to.equal("/7/items/FrankenberryCountChoculaTevevisionCommercial1971");
+						// Test a middle of address boxed object property
+						let tmpEmbeddedObjectBracket = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata["synthesizer"].author');
+						Expect(tmpEmbeddedObjectBracket).to.equal('The chocula himself');
+						// Test a middle of address boxed object property
+						let tmpEmbeddedObjectBracketMissing = _Manyfest.getValueAtAddress(_SampleDataArchiveOrgFrankenberry, 'metadata["chef"].author');
+						Expect(tmpEmbeddedObjectBracketMissing).to.be.undefined;
 						fTestComplete();
 					}
 				);
