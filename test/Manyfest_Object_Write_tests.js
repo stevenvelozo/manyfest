@@ -131,7 +131,10 @@ suite
 					(fTestComplete)=>
 					{
 						let _Manyfest = new libManyfest();
-						let _Object = {Dogs:{RunnerUp:{Name:'Fido',Speed:100},Loser:{Name:'Spot'},Winner:{Name:'Trinity'}}};
+						let _Object = {RaceHeats: [
+							{HeatNumber:1, Dogs:{RunnerUp:'Fido',Loser:'Spot',Winner:'Trinity'}},
+							{HeatNumber:2, Dogs:{RunnerUp:'Rex',Loser:'Max',Winner:'Buddy'}}
+						], Dogs:{RunnerUp:{Name:'Fido',Speed:100},Loser:{Name:'Spot'},Winner:{Name:'Trinity'}}};
 						_Manyfest.setValueAtAddress(_Object, 'Dogs[`RunnerUp`].Speed', 300);
 						Expect(_Object.Dogs.RunnerUp.Speed)
 							.to.equal(300);
@@ -139,6 +142,13 @@ suite
 						_Manyfest.setValueAtAddress(_Object, 'Dogs[`Loser`].Speed', 10);
 						Expect(_Object.Dogs.Loser.Speed)
 							.to.equal(10);
+						// Set a value for an address and boxed object property that doesn't exist.
+						_Manyfest.setValueAtAddress(_Object, 'Dogs[`CriterionCollection`].MovieRating', 10000);
+						Expect(_Object.Dogs.CriterionCollection.MovieRating)
+							.to.equal(10000);
+						_Manyfest.setValueAtAddress(_Object, 'RaceHeats[2].HeatNumber', 10001);
+						Expect(_Object.RaceHeats[2].HeatNumber)
+							.to.equal(10001);
 						fTestComplete();
 					}
 				);

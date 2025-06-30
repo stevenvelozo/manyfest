@@ -98,12 +98,24 @@ class ManyfestObjectAddressSetValue
 					tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
+					if (!(tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName]))
+					{
+						// If the subobject doesn't exist, create it
+						pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = {};
+					}
+
 					// Return the value in the property
 					pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = pValue;
 					return true;
 				}
 				else
 				{
+					while(pObject[tmpBoxedPropertyName].length < (tmpBoxedPropertyNumber + 1))
+					{
+						// If the subobject doesn't exist, create it
+						pObject[tmpBoxedPropertyName].push({});
+					}
+
 					pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber] = pValue;
 					return true;
 				}
@@ -174,11 +186,23 @@ class ManyfestObjectAddressSetValue
 					tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
 					tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
 
+					if (!(tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName]))
+					{
+						// If the subobject doesn't exist, create it
+						pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = {};
+					}
+
 					// Recurse directly into the subobject
 					return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, pValue);
 				}
 				else
 				{
+					while(pObject[tmpBoxedPropertyName].length < (tmpBoxedPropertyNumber + 1))
+					{
+						// If the subobject doesn't exist, create it
+						pObject[tmpBoxedPropertyName].push({});
+					}
+
 					// We parsed a valid number out of the boxed property name, so recurse into the array
 					return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, pValue);
 				}
