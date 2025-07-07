@@ -66,17 +66,30 @@ class ManyfestObjectAddressSetValue
 				// The "Name" of the Object contained too the left of the bracket
 				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
 
+				// The "Reference" to the property within it, either an array element or object property
+				let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
+				// Attempt to parse the reference as a number, which will be used as an array element
+				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+				let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+
+				if (pObject[tmpBoxedPropertyName] == null)
+				{
+					if (tmpIndexIsNumeric)
+					{
+						pObject[tmpBoxedPropertyName] = [];
+					}
+					else
+					{
+						pObject[tmpBoxedPropertyName] = {};
+					}
+				}
+
 				// If the subproperty doesn't test as a proper Object, none of the rest of this is possible.
 				// This is a rare case where Arrays testing as Objects is useful
 				if (typeof(pObject[tmpBoxedPropertyName]) !== 'object')
 				{
 					return false;
 				}
-
-				// The "Reference" to the property within it, either an array element or object property
-				let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
-				// Attempt to parse the reference as a number, which will be used as an array element
-				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
 
 				// Guard: If the referrant is a number and the boxed property is not an array, or vice versa, return undefined.
 				//        This seems confusing to me at first read, so explaination:
@@ -105,6 +118,7 @@ class ManyfestObjectAddressSetValue
 					}
 
 					// Return the value in the property
+					//TODO: For cases where we have chained [][] properties, this needs to recurse somehow
 					pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = pValue;
 					return true;
 				}
@@ -156,6 +170,20 @@ class ManyfestObjectAddressSetValue
 				let tmpBoxedPropertyReference = tmpSubObjectName.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
 
 				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+				let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+
+				//if (typeof(pObject[tmpBoxedPropertyName]) !== 'object')
+				if (pObject[tmpBoxedPropertyName] == null)
+				{
+					if (tmpIndexIsNumeric)
+					{
+						pObject[tmpBoxedPropertyName] = [];
+					}
+					else
+					{
+						pObject[tmpBoxedPropertyName] = {};
+					}
+				}
 
 				// Guard: If the referrant is a number and the boxed property is not an array, or vice versa, return undefined.
 				//        This seems confusing to me at first read, so explaination:
@@ -171,7 +199,7 @@ class ManyfestObjectAddressSetValue
 				//       BUT
 				//         StudentData.Sections.Algebra.Students is an array, so the ["JaneDoe"].Grade is not possible to access
 				// TODO: Should this be an error or something?  Should we keep a log of failures like this?
-				if (Array.isArray(pObject[tmpBoxedPropertyName]) == isNaN(tmpBoxedPropertyNumber))
+				if (Array.isArray(pObject[tmpBoxedPropertyName]) != tmpIndexIsNumeric)
 				{
 					return false;
 				}

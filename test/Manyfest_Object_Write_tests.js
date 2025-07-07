@@ -165,6 +165,52 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Indexed subobject are settable',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object['SubObject'].Property`, '123');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Property`))
+							.to.equal('123');
+						Expect(_SimpleObject._Object.SubObject.Property)
+							.to.equal('123');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Indexed subobject are settable unquoted',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object[SubObject].Property`, '123');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Property`))
+							.to.equal('123');
+						Expect(_SimpleObject._Object.SubObject.Property)
+							.to.equal('123');
+						fTestComplete();
+					}
+				);
+				//TODO: known broken case for multiple bracketed properties
+				test.skip
+				(
+					'Indexed subobject are settable double brackets',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object[SubObject]['Property']`, '123');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Property`))
+							.to.equal('123');
+						Expect(_SimpleObject._Object.SubObject.Property)
+							.to.equal('123');
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}
