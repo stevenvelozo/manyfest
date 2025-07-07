@@ -1,6 +1,6 @@
 {
     "name": "manyfest",
-    "version": "1.0.40",
+    "version": "1.0.41",
     "description": "JSON Object Manifest for Data Description and Parsing",
     "main": "source/Manyfest.js",
     "scripts": {
@@ -13,8 +13,10 @@
         "build": "npx quack build",
         "build-compatible": "GULP_CUSTOM_BUILD_TARGET=compatible ./node_modules/.bin/gulp build",
         "docker-dev-build": "docker build ./ -f Dockerfile_LUXURYCode -t manyfest-image:local",
-        "docker-dev-shell": "docker exec -it manyfest-dev /bin/bash"
+        "docker-dev-shell": "docker exec -it manyfest-dev /bin/bash",
+        "types": "tsc -p ."
     },
+    "types": "types/Manyfest.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/stevenvelozo/manyfest.git"
@@ -47,7 +49,8 @@
         "fable-serviceproviderbase": "^3.0.15"
     },
     "devDependencies": {
-        "quackage": "^1.0.41"
+        "quackage": "^1.0.41",
+        "typescript": "^5.8.3"
     },
     "author": "steven velozo <steven@velozo.com>",
     "license": "MIT",

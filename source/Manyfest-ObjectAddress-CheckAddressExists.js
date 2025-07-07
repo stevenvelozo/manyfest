@@ -28,9 +28,13 @@ let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 */
 class ManyfestObjectAddressResolverCheckAddressExists
 {
-	constructor()
+	constructor(pInfoLog, pErrorLog)
 	{
-		this.getObjectValueClass = new libGetObjectValue(libSimpleLog, libSimpleLog);
+		// Wire in logging
+		this.logInfo = (typeof(pInfoLog) == 'function') ? pInfoLog : libSimpleLog;
+		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
+
+		this.getObjectValueClass = new libGetObjectValue(this.logInfo, this.logError);
 	}
 
 	// Check if an address exists.

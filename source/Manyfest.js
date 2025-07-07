@@ -16,6 +16,18 @@ let libSchemaManipulation = require('./Manyfest-SchemaManipulation.js');
 const _DefaultConfiguration = { Scope:'DEFAULT', Descriptors: {} }
 
 /**
+ * @typedef {{
+ *   Hash?: string,
+ *   Name?: string,
+ *   DataType?: string,
+ *   Required?: boolean,
+ *   Address?: string,
+ *   Description?: string,
+ *   [key: string]: any,
+ * }} ManifestDescriptor
+ */
+
+/**
 * Manyfest object address-based descriptions and manipulations.
 *
 * @class Manyfest
@@ -32,6 +44,9 @@ class Manyfest extends libFableServiceProviderBase
 		{
 			super(pFable, pManifest, pServiceHash);
 		}
+
+		/** @type {Record<string, any>} */
+		this.options;
 
         this.serviceType = 'Manifest';
 
@@ -204,7 +219,12 @@ class Manyfest extends libFableServiceProviderBase
 			});
 	}
 
-	// Add a descriptor to the manifest
+	/**
+	 * Add a descriptor to the manifest
+	 *
+	 * @param {string} pAddress - The address of the element to add the descriptor for.
+	 * @param {ManifestDescriptor} pDescriptor - The descriptor object to add.
+	 */
 	addDescriptor(pAddress, pDescriptor)
 	{
 		if (typeof(pDescriptor) === 'object')
@@ -246,17 +266,30 @@ class Manyfest extends libFableServiceProviderBase
 		}
 	}
 
+	/**
+	 * @param {string} pHash - The hash of the address to resolve.
+	 *
+	 * @return {ManifestDescriptor} The descriptor for the address
+	 */
 	getDescriptorByHash(pHash)
 	{
 		return this.getDescriptor(this.resolveHashAddress(pHash));
 	}
 
+	/**
+	 * @param {string} pAddress - The address of the element to get the descriptor for.
+	 *
+	 * @return {ManifestDescriptor} The descriptor for the address
+	 */
 	getDescriptor(pAddress)
 	{
 		return this.elementDescriptors[pAddress];
 	}
 
-	// execute an action function for each descriptor
+	/**
+	 * execute an action function for each descriptor
+	 * @param {(d: ManifestDescriptor) => void} fAction - The action function to execute for each descriptor.
+	 */
 	eachDescriptor(fAction)
 	{
         let tmpDescriptorAddresses = Object.keys(this.elementDescriptors);
@@ -489,7 +522,11 @@ class Manyfest extends libFableServiceProviderBase
 		return tmpValidationData;
 	}
 
-	// Returns a default value, or, the default value for the data type (which is overridable with configuration)
+	/**
+	 * Returns a default value, or, the default value for the data type (which is overridable with configuration)
+	 *
+	 * @param {ManifestDescriptor} pDescriptor - The descriptor definition.
+	 */
 	getDefaultValue(pDescriptor)
 	{
 		if (typeof(pDescriptor) != 'object')
