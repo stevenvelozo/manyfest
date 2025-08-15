@@ -1,6 +1,6 @@
 "use strict";
 
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 (function (f) {
@@ -50,11 +50,53 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     return r;
   }()({
     1: [function (require, module, exports) {
+      module.exports = {
+        "name": "fable-serviceproviderbase",
+        "version": "3.0.15",
+        "description": "Simple base classes for fable services.",
+        "main": "source/Fable-ServiceProviderBase.js",
+        "scripts": {
+          "start": "node source/Fable-ServiceProviderBase.js",
+          "test": "npx mocha -u tdd -R spec",
+          "tests": "npx mocha -u tdd --exit -R spec --grep",
+          "coverage": "npx nyc --reporter=lcov --reporter=text-lcov npx mocha -- -u tdd -R spec",
+          "build": "npx quack build"
+        },
+        "mocha": {
+          "diff": true,
+          "extension": ["js"],
+          "package": "./package.json",
+          "reporter": "spec",
+          "slow": "75",
+          "timeout": "5000",
+          "ui": "tdd",
+          "watch-files": ["source/**/*.js", "test/**/*.js"],
+          "watch-ignore": ["lib/vendor"]
+        },
+        "repository": {
+          "type": "git",
+          "url": "https://github.com/stevenvelozo/fable-serviceproviderbase.git"
+        },
+        "keywords": ["entity", "behavior"],
+        "author": "Steven Velozo <steven@velozo.com> (http://velozo.com/)",
+        "license": "MIT",
+        "bugs": {
+          "url": "https://github.com/stevenvelozo/fable-serviceproviderbase/issues"
+        },
+        "homepage": "https://github.com/stevenvelozo/fable-serviceproviderbase",
+        "devDependencies": {
+          "fable": "^3.0.143",
+          "quackage": "^1.0.33"
+        }
+      };
+    }, {}],
+    2: [function (require, module, exports) {
       /**
       * Fable Service Base
       * @author <steven@velozo.com>
       */
 
+      const libPackage = require('../package.json');
       class FableServiceProviderBase {
         // The constructor can be used in two ways:
         // 1) With a fable, options object and service hash (the options object and service hash are optional)
@@ -66,6 +108,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           } else {
             this.fable = false;
           }
+
+          // Initialize the services map if it wasn't passed in
+          /** @type {Object} */
+          this._PackageFableServiceProvider = libPackage;
 
           // initialize options and UUID based on whether the fable was passed in or not.
           if (this.fable) {
@@ -110,8 +156,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
       // This is left here in case we want to go back to having different code/base class for "core" services
       module.exports.CoreServiceProviderBase = FableServiceProviderBase;
-    }, {}],
-    2: [function (require, module, exports) {
+    }, {
+      "../package.json": 1
+    }],
+    3: [function (require, module, exports) {
       // When a boxed property is passed in, it should have quotes of some
       // kind around it.
       //
@@ -136,7 +184,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       };
       module.exports = cleanWrapCharacters;
     }, {}],
-    3: [function (require, module, exports) {
+    4: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -220,9 +268,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       }
       module.exports = ManyfestHashTranslation;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 5
     }],
-    4: [function (require, module, exports) {
+    5: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -238,7 +286,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       };
       module.exports = logToConsole;
     }, {}],
-    5: [function (require, module, exports) {
+    6: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -270,8 +318,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       * @class ManyfestObjectAddressResolverCheckAddressExists
       */
       class ManyfestObjectAddressResolverCheckAddressExists {
-        constructor() {
-          this.getObjectValueClass = new libGetObjectValue(libSimpleLog, libSimpleLog);
+        constructor(pInfoLog, pErrorLog) {
+          // Wire in logging
+          this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
+          this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
+          this.getObjectValueClass = new libGetObjectValue(this.logInfo, this.logError);
         }
 
         // Check if an address exists.
@@ -535,11 +586,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
-      "./Manyfest-LogToConsole.js": 4,
-      "./Manyfest-ObjectAddress-GetValue.js": 7,
-      "./Manyfest-ObjectAddress-Parser.js": 8
+      "./Manyfest-LogToConsole.js": 5,
+      "./Manyfest-ObjectAddress-GetValue.js": 8,
+      "./Manyfest-ObjectAddress-Parser.js": 9
     }],
-    6: [function (require, module, exports) {
+    7: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -844,11 +895,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverDeleteValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 11,
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "../source/Manyfest-ParseConditionals.js": 12,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    7: [function (require, module, exports) {
+    8: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -893,9 +944,16 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         // Get the value of an element at an address
         getValueAtAddress(pObject, pAddress, pParentAddress, pRootObject) {
           // Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)
-          if (typeof pObject != 'object') return undefined;
+          if (typeof pObject != 'object') {
+            return undefined;
+          }
+          if (pObject === null) {
+            return undefined;
+          }
           // Make sure pAddress (the address we are resolving) is a string
-          if (typeof pAddress != 'string') return undefined;
+          if (typeof pAddress != 'string') {
+            return undefined;
+          }
           // Stash the parent address for later resolution
           let tmpParentAddress = "";
           if (typeof pParentAddress == 'string') {
@@ -1113,7 +1171,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               if (typeof pObject[pAddress] != null) {
                 return pObject[pAddress];
               } else {
-                return undefined;
+                return null;
               }
             }
           } else {
@@ -1341,12 +1399,12 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressResolverGetValue;
     }, {
-      "../source/Manyfest-ParseConditionals.js": 11,
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4,
-      "./Manyfest-ObjectAddress-Parser.js": 8
+      "../source/Manyfest-ParseConditionals.js": 12,
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5,
+      "./Manyfest-ObjectAddress-Parser.js": 9
     }],
-    8: [function (require, module, exports) {
+    9: [function (require, module, exports) {
       // TODO: This is an inelegant solution to delay the rewrite of Manyfest.
 
       // Fable 3.0 has a service for data formatting that deals well with nested enclosures.
@@ -1600,7 +1658,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         }
       };
     }, {}],
-    9: [function (require, module, exports) {
+    10: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1661,16 +1719,24 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               // The "Name" of the Object contained too the left of the bracket
               let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
 
+              // The "Reference" to the property within it, either an array element or object property
+              let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex + 1, tmpBracketStopIndex).trim();
+              // Attempt to parse the reference as a number, which will be used as an array element
+              let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+              let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+              if (pObject[tmpBoxedPropertyName] == null) {
+                if (tmpIndexIsNumeric) {
+                  pObject[tmpBoxedPropertyName] = [];
+                } else {
+                  pObject[tmpBoxedPropertyName] = {};
+                }
+              }
+
               // If the subproperty doesn't test as a proper Object, none of the rest of this is possible.
               // This is a rare case where Arrays testing as Objects is useful
               if (typeof pObject[tmpBoxedPropertyName] !== 'object') {
                 return false;
               }
-
-              // The "Reference" to the property within it, either an array element or object property
-              let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex + 1, tmpBracketStopIndex).trim();
-              // Attempt to parse the reference as a number, which will be used as an array element
-              let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
 
               // Guard: If the referrant is a number and the boxed property is not an array, or vice versa, return undefined.
               //        This seems confusing to me at first read, so explaination:
@@ -1689,11 +1755,20 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 tmpBoxedPropertyReference = this.cleanWrapCharacters('"', tmpBoxedPropertyReference);
                 tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
+                if (!(tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName])) {
+                  // If the subobject doesn't exist, create it
+                  pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = {};
+                }
 
                 // Return the value in the property
+                //TODO: For cases where we have chained [][] properties, this needs to recurse somehow
                 pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = pValue;
                 return true;
               } else {
+                while (pObject[tmpBoxedPropertyName].length < tmpBoxedPropertyNumber + 1) {
+                  // If the subobject doesn't exist, create it
+                  pObject[tmpBoxedPropertyName].push({});
+                }
                 pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber] = pValue;
                 return true;
               }
@@ -1727,6 +1802,16 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               let tmpBoxedPropertyName = tmpSubObjectName.substring(0, tmpBracketStartIndex).trim();
               let tmpBoxedPropertyReference = tmpSubObjectName.substring(tmpBracketStartIndex + 1, tmpBracketStopIndex).trim();
               let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+              let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+
+              //if (typeof(pObject[tmpBoxedPropertyName]) !== 'object')
+              if (pObject[tmpBoxedPropertyName] == null) {
+                if (tmpIndexIsNumeric) {
+                  pObject[tmpBoxedPropertyName] = [];
+                } else {
+                  pObject[tmpBoxedPropertyName] = {};
+                }
+              }
 
               // Guard: If the referrant is a number and the boxed property is not an array, or vice versa, return undefined.
               //        This seems confusing to me at first read, so explaination:
@@ -1742,7 +1827,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               //       BUT
               //         StudentData.Sections.Algebra.Students is an array, so the ["JaneDoe"].Grade is not possible to access
               // TODO: Should this be an error or something?  Should we keep a log of failures like this?
-              if (Array.isArray(pObject[tmpBoxedPropertyName]) == isNaN(tmpBoxedPropertyNumber)) {
+              if (Array.isArray(pObject[tmpBoxedPropertyName]) != tmpIndexIsNumeric) {
                 return false;
               }
 
@@ -1754,10 +1839,19 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
                 tmpBoxedPropertyReference = this.cleanWrapCharacters('"', tmpBoxedPropertyReference);
                 tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
                 tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
+                if (!(tmpBoxedPropertyReference in pObject[tmpBoxedPropertyName])) {
+                  // If the subobject doesn't exist, create it
+                  pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = {};
+                }
 
                 // Recurse directly into the subobject
                 return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpNewAddress, pValue);
               } else {
+                while (pObject[tmpBoxedPropertyName].length < tmpBoxedPropertyNumber + 1) {
+                  // If the subobject doesn't exist, create it
+                  pObject[tmpBoxedPropertyName].push({});
+                }
+
                 // We parsed a valid number out of the boxed property name, so recurse into the array
                 return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpNewAddress, pValue);
               }
@@ -1784,10 +1878,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressSetValue;
     }, {
-      "./Manyfest-CleanWrapCharacters.js": 2,
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-CleanWrapCharacters.js": 3,
+      "./Manyfest-LogToConsole.js": 5
     }],
-    10: [function (require, module, exports) {
+    11: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -1895,9 +1989,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = ManyfestObjectAddressGeneration;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 5
     }],
-    11: [function (require, module, exports) {
+    12: [function (require, module, exports) {
       // Given a string, parse out any conditional expressions and set whether or not to keep the record.
       //
       // For instance:
@@ -2031,7 +2125,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       };
       module.exports = parseConditionals;
     }, {}],
-    12: [function (require, module, exports) {
+    13: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -2140,9 +2234,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       }
       module.exports = ManyfestSchemaManipulation;
     }, {
-      "./Manyfest-LogToConsole.js": 4
+      "./Manyfest-LogToConsole.js": 5
     }],
-    13: [function (require, module, exports) {
+    14: [function (require, module, exports) {
       /**
       * @author <steven@velozo.com>
       */
@@ -2161,6 +2255,18 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       };
 
       /**
+       * @typedef {{
+       *   Hash?: string,
+       *   Name?: string,
+       *   DataType?: string,
+       *   Required?: boolean,
+       *   Address?: string,
+       *   Description?: string,
+       *   [key: string]: any,
+       * }} ManifestDescriptor
+       */
+
+      /**
       * Manyfest object address-based descriptions and manipulations.
       *
       * @class Manyfest
@@ -2172,6 +2278,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           } else {
             super(pFable, pManifest, pServiceHash);
           }
+
+          /** @type {Record<string, any>} */
+          this.options;
           this.serviceType = 'Manifest';
 
           // Wire in logging
@@ -2296,7 +2405,12 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           };
         }
 
-        // Add a descriptor to the manifest
+        /**
+         * Add a descriptor to the manifest
+         *
+         * @param {string} pAddress - The address of the element to add the descriptor for.
+         * @param {ManifestDescriptor} pDescriptor - The descriptor object to add.
+         */
         addDescriptor(pAddress, pDescriptor) {
           if (typeof pDescriptor === 'object') {
             // Add the Address into the Descriptor if it doesn't exist:
@@ -2325,14 +2439,29 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             return false;
           }
         }
+
+        /**
+         * @param {string} pHash - The hash of the address to resolve.
+         *
+         * @return {ManifestDescriptor} The descriptor for the address
+         */
         getDescriptorByHash(pHash) {
           return this.getDescriptor(this.resolveHashAddress(pHash));
         }
+
+        /**
+         * @param {string} pAddress - The address of the element to get the descriptor for.
+         *
+         * @return {ManifestDescriptor} The descriptor for the address
+         */
         getDescriptor(pAddress) {
           return this.elementDescriptors[pAddress];
         }
 
-        // execute an action function for each descriptor
+        /**
+         * execute an action function for each descriptor
+         * @param {(d: ManifestDescriptor) => void} fAction - The action function to execute for each descriptor.
+         */
         eachDescriptor(fAction) {
           let tmpDescriptorAddresses = Object.keys(this.elementDescriptors);
           for (let i = 0; i < tmpDescriptorAddresses.length; i++) {
@@ -2356,8 +2485,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         // Turn a hash into an address, factoring in the translation table.
         resolveHashAddress(pHash) {
           let tmpAddress = undefined;
-          let tmpInElementHashTable = (pHash in this.elementHashes);
-          let tmpInTranslationTable = (pHash in this.hashTranslations.translationTable);
+          let tmpInElementHashTable = pHash in this.elementHashes;
+          let tmpInTranslationTable = pHash in this.hashTranslations.translationTable;
 
           // The most straightforward: the hash exists, no translations.
           if (tmpInElementHashTable && !tmpInTranslationTable) {
@@ -2388,18 +2517,28 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           }
           return tmpValue;
         }
+        lintAddress(pAddress) {
+          let tmpLintedAddress = pAddress.trim();
+          // Check for a single . (but not a ..) at the end of the address and remove it.
+          if (tmpLintedAddress.endsWith('..')) {
+            tmpLintedAddress = tmpLintedAddress.slice(0, -1);
+          } else if (tmpLintedAddress.endsWith('.')) {
+            tmpLintedAddress = tmpLintedAddress.slice(0, -1);
+          }
+          return tmpLintedAddress;
+        }
 
         // Get the value of an element at an address
         getValueAtAddress(pObject, pAddress) {
-          let tmpLintedAddress = pAddress.trim();
+          let tmpLintedAddress = this.lintAddress(pAddress);
           if (tmpLintedAddress == '') {
             this.logError("(".concat(this.scope, ") Error getting value at address; address is an empty string."), pObject);
             return undefined;
           }
-          let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
+          let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, tmpLintedAddress);
           if (typeof tmpValue == 'undefined') {
             // Try to get a default if it exists
-            tmpValue = this.getDefaultValue(this.getDescriptor(pAddress));
+            tmpValue = this.getDefaultValue(this.getDescriptor(tmpLintedAddress));
           }
           return tmpValue;
         }
@@ -2411,7 +2550,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
         // Set the value of an element at an address
         setValueAtAddress(pObject, pAddress, pValue) {
-          return this.objectAddressSetValue.setValueAtAddress(pObject, pAddress, pValue);
+          let tmpLintedAddress = this.lintAddress(pAddress);
+          return this.objectAddressSetValue.setValueAtAddress(pObject, tmpLintedAddress, pValue);
         }
 
         // Delete the value of an element by its hash
@@ -2421,7 +2561,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
 
         // Delete the value of an element at an address
         deleteValueAtAddress(pObject, pAddress, pValue) {
-          return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, pAddress, pValue);
+          let tmpLintedAddress = this.lintAddress(pAddress);
+          return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, tmpLintedAddress, pValue);
         }
 
         // Validate the consistency of an object against the schema
@@ -2509,7 +2650,11 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           return tmpValidationData;
         }
 
-        // Returns a default value, or, the default value for the data type (which is overridable with configuration)
+        /**
+         * Returns a default value, or, the default value for the data type (which is overridable with configuration)
+         *
+         * @param {ManifestDescriptor} pDescriptor - The descriptor definition.
+         */
         getDefaultValue(pDescriptor) {
           if (typeof pDescriptor != 'object') {
             return undefined;
@@ -2566,15 +2711,16 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       ;
       module.exports = Manyfest;
     }, {
-      "./Manyfest-HashTranslation.js": 3,
-      "./Manyfest-LogToConsole.js": 4,
-      "./Manyfest-ObjectAddress-CheckAddressExists.js": 5,
-      "./Manyfest-ObjectAddress-DeleteValue.js": 6,
-      "./Manyfest-ObjectAddress-GetValue.js": 7,
-      "./Manyfest-ObjectAddress-SetValue.js": 9,
-      "./Manyfest-ObjectAddressGeneration.js": 10,
-      "./Manyfest-SchemaManipulation.js": 12,
-      "fable-serviceproviderbase": 1
+      "./Manyfest-HashTranslation.js": 4,
+      "./Manyfest-LogToConsole.js": 5,
+      "./Manyfest-ObjectAddress-CheckAddressExists.js": 6,
+      "./Manyfest-ObjectAddress-DeleteValue.js": 7,
+      "./Manyfest-ObjectAddress-GetValue.js": 8,
+      "./Manyfest-ObjectAddress-SetValue.js": 10,
+      "./Manyfest-ObjectAddressGeneration.js": 11,
+      "./Manyfest-SchemaManipulation.js": 13,
+      "fable-serviceproviderbase": 2
     }]
-  }, {}, [13])(13);
+  }, {}, [14])(14);
 });
+//# sourceMappingURL=manyfest.js.map

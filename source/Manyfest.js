@@ -362,21 +362,37 @@ class Manyfest extends libFableServiceProviderBase
 		return tmpValue;
 	}
 
+	lintAddress(pAddress)
+	{
+		let tmpLintedAddress = pAddress.trim();
+		// Check for a single . (but not a ..) at the end of the address and remove it.
+		if (tmpLintedAddress.endsWith('..'))
+		{
+			tmpLintedAddress = tmpLintedAddress.slice(0, -1);
+		}
+		else if (tmpLintedAddress.endsWith('.'))
+		{
+			tmpLintedAddress = tmpLintedAddress.slice(0, -1);
+		}
+
+		return tmpLintedAddress;
+	}
+
 	// Get the value of an element at an address
 	getValueAtAddress (pObject, pAddress)
 	{
-		let tmpLintedAddress = pAddress.trim();
+		let tmpLintedAddress = this.lintAddress(pAddress);
 		if (tmpLintedAddress == '')
 		{
 			this.logError(`(${this.scope}) Error getting value at address; address is an empty string.`, pObject);
 			return undefined;
 		}
-		let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, pAddress);
+		let tmpValue = this.objectAddressGetValue.getValueAtAddress(pObject, tmpLintedAddress);
 
 		if (typeof(tmpValue) == 'undefined')
 		{
 			// Try to get a default if it exists
-			tmpValue = this.getDefaultValue(this.getDescriptor(pAddress));
+			tmpValue = this.getDefaultValue(this.getDescriptor(tmpLintedAddress));
 		}
 
 		return tmpValue;
@@ -391,7 +407,8 @@ class Manyfest extends libFableServiceProviderBase
 	// Set the value of an element at an address
 	setValueAtAddress (pObject, pAddress, pValue)
 	{
-		return this.objectAddressSetValue.setValueAtAddress(pObject, pAddress, pValue);
+		let tmpLintedAddress = this.lintAddress(pAddress);
+		return this.objectAddressSetValue.setValueAtAddress(pObject, tmpLintedAddress, pValue);
 	}
 
 	// Delete the value of an element by its hash
@@ -403,7 +420,8 @@ class Manyfest extends libFableServiceProviderBase
 	// Delete the value of an element at an address
 	deleteValueAtAddress (pObject, pAddress, pValue)
 	{
-		return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, pAddress, pValue);
+		let tmpLintedAddress = this.lintAddress(pAddress);
+		return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, tmpLintedAddress, pValue);
 	}
 
 	// Validate the consistency of an object against the schema

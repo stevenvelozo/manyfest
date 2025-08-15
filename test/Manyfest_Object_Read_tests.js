@@ -161,6 +161,19 @@ suite
 				);
 				test
 				(
+					'Access relative objects with invalid dots',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'location.city')).to.equal('Sunnyvale');
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'location.city.')).to.equal('Sunnyvale');
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'current_observation.wind.').chill).to.equal(59);
+						Expect(_Manyfest.getValueAtAddress(_SampleDataYahooWeather, 'current_observation.BadObjectPropertyName.')).to.equal(undefined);
+						fTestComplete();
+					}
+				);
+				test
+				(
 					'Access specific array elements',
 					(fTestComplete)=>
 					{

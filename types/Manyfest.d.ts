@@ -78,6 +78,7 @@ declare class Manyfest {
     checkAddressExists(pObject: any, pAddress: any): any;
     resolveHashAddress(pHash: any): any;
     getValueByHash(pObject: any, pHash: any): any;
+    lintAddress(pAddress: any): any;
     getValueAtAddress(pObject: any, pAddress: any): any;
     setValueByHash(pObject: any, pHash: any, pValue: any): any;
     setValueAtAddress(pObject: any, pAddress: any, pValue: any): any;
