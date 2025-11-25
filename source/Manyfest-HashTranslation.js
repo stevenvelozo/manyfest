@@ -20,6 +20,10 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 */
 class ManyfestHashTranslation
 {
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -29,11 +33,17 @@ class ManyfestHashTranslation
         this.translationTable = {};
 	}
 
+    /**
+     * @return {number} The number of translations in the table
+     */
     translationCount()
     {
         return Object.keys(this.translationTable).length;
     }
 
+    /**
+     * @param {object} pTranslation - An object containing source:destination hash pairs to add to the translation table
+     */
     addTranslation(pTranslation)
     {
         // This adds a translation in the form of:
@@ -60,17 +70,23 @@ class ManyfestHashTranslation
             });
     }
 
+    /**
+     * @param {string} pTranslationHash - The source hash to remove from the translation table
+     */
     removeTranslationHash(pTranslationHash)
     {
-        if (pTranslationHash in this.translationTable)
-        {
-            delete this.translationTable[pTranslationHash];
-        }
+        delete this.translationTable[pTranslationHash];
     }
 
-    // This removes translations.
-    // If passed a string, just removes the single one.
-    // If passed an object, it does all the source keys.
+    /**
+     * This removes translations.
+     * If passed a string, just removes the single one.
+     * If passed an object, it does all the source keys.
+     *
+     * @param {string|object} pTranslation - Either a source hash string to remove, or an object containing source:destination hash pairs to remove
+     *
+     * @return {boolean} True if the removal was successful, false otherwise
+     */
     removeTranslation(pTranslation)
     {
         if (typeof(pTranslation) == 'string')
@@ -101,6 +117,11 @@ class ManyfestHashTranslation
         this.translationTable = {};
     }
 
+    /**
+     * @param {string} pTranslation - The source hash to translate
+     *
+     * @return {string} The translated hash, or the original if no translation exists
+     */
     translate(pTranslation)
     {
         if (pTranslation in this.translationTable)

@@ -190,6 +190,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       //
       // TODO: Should template literals be processed?  If so what state do they have access to?  That should happen here if so.
       // TODO: Make a simple class include library with these
+      /**
+       * @param {string} pCharacter - The character to remove from the start and end of the string
+       * @param {string} pString - The string to clean
+       *
+       * @return {string} The cleaned string
+       */
       var cleanWrapCharacters = function cleanWrapCharacters(pCharacter, pString) {
         if (pString.startsWith(pCharacter) && pString.endsWith(pCharacter)) {
           return pString.substring(1, pString.length - 1);
@@ -221,6 +227,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestHashTranslation
       */
       var ManyfestHashTranslation = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestHashTranslation(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestHashTranslation);
           // Wire in logging
@@ -228,11 +238,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog === 'function' ? pErrorLog : libSimpleLog;
           this.translationTable = {};
         }
+
+        /**
+         * @return {number} The number of translations in the table
+         */
         return _createClass(ManyfestHashTranslation, [{
           key: "translationCount",
           value: function translationCount() {
             return Object.keys(this.translationTable).length;
           }
+
+          /**
+           * @param {object} pTranslation - An object containing source:destination hash pairs to add to the translation table
+           */
         }, {
           key: "addTranslation",
           value: function addTranslation(pTranslation) {
@@ -252,17 +270,25 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               }
             });
           }
+
+          /**
+           * @param {string} pTranslationHash - The source hash to remove from the translation table
+           */
         }, {
           key: "removeTranslationHash",
           value: function removeTranslationHash(pTranslationHash) {
-            if (pTranslationHash in this.translationTable) {
-              delete this.translationTable[pTranslationHash];
-            }
+            delete this.translationTable[pTranslationHash];
           }
 
-          // This removes translations.
-          // If passed a string, just removes the single one.
-          // If passed an object, it does all the source keys.
+          /**
+           * This removes translations.
+           * If passed a string, just removes the single one.
+           * If passed an object, it does all the source keys.
+           *
+           * @param {string|object} pTranslation - Either a source hash string to remove, or an object containing source:destination hash pairs to remove
+           *
+           * @return {boolean} True if the removal was successful, false otherwise
+           */
         }, {
           key: "removeTranslation",
           value: function removeTranslation(pTranslation) {
@@ -286,6 +312,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           value: function clearTranslations() {
             this.translationTable = {};
           }
+
+          /**
+           * @param {string} pTranslation - The source hash to translate
+           *
+           * @return {string} The translated hash, or the original if no translation exists
+           */
         }, {
           key: "translate",
           value: function translate(pTranslation) {
@@ -324,6 +356,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       var libSimpleLog = require('./Manyfest-LogToConsole.js');
       // This is for resolving functions mid-address
       var libGetObjectValue = require('./Manyfest-ObjectAddress-GetValue.js');
+      var fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 
       // TODO: Just until this is a fable service.
       var _MockFable = {
@@ -349,20 +382,33 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressResolverCheckAddressExists
       */
       var ManyfestObjectAddressResolverCheckAddressExists = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) Function to use for info logging
+         * @param {function} [pErrorLog] - (optional) Function to use for error logging
+         */
         function ManyfestObjectAddressResolverCheckAddressExists(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestObjectAddressResolverCheckAddressExists);
           // Wire in logging
           this.logInfo = typeof pInfoLog == 'function' ? pInfoLog : libSimpleLog;
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.getObjectValueClass = new libGetObjectValue(this.logInfo, this.logError);
+          this.cleanWrapCharacters = fCleanWrapCharacters;
         }
 
-        // Check if an address exists.
-        //
-        // This is necessary because the getValueAtAddress function is ambiguous on
-        // whether the element/property is actually there or not (it returns
-        // undefined whether the property exists or not).  This function checks for
-        // existance and returns true or false dependent.
+        /**
+         * Check if an address exists.
+         *
+         * This is necessary because the getValueAtAddress function is ambiguous on
+         * whether the element/property is actually there or not (it returns
+         * undefined whether the property exists or not).  This function checks for
+         * existance and returns true or false dependent.
+         *
+         * @param {object} pObject - The object to check within
+         * @param {string} pAddress - The address to check for
+         * @param {object} [pRootObject] - (optional) The root object for function resolution context
+         *
+         * @return {boolean} - True if the address exists, false if it does not
+         */
         return _createClass(ManyfestObjectAddressResolverCheckAddressExists, [{
           key: "checkAddressExists",
           value: function checkAddressExists(pObject, pAddress, pRootObject) {
@@ -497,7 +543,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 var _tmpFunctionAddress = tmpSubObjectName.substring(0, _tmpFunctionStartIndex).trim();
                 //tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 
-                if (!_typeof(pObject[_tmpFunctionAddress]) == 'function') {
+                if (typeof pObject[_tmpFunctionAddress] !== 'function') {
                   // The address suggests it is a function, but it is not.
                   return false;
                 }
@@ -512,12 +558,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                       return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject), tmpNewAddress, tmpRootObject);
                     } catch (pError) {
                       // The function call failed, so the address doesn't exist
-                      libSimpleLog.log("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      libSimpleLog("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
                       return false;
                     }
                   } else {
                     // The function doesn't exist, so the address doesn't exist
-                    libSimpleLog.log("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    libSimpleLog("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
                     return false;
                   }
                 } else {
@@ -537,12 +583,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                       return this.checkAddressExists(pObject[_tmpFunctionAddress].apply(pObject, tmpArgumentValues), tmpNewAddress, _tmpRootObject);
                     } catch (pError) {
                       // The function call failed, so the address doesn't exist
-                      libSimpleLog.log("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
+                      libSimpleLog("Error calling function ".concat(_tmpFunctionAddress, " (address [").concat(pAddress, "]): ").concat(pError.message));
                       return false;
                     }
                   } else {
                     // The function doesn't exist, so the address doesn't exist
-                    libSimpleLog.log("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
+                    libSimpleLog("Function ".concat(_tmpFunctionAddress, " does not exist (address [").concat(pAddress, "])"));
                     return false;
                   }
                 }
@@ -618,9 +664,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           }
         }]);
       }();
-      ;
       module.exports = ManyfestObjectAddressResolverCheckAddressExists;
     }, {
+      "./Manyfest-CleanWrapCharacters.js": 3,
       "./Manyfest-LogToConsole.js": 5,
       "./Manyfest-ObjectAddress-GetValue.js": 8,
       "./Manyfest-ObjectAddress-Parser.js": 9
@@ -654,6 +700,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressResolverDeleteValue
       */
       var ManyfestObjectAddressResolverDeleteValue = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestObjectAddressResolverDeleteValue(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestObjectAddressResolverDeleteValue);
           // Wire in logging
@@ -663,13 +713,27 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         }
 
         // TODO: Dry me
+        /**
+         * @param {string} pAddress - The address being evaluated
+         * @param {object} pRecord - The record being evaluated
+         *
+         * @return {boolean} True if the record passes the filters, false if it does not
+         */
         return _createClass(ManyfestObjectAddressResolverDeleteValue, [{
           key: "checkRecordFilters",
           value: function checkRecordFilters(pAddress, pRecord) {
             return fParseConditionals(this, pAddress, pRecord);
           }
 
-          // Delete the value of an element at an address
+          /**
+           * Delete the value of an element at an address
+           *
+           * @param {object} pObject - The object to delete the value from
+           * @param {string} pAddress - The address to delete the value at
+           * @param {string} [pParentAddress] - (optional) The parent address for recursion
+           *
+           * @return {boolean|object|undefined} - True if the value was deleted, false if it could not be deleted, undefined on error
+           */
         }, {
           key: "deleteValueAtAddress",
           value: function deleteValueAtAddress(pObject, pAddress, pParentAddress) {
@@ -972,6 +1036,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressResolverGetValue
       */
       var ManyfestObjectAddressResolverGetValue = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestObjectAddressResolverGetValue(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestObjectAddressResolverGetValue);
           // Wire in logging
@@ -979,13 +1047,29 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
           this.cleanWrapCharacters = fCleanWrapCharacters;
         }
+
+        /**
+         * @param {string} pAddress - The address of the record to check
+         * @param {object} pRecord - The record to check against the filters
+         *
+         * @return {boolean} - True if the record passes the filters, false otherwise
+         */
         return _createClass(ManyfestObjectAddressResolverGetValue, [{
           key: "checkRecordFilters",
           value: function checkRecordFilters(pAddress, pRecord) {
             return fParseConditionals(this, pAddress, pRecord);
           }
 
-          // Get the value of an element at an address
+          /**
+           * Get the value of an element at an address
+           *
+           * @param {object} pObject - The object to resolve the address against
+           * @param {string} pAddress - The address to resolve
+           * @param {string} [pParentAddress] - (optional) The parent address for back-navigation
+           * @param {object} [pRootObject] - (optional) The root object for function argument resolution
+           *
+           * @return {any} The value at the address, or undefined if not found
+           */
         }, {
           key: "getValueAtAddress",
           value: function getValueAtAddress(pObject, pAddress, pParentAddress, pRootObject) {
@@ -1075,7 +1159,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               //    2) The end bracket is after the start bracket
               && _MockFable.DataFormat.stringCountEnclosures(pAddress) > 0) {
                 var tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
-                if (!_typeof(pObject[tmpFunctionAddress]) == 'function') {
+                if (typeof pObject[tmpFunctionAddress] !== 'function') {
                   // The address suggests it is a function, but it is not.
                   return false;
                 }
@@ -1252,7 +1336,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               && _MockFable.DataFormat.stringCountEnclosures(tmpSubObjectName) > 0) {
                 var _tmpFunctionAddress2 = tmpSubObjectName.substring(0, _tmpFunctionStartIndex2).trim();
                 tmpParentAddress = "".concat(tmpParentAddress).concat(tmpParentAddress.length > 0 ? '.' : '').concat(tmpSubObjectName);
-                if (!_typeof(pObject[_tmpFunctionAddress2]) == 'function') {
+                if (typeof pObject[_tmpFunctionAddress2] !== 'function') {
                   // The address suggests it is a function, but it is not.
                   return false;
                 }
@@ -1462,29 +1546,32 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       // Until we shift Manyfest to be a fable service, these three functions were pulled out of
       // fable to aid in parsing functions with nested enclosures.
 
+      var DEFAULT_START_SYMBOL_MAP = {
+        '{': 0,
+        '[': 1,
+        '(': 2
+      };
+      var DEFAULT_END_SYMBOL_MAP = {
+        '}': 0,
+        ']': 1,
+        ')': 2
+      };
       module.exports = {
         /**
          * Count the number of segments in a string, respecting enclosures
-         * 
-         * @param {string} pString 
-         * @param {string} pSeparator 
-         * @param {object} pEnclosureStartSymbolMap 
-         * @param {object} pEnclosureEndSymbolMap 
-         * @returns the count of segments in the string as a number
+         *
+         * @param {string} pString
+         * @param {string} [pSeparator]
+         * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+         * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+         *
+         * @return {number} - The number of segments in the string
          */
         stringCountSegments: function stringCountSegments(pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) {
           var tmpString = typeof pString == 'string' ? pString : '';
           var tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
-          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStart : {
-            '{': 0,
-            '[': 1,
-            '(': 2
-          };
-          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEnd : {
-            '}': 0,
-            ']': 1,
-            ')': 2
-          };
+          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
           if (pString.length < 1) {
             return 0;
           }
@@ -1515,28 +1602,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         },
         /**
          * Get the first segment in a string, respecting enclosures
-         * 
-         * @param {string} pString 
-         * @param {string} pSeparator 
-         * @param {object} pEnclosureStartSymbolMap 
-         * @param {object} pEnclosureEndSymbolMap 
-         * @returns the first segment in the string as a string
+         *
+         * @param {string} pString
+         * @param {string} [pSeparator]
+         * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+         * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+         *
+         * @return {string} - the first segment in the string as a string
          */
         stringGetFirstSegment: function stringGetFirstSegment(pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) {
           var tmpString = typeof pString == 'string' ? pString : '';
           var tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
-          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStart : {
-            '{': 0,
-            '[': 1,
-            '(': 2
-          };
-          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEnd : {
-            '}': 0,
-            ']': 1,
-            ')': 2
-          };
+          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
           if (pString.length < 1) {
-            return 0;
+            return '';
           }
           var tmpEnclosureStack = [];
           for (var i = 0; i < tmpString.length; i++) {
@@ -1564,26 +1644,19 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         },
         /**
          * Get all segments in a string, respecting enclosures
-         * 
-         * @param {string} pString 
-         * @param {string} pSeparator 
-         * @param {object} pEnclosureStartSymbolMap 
-         * @param {object} pEnclosureEndSymbolMap 
-         * @returns the first segment in the string as a string
+         *
+         * @param {string} pString
+         * @param {string} [pSeparator]
+         * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+         * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+         *
+         * @return {Array<string>} - the segments in the string as an array of strings
          */
         stringGetSegments: function stringGetSegments(pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) {
           var tmpString = typeof pString == 'string' ? pString : '';
           var tmpSeparator = typeof pSeparator == 'string' ? pSeparator : '.';
-          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStart : {
-            '{': 0,
-            '[': 1,
-            '(': 2
-          };
-          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEnd : {
-            '}': 0,
-            ']': 1,
-            ')': 2
-          };
+          var tmpEnclosureStartSymbolMap = _typeof(pEnclosureStartSymbolMap) == 'object' ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+          var tmpEnclosureEndSymbolMap = _typeof(pEnclosureEndSymbolMap) == 'object' ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
           var tmpCurrentSegmentStart = 0;
           var tmpSegmentList = [];
           if (pString.length < 1) {
@@ -1623,8 +1696,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
          * If no start or end characters are specified, it will default to parentheses.  If the string is not a string, it will return 0.
          *
          * @param {string} pString
-         * @param {string} pEnclosureStart
-         * @param {string} pEnclosureEnd
+         * @param {string} [pEnclosureStart]
+         * @param {string} [pEnclosureEnd]
          * @returns the count of full in the string
          */
         stringCountEnclosures: function stringCountEnclosures(pString, pEnclosureStart, pEnclosureEnd) {
@@ -1653,9 +1726,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
          *
          * @param {string} pString
          * @param {number} pEnclosureIndexToGet
-         * @param {string} pEnclosureStart
-         * @param {string}} pEnclosureEnd
-         * @returns {string}
+         * @param {string} [pEnclosureStart]
+         * @param {string} [pEnclosureEnd]
+         *
+         * @return {string} - The value of the enclosure at the specified index
          */
         stringGetEnclosureValueByIndex: function stringGetEnclosureValueByIndex(pString, pEnclosureIndexToGet, pEnclosureStart, pEnclosureEnd) {
           var tmpString = typeof pString == 'string' ? pString : '';
@@ -1731,6 +1805,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressSetValue
       */
       var ManyfestObjectAddressSetValue = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestObjectAddressSetValue(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestObjectAddressSetValue);
           // Wire in logging
@@ -1739,7 +1817,15 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.cleanWrapCharacters = fCleanWrapCharacters;
         }
 
-        // Set the value of an element at an address
+        /**
+         * Set the value of an element at an address
+         *
+         * @param {object} pObject - The object to set the value in
+         * @param {string} pAddress - The address to set the value at
+         * @param {any} pValue - The value to set at the address
+         *
+         * @return {boolean} True if the value was set, false otherwise
+         */
         return _createClass(ManyfestObjectAddressSetValue, [{
           key: "setValueAtAddress",
           value: function setValueAtAddress(pObject, pAddress, pValue) {
@@ -1961,6 +2047,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestObjectAddressGeneration
       */
       var ManyfestObjectAddressGeneration = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestObjectAddressGeneration(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestObjectAddressGeneration);
           // Wire in logging
@@ -1968,15 +2058,23 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog == 'function' ? pErrorLog : libSimpleLog;
         }
 
-        // generateAddressses
-        //
-        // This flattens an object into a set of key:value pairs for *EVERY SINGLE
-        // POSSIBLE ADDRESS* in the object.  It can get ... really insane really
-        // quickly.  This is not meant to be used directly to generate schemas, but
-        // instead as a starting point for scripts or UIs.
-        //
-        // This will return a mega set of key:value pairs with all possible schema
-        // permutations and default values (when not an object) and everything else.
+        /**
+         * generateAddressses
+         *
+         * This flattens an object into a set of key:value pairs for *EVERY SINGLE
+         * POSSIBLE ADDRESS* in the object.  It can get ... really insane really
+         * quickly.  This is not meant to be used directly to generate schemas, but
+         * instead as a starting point for scripts or UIs.
+         *
+         * This will return a mega set of key:value pairs with all possible schema
+         * permutations and default values (when not an object) and everything else.
+         *
+         * @param {any} pObject - The object to generate addresses for
+         * @param {string} [pBaseAddress] - (optional) The base address to start from
+         * @param {object} [pSchema] - (optional) The schema object to append to
+         *
+         * @return {object} The generated schema object
+         */
         return _createClass(ManyfestObjectAddressGeneration, [{
           key: "generateAddressses",
           value: function generateAddressses(pObject, pBaseAddress, pSchema) {
@@ -1991,7 +2089,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               InSchema: false
             };
             if (tmpObjectType == 'object' && pObject == null) {
-              tmpObjectType = 'null';
+              tmpObjectType = 'undefined';
             }
             switch (tmpObjectType) {
               case 'string':
@@ -2006,7 +2104,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;
                 break;
               case 'undefined':
-              case 'null':
                 tmpSchemaObjectEntry.DataType = 'Any';
                 tmpSchemaObjectEntry.Default = pObject;
                 tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;
@@ -2192,6 +2289,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
       * @class ManyfestSchemaManipulation
       */
       var ManyfestSchemaManipulation = /*#__PURE__*/function () {
+        /**
+         * @param {function} [pInfoLog] - (optional) A logging function for info messages
+         * @param {function} [pErrorLog] - (optional) A logging function for error messages
+         */
         function ManyfestSchemaManipulation(pInfoLog, pErrorLog) {
           _classCallCheck(this, ManyfestSchemaManipulation);
           // Wire in logging
@@ -2199,24 +2300,31 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           this.logError = typeof pErrorLog === 'function' ? pErrorLog : libSimpleLog;
         }
 
-        // This translates the default address mappings to something different.
-        //
-        // For instance you can pass in manyfest schema descriptor object:
-        // 	{
-        //	  "Address.Of.a": { "Hash": "a", "Type": "Number" },
-        //	  "Address.Of.b": { "Hash": "b", "Type": "Number" }
-        //  }
-        //
-        //
-        // And then an address mapping (basically a Hash->Address map)
-        //  {
-        //    "a": "New.Address.Of.a",
-        //    "b": "New.Address.Of.b"
-        //  }
-        //
-        // NOTE: This mutates the schema object permanently, altering the base hash.
-        //       If there is a collision with an existing address, it can lead to overwrites.
-        // TODO: Discuss what should happen on collisions.
+        /**
+            * This translates the default address mappings to something different.
+            *
+            * For instance you can pass in manyfest schema descriptor object:
+            * 	{
+         *	  "Address.Of.a": { "Hash": "a", "Type": "Number" },
+         *	  "Address.Of.b": { "Hash": "b", "Type": "Number" }
+         *  }
+            *
+            *
+            * And then an address mapping (basically a Hash->Address map)
+            *  {
+            *    "a": "New.Address.Of.a",
+            *    "b": "New.Address.Of.b"
+            *  }
+            *
+            * NOTE: This mutates the schema object permanently, altering the base hash.
+            *       If there is a collision with an existing address, it can lead to overwrites.
+            * TODO: Discuss what should happen on collisions.
+         *
+         * @param {object} pManyfestSchemaDescriptors - The manyfest schema descriptors to resolve address mappings for
+         * @param {object} pAddressMapping - The address mapping object to use for remapping
+         *
+         * @return {boolean} True if successful, false if there was an error
+         */
         return _createClass(ManyfestSchemaManipulation, [{
           key: "resolveAddressMappings",
           value: function resolveAddressMappings(pManyfestSchemaDescriptors, pAddressMapping) {
@@ -2240,8 +2348,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             var tmpAddressMappingSet = Object.keys(pAddressMapping);
             tmpAddressMappingSet.forEach(function (pInputAddress) {
               var tmpNewDescriptorAddress = pAddressMapping[pInputAddress];
-              var tmpOldDescriptorAddress = false;
-              var tmpDescriptor = false;
+              var tmpOldDescriptorAddress = null;
+              var tmpDescriptor;
 
               // See if there is a matching descriptor either by Address directly or Hash
               if (pInputAddress in pManyfestSchemaDescriptors) {
@@ -2266,6 +2374,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             });
             return true;
           }
+
+          /**
+           * @param {object} pManyfestSchemaDescriptors - The manyfest schema descriptors to resolve address mappings for
+           * @param {object} pAddressMapping - The address mapping object to use for remapping
+           *
+           * @return {object} A new object containing the remapped schema descriptors
+           */
         }, {
           key: "safeResolveAddressMappings",
           value: function safeResolveAddressMappings(pManyfestSchemaDescriptors, pAddressMapping) {
@@ -2274,6 +2389,13 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             this.resolveAddressMappings(tmpManyfestSchemaDescriptors, pAddressMapping);
             return tmpManyfestSchemaDescriptors;
           }
+
+          /**
+           * @param {object} pManyfestSchemaDescriptorsDestination - The destination manyfest schema descriptors
+           * @param {object} pManyfestSchemaDescriptorsSource - The source manyfest schema descriptors
+           *
+           * @return {object} A new object containing the merged schema descriptors
+           */
         }, {
           key: "mergeAddressMappings",
           value: function mergeAddressMappings(pManyfestSchemaDescriptorsDestination, pManyfestSchemaDescriptorsSource) {
@@ -2344,8 +2466,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             _this3 = _callSuper(this, Manyfest, [pFable, pManifest, pServiceHash]);
           }
 
+          /** @type {import('fable')} */
+          _this3.fable;
           /** @type {Record<string, any>} */
           _this3.options;
+          /** @type {string} */
+          _this3.Hash;
+          /** @type {string} */
+          _this3.UUID;
           _this3.serviceType = 'Manifest';
 
           // Wire in logging
@@ -2375,9 +2503,14 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           if (!('strict' in _this3.options)) {
             _this3.options.strict = false;
           }
+
+          /** @type {string} */
           _this3.scope = undefined;
+          /** @type {Array<string>} */
           _this3.elementAddresses = undefined;
+          /** @type {Record<string, string>} */
           _this3.elementHashes = undefined;
+          /** @type {Record<string, ManifestDescriptor>} */
           _this3.elementDescriptors = undefined;
           _this3.reset();
           if (_typeof(_this3.options) === 'object') {
@@ -2409,7 +2542,26 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           value: function clone() {
             // Make a copy of the options in-place
             var tmpNewOptions = JSON.parse(JSON.stringify(this.options));
-            var tmpNewManyfest = new Manyfest(this.getManifest(), this.logInfo, this.logError, tmpNewOptions);
+            var tmpNewManyfest = new Manyfest(this.fable, tmpNewOptions, this.Hash);
+            tmpNewManyfest.logInfo = this.logInfo;
+            tmpNewManyfest.logError = this.logError;
+            //FIXME: mostly written by co-pilot
+            var _this$getManifest = this.getManifest(),
+              Scope = _this$getManifest.Scope,
+              Descriptors = _this$getManifest.Descriptors,
+              HashTranslations = _this$getManifest.HashTranslations;
+            tmpNewManyfest.scope = Scope;
+            tmpNewManyfest.elementDescriptors = Descriptors;
+            tmpNewManyfest.elementAddresses = Object.keys(Descriptors);
+            // Rebuild the element hashes
+            for (var i = 0; i < tmpNewManyfest.elementAddresses.length; i++) {
+              var tmpAddress = tmpNewManyfest.elementAddresses[i];
+              var tmpDescriptor = tmpNewManyfest.elementDescriptors[tmpAddress];
+              tmpNewManyfest.elementHashes[tmpAddress] = tmpAddress;
+              if ('Hash' in tmpDescriptor) {
+                tmpNewManyfest.elementHashes[tmpDescriptor.Hash] = tmpAddress;
+              }
+            }
 
             // Import the hash translations
             tmpNewManyfest.hashTranslations.addTranslation(this.hashTranslations.translationTable);
@@ -2417,11 +2569,17 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           }
 
           // Deserialize a Manifest from a string
+          /**
+           * @param {string} pManifestString - The manifest string to deserialize
+           *
+           * @return {Manyfest} The deserialized manifest
+           */
         }, {
           key: "deserialize",
           value: function deserialize(pManifestString) {
             // TODO: Add guards for bad manifest string
-            return this.loadManifest(JSON.parse(pManifestString));
+            this.loadManifest(JSON.parse(pManifestString));
+            return this;
           }
 
           // Load a manifest from an object
@@ -2462,18 +2620,27 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if ('HashTranslations' in tmpManifest) {
               if (_typeof(tmpManifest.HashTranslations) === 'object') {
                 for (var _i0 = 0; _i0 < tmpManifest.HashTranslations.length; _i0++) {
-                  // Each translation is 
+                  // Each translation is
+                  //FIXME: ?????????
                 }
               }
             }
           }
 
-          // Serialize the Manifest to a string
+          /**
+           * Serialize the Manifest to a string
+           *
+           * @return {string} - The serialized manifest
+           */
         }, {
           key: "serialize",
           value: function serialize() {
             return JSON.stringify(this.getManifest());
           }
+
+          /**
+           * @return {{ Scope: string, Descriptors: Record<string, ManifestDescriptor>, HashTranslations: Record<string, string> }} - A copy of the manifest state.
+           */
         }, {
           key: "getManifest",
           value: function getManifest() {

@@ -18,11 +18,30 @@ export = ManyfestObjectAddressResolverCheckAddressExists;
 * @class ManyfestObjectAddressResolverCheckAddressExists
 */
 declare class ManyfestObjectAddressResolverCheckAddressExists {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
+    /**
+     * @param {function} [pInfoLog] - (optional) Function to use for info logging
+     * @param {function} [pErrorLog] - (optional) Function to use for error logging
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
     getObjectValueClass: libGetObjectValue;
-    checkAddressExists(pObject: any, pAddress: any, pRootObject: any): any;
+    cleanWrapCharacters: (pCharacter: string, pString: string) => string;
+    /**
+     * Check if an address exists.
+     *
+     * This is necessary because the getValueAtAddress function is ambiguous on
+     * whether the element/property is actually there or not (it returns
+     * undefined whether the property exists or not).  This function checks for
+     * existance and returns true or false dependent.
+     *
+     * @param {object} pObject - The object to check within
+     * @param {string} pAddress - The address to check for
+     * @param {object} [pRootObject] - (optional) The root object for function resolution context
+     *
+     * @return {boolean} - True if the address exists, false if it does not
+     */
+    checkAddressExists(pObject: object, pAddress: string, pRootObject?: object): boolean;
 }
 import libGetObjectValue = require("./Manyfest-ObjectAddress-GetValue.js");
 //# sourceMappingURL=Manyfest-ObjectAddress-CheckAddressExists.d.ts.map

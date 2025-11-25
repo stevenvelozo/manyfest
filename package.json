@@ -1,6 +1,6 @@
 {
     "name": "manyfest",
-    "version": "1.0.42",
+    "version": "1.0.43",
     "description": "JSON Object Manifest for Data Description and Parsing",
     "main": "source/Manyfest.js",
     "scripts": {
@@ -49,8 +49,8 @@
         "fable-serviceproviderbase": "^3.0.15"
     },
     "devDependencies": {
-        "quackage": "^1.0.42",
-        "typescript": "^5.9.2"
+        "quackage": "^1.0.45",
+        "typescript": "^5.9.3"
     },
     "author": "steven velozo <steven@velozo.com>",
     "license": "MIT",

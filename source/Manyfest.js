@@ -45,8 +45,14 @@ class Manyfest extends libFableServiceProviderBase
 			super(pFable, pManifest, pServiceHash);
 		}
 
+		/** @type {import('fable')} */
+		this.fable;
 		/** @type {Record<string, any>} */
 		this.options;
+		/** @type {string} */
+		this.Hash;
+		/** @type {string} */
+		this.UUID;
 
         this.serviceType = 'Manifest';
 
@@ -82,9 +88,13 @@ class Manyfest extends libFableServiceProviderBase
 			this.options.strict = false;
 		}
 
+		/** @type {string} */
 		this.scope = undefined;
+		/** @type {Array<string>} */
 		this.elementAddresses = undefined;
+		/** @type {Record<string, string>} */
 		this.elementHashes = undefined;
+		/** @type {Record<string, ManifestDescriptor>} */
 		this.elementDescriptors = undefined;
 
 		this.reset();
@@ -120,7 +130,25 @@ class Manyfest extends libFableServiceProviderBase
 		// Make a copy of the options in-place
 		let tmpNewOptions = JSON.parse(JSON.stringify(this.options));
 
-		let tmpNewManyfest = new Manyfest(this.getManifest(), this.logInfo, this.logError, tmpNewOptions);
+		let tmpNewManyfest = new Manyfest(this.fable, tmpNewOptions, this.Hash);
+		tmpNewManyfest.logInfo = this.logInfo;
+		tmpNewManyfest.logError = this.logError;
+		//FIXME: mostly written by co-pilot
+		const { Scope, Descriptors, HashTranslations } = this.getManifest();
+		tmpNewManyfest.scope = Scope;
+		tmpNewManyfest.elementDescriptors = Descriptors;
+		tmpNewManyfest.elementAddresses = Object.keys(Descriptors);
+		// Rebuild the element hashes
+		for (let i = 0; i < tmpNewManyfest.elementAddresses.length; i++)
+		{
+			let tmpAddress = tmpNewManyfest.elementAddresses[i];
+			let tmpDescriptor = tmpNewManyfest.elementDescriptors[tmpAddress];
+			tmpNewManyfest.elementHashes[tmpAddress] = tmpAddress;
+			if ('Hash' in tmpDescriptor)
+			{
+				tmpNewManyfest.elementHashes[tmpDescriptor.Hash] = tmpAddress;
+			}
+		}
 
 		// Import the hash translations
 		tmpNewManyfest.hashTranslations.addTranslation(this.hashTranslations.translationTable);
@@ -129,10 +157,16 @@ class Manyfest extends libFableServiceProviderBase
 	}
 
 	// Deserialize a Manifest from a string
+	/**
+	 * @param {string} pManifestString - The manifest string to deserialize
+	 *
+	 * @return {Manyfest} The deserialized manifest
+	 */
 	deserialize(pManifestString)
 	{
 		// TODO: Add guards for bad manifest string
-		return this.loadManifest(JSON.parse(pManifestString));
+		this.loadManifest(JSON.parse(pManifestString));
+		return this;
 	}
 
 	// Load a manifest from an object
@@ -197,18 +231,26 @@ class Manyfest extends libFableServiceProviderBase
 			{
 				for (let i = 0; i < tmpManifest.HashTranslations.length; i++)
 				{
-					// Each translation is 
+					// Each translation is
+					//FIXME: ?????????
 				}
 			}
 		}
 	}
 
-	// Serialize the Manifest to a string
+	/**
+	 * Serialize the Manifest to a string
+	 *
+	 * @return {string} - The serialized manifest
+	 */
 	serialize()
 	{
 		return JSON.stringify(this.getManifest());
 	}
 
+	/**
+	 * @return {{ Scope: string, Descriptors: Record<string, ManifestDescriptor>, HashTranslations: Record<string, string> }} - A copy of the manifest state.
+	 */
 	getManifest()
 	{
 		return (

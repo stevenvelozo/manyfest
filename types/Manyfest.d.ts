@@ -17,8 +17,14 @@ export = Manyfest;
 */
 declare class Manyfest {
     constructor(pFable: any, pManifest: any, pServiceHash: any);
+    /** @type {import('fable')} */
+    fable: any;
     /** @type {Record<string, any>} */
     options: Record<string, any>;
+    /** @type {string} */
+    Hash: string;
+    /** @type {string} */
+    UUID: string;
     serviceType: string;
     logInfo: (pLogLine: any, pLogObject: any) => void;
     logError: (pLogLine: any, pLogObject: any) => void;
@@ -26,10 +32,14 @@ declare class Manyfest {
     objectAddressGetValue: libObjectAddressGetValue;
     objectAddressSetValue: libObjectAddressSetValue;
     objectAddressDeleteValue: libObjectAddressDeleteValue;
-    scope: any;
-    elementAddresses: any[];
-    elementHashes: {};
-    elementDescriptors: {};
+    /** @type {string} */
+    scope: string;
+    /** @type {Array<string>} */
+    elementAddresses: Array<string>;
+    /** @type {Record<string, string>} */
+    elementHashes: Record<string, string>;
+    /** @type {Record<string, ManifestDescriptor>} */
+    elementDescriptors: Record<string, ManifestDescriptor>;
     schemaManipulations: libSchemaManipulation;
     objectAddressGeneration: libObjectAddressGeneration;
     hashTranslations: libHashTranslation;
@@ -39,13 +49,26 @@ declare class Manyfest {
      */
     reset(): void;
     clone(): import("./Manyfest.js");
-    deserialize(pManifestString: any): void;
+    /**
+     * @param {string} pManifestString - The manifest string to deserialize
+     *
+     * @return {Manyfest} The deserialized manifest
+     */
+    deserialize(pManifestString: string): Manyfest;
     loadManifest(pManifest: any): void;
+    /**
+     * Serialize the Manifest to a string
+     *
+     * @return {string} - The serialized manifest
+     */
     serialize(): string;
+    /**
+     * @return {{ Scope: string, Descriptors: Record<string, ManifestDescriptor>, HashTranslations: Record<string, string> }} - A copy of the manifest state.
+     */
     getManifest(): {
-        Scope: any;
-        Descriptors: any;
-        HashTranslations: any;
+        Scope: string;
+        Descriptors: Record<string, ManifestDescriptor>;
+        HashTranslations: Record<string, string>;
     };
     /**
      * Add a descriptor to the manifest
@@ -74,14 +97,14 @@ declare class Manyfest {
     /*************************************************************************
      * Beginning of Object Manipulation (read & write) Functions
      */
-    checkAddressExistsByHash(pObject: any, pHash: any): any;
-    checkAddressExists(pObject: any, pAddress: any): any;
+    checkAddressExistsByHash(pObject: any, pHash: any): boolean;
+    checkAddressExists(pObject: any, pAddress: any): boolean;
     resolveHashAddress(pHash: any): any;
     getValueByHash(pObject: any, pHash: any): any;
     lintAddress(pAddress: any): any;
     getValueAtAddress(pObject: any, pAddress: any): any;
-    setValueByHash(pObject: any, pHash: any, pValue: any): any;
-    setValueAtAddress(pObject: any, pAddress: any, pValue: any): any;
+    setValueByHash(pObject: any, pHash: any, pValue: any): boolean;
+    setValueAtAddress(pObject: any, pAddress: any, pValue: any): boolean;
     deleteValueByHash(pObject: any, pHash: any, pValue: any): any;
     deleteValueAtAddress(pObject: any, pAddress: any, pValue: any): any;
     validate(pObject: any): {

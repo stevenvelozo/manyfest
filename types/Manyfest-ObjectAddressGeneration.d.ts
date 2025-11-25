@@ -22,9 +22,30 @@ export = ManyfestObjectAddressGeneration;
 * @class ManyfestObjectAddressGeneration
 */
 declare class ManyfestObjectAddressGeneration {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
-    generateAddressses(pObject: any, pBaseAddress: any, pSchema: any): any;
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
+    /**
+     * generateAddressses
+     *
+     * This flattens an object into a set of key:value pairs for *EVERY SINGLE
+     * POSSIBLE ADDRESS* in the object.  It can get ... really insane really
+     * quickly.  This is not meant to be used directly to generate schemas, but
+     * instead as a starting point for scripts or UIs.
+     *
+     * This will return a mega set of key:value pairs with all possible schema
+     * permutations and default values (when not an object) and everything else.
+     *
+     * @param {any} pObject - The object to generate addresses for
+     * @param {string} [pBaseAddress] - (optional) The base address to start from
+     * @param {object} [pSchema] - (optional) The schema object to append to
+     *
+     * @return {object} The generated schema object
+     */
+    generateAddressses(pObject: any, pBaseAddress?: string, pSchema?: object): object;
 }
 //# sourceMappingURL=Manyfest-ObjectAddressGeneration.d.ts.map

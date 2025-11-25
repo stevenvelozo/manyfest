@@ -123,7 +123,7 @@ const parseConditionals = (pManyfest, pAddress, pRecord) =>
 			let tmpSearchComparator = 'EXISTS';
 			if (tmpMagicComparisonPatternSet.length > 1)
 			{
-				tmpSearchComparator = tmpMagicComparisonPatternSet[1];				
+				tmpSearchComparator = tmpMagicComparisonPatternSet[1];
 			}
 
 			// The value to search for
@@ -141,7 +141,7 @@ const parseConditionals = (pManyfest, pAddress, pRecord) =>
 		{
 			tmpStartIndex = -1;
 		}
-		
+
 	}
 
 	return tmpKeepRecord;

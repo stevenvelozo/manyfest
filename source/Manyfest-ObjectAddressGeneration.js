@@ -27,6 +27,10 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 */
 class ManyfestObjectAddressGeneration
 {
+	/**
+	 * @param {function} [pInfoLog] - (optional) A logging function for info messages
+	 * @param {function} [pErrorLog] - (optional) A logging function for error messages
+	 */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -34,15 +38,23 @@ class ManyfestObjectAddressGeneration
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 	}
 
-	// generateAddressses
-	//
-	// This flattens an object into a set of key:value pairs for *EVERY SINGLE
-	// POSSIBLE ADDRESS* in the object.  It can get ... really insane really
-	// quickly.  This is not meant to be used directly to generate schemas, but
-	// instead as a starting point for scripts or UIs.
-	//
-	// This will return a mega set of key:value pairs with all possible schema
-	// permutations and default values (when not an object) and everything else.
+	/**
+	 * generateAddressses
+	 *
+	 * This flattens an object into a set of key:value pairs for *EVERY SINGLE
+	 * POSSIBLE ADDRESS* in the object.  It can get ... really insane really
+	 * quickly.  This is not meant to be used directly to generate schemas, but
+	 * instead as a starting point for scripts or UIs.
+	 *
+	 * This will return a mega set of key:value pairs with all possible schema
+	 * permutations and default values (when not an object) and everything else.
+	 *
+	 * @param {any} pObject - The object to generate addresses for
+	 * @param {string} [pBaseAddress] - (optional) The base address to start from
+	 * @param {object} [pSchema] - (optional) The schema object to append to
+	 *
+	 * @return {object} The generated schema object
+	 */
 	generateAddressses (pObject, pBaseAddress, pSchema)
 	{
 		let tmpBaseAddress = (typeof(pBaseAddress) == 'string') ? pBaseAddress : '';
@@ -62,7 +74,7 @@ class ManyfestObjectAddressGeneration
 
 		if ((tmpObjectType == 'object') && (pObject == null))
 		{
-			tmpObjectType = 'null';
+			tmpObjectType = 'undefined';
 		}
 
 		switch(tmpObjectType)
@@ -79,7 +91,6 @@ class ManyfestObjectAddressGeneration
 				tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;
 				break;
 			case 'undefined':
-			case 'null':
 				tmpSchemaObjectEntry.DataType = 'Any';
 				tmpSchemaObjectEntry.Default = pObject;
 				tmpSchema[tmpBaseAddress] = tmpSchemaObjectEntry;

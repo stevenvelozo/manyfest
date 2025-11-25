@@ -18,10 +18,23 @@ export = ManyfestObjectAddressSetValue;
 * @class ManyfestObjectAddressSetValue
 */
 declare class ManyfestObjectAddressSetValue {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
-    cleanWrapCharacters: (pCharacter: any, pString: any) => any;
-    setValueAtAddress(pObject: any, pAddress: any, pValue: any): any;
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
+    cleanWrapCharacters: (pCharacter: string, pString: string) => string;
+    /**
+     * Set the value of an element at an address
+     *
+     * @param {object} pObject - The object to set the value in
+     * @param {string} pAddress - The address to set the value at
+     * @param {any} pValue - The value to set at the address
+     *
+     * @return {boolean} True if the value was set, false otherwise
+     */
+    setValueAtAddress(pObject: object, pAddress: string, pValue: any): boolean;
 }
 //# sourceMappingURL=Manyfest-ObjectAddress-SetValue.d.ts.map

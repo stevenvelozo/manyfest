@@ -20,11 +20,31 @@ export = ManyfestObjectAddressResolverGetValue;
 * @class ManyfestObjectAddressResolverGetValue
 */
 declare class ManyfestObjectAddressResolverGetValue {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
-    cleanWrapCharacters: (pCharacter: any, pString: any) => any;
-    checkRecordFilters(pAddress: any, pRecord: any): boolean;
-    getValueAtAddress(pObject: any, pAddress: any, pParentAddress: any, pRootObject: any): any;
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
+    cleanWrapCharacters: (pCharacter: string, pString: string) => string;
+    /**
+     * @param {string} pAddress - The address of the record to check
+     * @param {object} pRecord - The record to check against the filters
+     *
+     * @return {boolean} - True if the record passes the filters, false otherwise
+     */
+    checkRecordFilters(pAddress: string, pRecord: object): boolean;
+    /**
+     * Get the value of an element at an address
+     *
+     * @param {object} pObject - The object to resolve the address against
+     * @param {string} pAddress - The address to resolve
+     * @param {string} [pParentAddress] - (optional) The parent address for back-navigation
+     * @param {object} [pRootObject] - (optional) The root object for function argument resolution
+     *
+     * @return {any} The value at the address, or undefined if not found
+     */
+    getValueAtAddress(pObject: object, pAddress: string, pParentAddress?: string, pRootObject?: object): any;
 }
 //# sourceMappingURL=Manyfest-ObjectAddress-GetValue.d.ts.map

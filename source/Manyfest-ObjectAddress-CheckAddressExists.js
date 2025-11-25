@@ -5,6 +5,8 @@ const libSimpleLog = require('./Manyfest-LogToConsole.js');
 // This is for resolving functions mid-address
 const libGetObjectValue = require('./Manyfest-ObjectAddress-GetValue.js');
 
+const fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
+
 // TODO: Just until this is a fable service.
 let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 
@@ -28,6 +30,10 @@ let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 */
 class ManyfestObjectAddressResolverCheckAddressExists
 {
+	/**
+	 * @param {function} [pInfoLog] - (optional) Function to use for info logging
+	 * @param {function} [pErrorLog] - (optional) Function to use for error logging
+	 */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -35,15 +41,24 @@ class ManyfestObjectAddressResolverCheckAddressExists
 		this.logError = (typeof(pErrorLog) == 'function') ? pErrorLog : libSimpleLog;
 
 		this.getObjectValueClass = new libGetObjectValue(this.logInfo, this.logError);
+		this.cleanWrapCharacters = fCleanWrapCharacters;
 	}
 
-	// Check if an address exists.
-	//
-	// This is necessary because the getValueAtAddress function is ambiguous on
-	// whether the element/property is actually there or not (it returns
-	// undefined whether the property exists or not).  This function checks for
-	// existance and returns true or false dependent.
-	checkAddressExists (pObject, pAddress, pRootObject)
+	/**
+	 * Check if an address exists.
+	 *
+	 * This is necessary because the getValueAtAddress function is ambiguous on
+	 * whether the element/property is actually there or not (it returns
+	 * undefined whether the property exists or not).  This function checks for
+	 * existance and returns true or false dependent.
+	 *
+	 * @param {object} pObject - The object to check within
+	 * @param {string} pAddress - The address to check for
+	 * @param {object} [pRootObject] - (optional) The root object for function resolution context
+	 *
+	 * @return {boolean} - True if the address exists, false if it does not
+	 */
+	checkAddressExists(pObject, pAddress, pRootObject)
 	{
 		// TODO: Should these throw an error?
 		// Make sure pObject is an object
@@ -193,7 +208,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 				let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
 				//tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 
-				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				if (typeof pObject[tmpFunctionAddress] !== 'function')
 				{
 					// The address suggests it is a function, but it is not.
 					return false;
@@ -214,14 +229,14 @@ class ManyfestObjectAddressResolverCheckAddressExists
 						catch(pError)
 						{
 							// The function call failed, so the address doesn't exist
-							libSimpleLog.log(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							libSimpleLog(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
 							return false;
 						}
 					}
 					else
 					{
 						// The function doesn't exist, so the address doesn't exist
-						libSimpleLog.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						libSimpleLog(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
 						return false;
 					}
 				}
@@ -249,14 +264,14 @@ class ManyfestObjectAddressResolverCheckAddressExists
 						catch(pError)
 						{
 							// The function call failed, so the address doesn't exist
-							libSimpleLog.log(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
+							libSimpleLog(`Error calling function ${tmpFunctionAddress} (address [${pAddress}]): ${pError.message}`);
 							return false;
 						}
 					}
 					else
 					{
 						// The function doesn't exist, so the address doesn't exist
-						libSimpleLog.log(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
+						libSimpleLog(`Function ${tmpFunctionAddress} does not exist (address [${pAddress}])`);
 						return false;
 					}
 				}
@@ -342,6 +357,6 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			}
 		}
 	}
-};
+}
 
 module.exports = ManyfestObjectAddressResolverCheckAddressExists;

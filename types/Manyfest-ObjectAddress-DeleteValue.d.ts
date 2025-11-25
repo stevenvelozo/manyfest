@@ -20,11 +20,30 @@ export = ManyfestObjectAddressResolverDeleteValue;
 * @class ManyfestObjectAddressResolverDeleteValue
 */
 declare class ManyfestObjectAddressResolverDeleteValue {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
-    cleanWrapCharacters: (pCharacter: any, pString: any) => any;
-    checkRecordFilters(pAddress: any, pRecord: any): boolean;
-    deleteValueAtAddress(pObject: any, pAddress: any, pParentAddress: any): any;
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
+    cleanWrapCharacters: (pCharacter: string, pString: string) => string;
+    /**
+     * @param {string} pAddress - The address being evaluated
+     * @param {object} pRecord - The record being evaluated
+     *
+     * @return {boolean} True if the record passes the filters, false if it does not
+     */
+    checkRecordFilters(pAddress: string, pRecord: object): boolean;
+    /**
+     * Delete the value of an element at an address
+     *
+     * @param {object} pObject - The object to delete the value from
+     * @param {string} pAddress - The address to delete the value at
+     * @param {string} [pParentAddress] - (optional) The parent address for recursion
+     *
+     * @return {boolean|object|undefined} - True if the value was deleted, false if it could not be deleted, undefined on error
+     */
+    deleteValueAtAddress(pObject: object, pAddress: string, pParentAddress?: string): boolean | object | undefined;
 }
 //# sourceMappingURL=Manyfest-ObjectAddress-DeleteValue.d.ts.map

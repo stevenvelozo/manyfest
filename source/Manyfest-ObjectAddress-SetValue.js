@@ -24,6 +24,10 @@ let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 */
 class ManyfestObjectAddressSetValue
 {
+	/**
+	 * @param {function} [pInfoLog] - (optional) A logging function for info messages
+	 * @param {function} [pErrorLog] - (optional) A logging function for error messages
+	 */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -33,7 +37,15 @@ class ManyfestObjectAddressSetValue
 		this.cleanWrapCharacters = fCleanWrapCharacters;
 	}
 
-	// Set the value of an element at an address
+	/**
+	 * Set the value of an element at an address
+	 *
+	 * @param {object} pObject - The object to set the value in
+	 * @param {string} pAddress - The address to set the value at
+	 * @param {any} pValue - The value to set at the address
+	 *
+	 * @return {boolean} True if the value was set, false otherwise
+	 */
 	setValueAtAddress (pObject, pAddress, pValue)
 	{
 		// Make sure pObject is an object

@@ -27,6 +27,10 @@ let fParseConditionals = require(`../source/Manyfest-ParseConditionals.js`)
 */
 class ManyfestObjectAddressResolverDeleteValue
 {
+	/**
+	 * @param {function} [pInfoLog] - (optional) A logging function for info messages
+	 * @param {function} [pErrorLog] - (optional) A logging function for error messages
+	 */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -37,12 +41,26 @@ class ManyfestObjectAddressResolverDeleteValue
 	}
 
 	// TODO: Dry me
+	/**
+	 * @param {string} pAddress - The address being evaluated
+	 * @param {object} pRecord - The record being evaluated
+	 *
+	 * @return {boolean} True if the record passes the filters, false if it does not
+	 */
 	checkRecordFilters(pAddress, pRecord)
 	{
 		return fParseConditionals(this, pAddress, pRecord);
 	}
 
-	// Delete the value of an element at an address
+	/**
+	 * Delete the value of an element at an address
+	 *
+	 * @param {object} pObject - The object to delete the value from
+	 * @param {string} pAddress - The address to delete the value at
+	 * @param {string} [pParentAddress] - (optional) The parent address for recursion
+	 *
+	 * @return {boolean|object|undefined} - True if the value was deleted, false if it could not be deleted, undefined on error
+	 */
 	deleteValueAtAddress (pObject, pAddress, pParentAddress)
 	{
 		// Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)

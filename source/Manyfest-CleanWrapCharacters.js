@@ -13,6 +13,12 @@
 //
 // TODO: Should template literals be processed?  If so what state do they have access to?  That should happen here if so.
 // TODO: Make a simple class include library with these
+/**
+ * @param {string} pCharacter - The character to remove from the start and end of the string
+ * @param {string} pString - The string to clean
+ *
+ * @return {string} The cleaned string
+ */
 const cleanWrapCharacters = (pCharacter, pString) =>
 {
 	if (pString.startsWith(pCharacter) && pString.endsWith(pCharacter))

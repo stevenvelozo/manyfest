@@ -15,15 +15,42 @@ export = ManyfestHashTranslation;
 * @class ManyfestHashTranslation
 */
 declare class ManyfestHashTranslation {
-    constructor(pInfoLog: any, pErrorLog: any);
-    logInfo: any;
-    logError: any;
+    /**
+     * @param {function} [pInfoLog] - (optional) A logging function for info messages
+     * @param {function} [pErrorLog] - (optional) A logging function for error messages
+     */
+    constructor(pInfoLog?: Function, pErrorLog?: Function);
+    logInfo: Function;
+    logError: Function;
     translationTable: {};
+    /**
+     * @return {number} The number of translations in the table
+     */
     translationCount(): number;
-    addTranslation(pTranslation: any): boolean;
-    removeTranslationHash(pTranslationHash: any): void;
-    removeTranslation(pTranslation: any): boolean;
+    /**
+     * @param {object} pTranslation - An object containing source:destination hash pairs to add to the translation table
+     */
+    addTranslation(pTranslation: object): boolean;
+    /**
+     * @param {string} pTranslationHash - The source hash to remove from the translation table
+     */
+    removeTranslationHash(pTranslationHash: string): void;
+    /**
+     * This removes translations.
+     * If passed a string, just removes the single one.
+     * If passed an object, it does all the source keys.
+     *
+     * @param {string|object} pTranslation - Either a source hash string to remove, or an object containing source:destination hash pairs to remove
+     *
+     * @return {boolean} True if the removal was successful, false otherwise
+     */
+    removeTranslation(pTranslation: string | object): boolean;
     clearTranslations(): void;
-    translate(pTranslation: any): any;
+    /**
+     * @param {string} pTranslation - The source hash to translate
+     *
+     * @return {string} The translated hash, or the original if no translation exists
+     */
+    translate(pTranslation: string): string;
 }
 //# sourceMappingURL=Manyfest-HashTranslation.d.ts.map

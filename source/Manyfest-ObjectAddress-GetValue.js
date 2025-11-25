@@ -29,6 +29,10 @@ let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
 */
 class ManyfestObjectAddressResolverGetValue
 {
+	/**
+	 * @param {function} [pInfoLog] - (optional) A logging function for info messages
+	 * @param {function} [pErrorLog] - (optional) A logging function for error messages
+	 */
 	constructor(pInfoLog, pErrorLog)
 	{
 		// Wire in logging
@@ -38,12 +42,27 @@ class ManyfestObjectAddressResolverGetValue
 		this.cleanWrapCharacters = fCleanWrapCharacters;
 	}
 
+	/**
+	 * @param {string} pAddress - The address of the record to check
+	 * @param {object} pRecord - The record to check against the filters
+	 *
+	 * @return {boolean} - True if the record passes the filters, false otherwise
+	 */
 	checkRecordFilters(pAddress, pRecord)
 	{
 		return fParseConditionals(this, pAddress, pRecord);
 	}
 
-	// Get the value of an element at an address
+	/**
+	 * Get the value of an element at an address
+	 *
+	 * @param {object} pObject - The object to resolve the address against
+	 * @param {string} pAddress - The address to resolve
+	 * @param {string} [pParentAddress] - (optional) The parent address for back-navigation
+	 * @param {object} [pRootObject] - (optional) The root object for function argument resolution
+	 *
+	 * @return {any} The value at the address, or undefined if not found
+	 */
 	getValueAtAddress (pObject, pAddress, pParentAddress, pRootObject)
 	{
 		// Make sure pObject (the object we are meant to be recursing) is an object (which could be an array or object)
@@ -150,7 +169,7 @@ class ManyfestObjectAddressResolverGetValue
 			{
 				let tmpFunctionAddress = pAddress.substring(0, tmpFunctionStartIndex).trim();
 
-				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				if (typeof pObject[tmpFunctionAddress] !== 'function')
 				{
 					// The address suggests it is a function, but it is not.
 					return false;
@@ -384,7 +403,7 @@ class ManyfestObjectAddressResolverGetValue
 				let tmpFunctionAddress = tmpSubObjectName.substring(0, tmpFunctionStartIndex).trim();
 				tmpParentAddress = `${tmpParentAddress}${(tmpParentAddress.length > 0) ? '.' : ''}${tmpSubObjectName}`;
 
-				if (!typeof(pObject[tmpFunctionAddress]) == 'function')
+				if (typeof pObject[tmpFunctionAddress] !== 'function')
 				{
 					// The address suggests it is a function, but it is not.
 					return false;

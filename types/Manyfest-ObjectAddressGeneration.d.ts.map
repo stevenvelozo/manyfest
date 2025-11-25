@@ -1,1 +1,1 @@
-{"version":3,"file":"Manyfest-ObjectAddressGeneration.d.ts","sourceRoot":"","sources":["../source/Manyfest-ObjectAddressGeneration.js"],"names":[],"mappings":";AAKA;;;;;;;;;;;;;;;;;;;;;EAqBE;AACF;IAEC,2CAKC;IAFA,aAAyE;IACzE,cAA4E;IAY7E,uEA+EC;CACD"}
+{"version":3,"file":"Manyfest-ObjectAddressGeneration.d.ts","sourceRoot":"","sources":["../source/Manyfest-ObjectAddressGeneration.js"],"names":[],"mappings":";AAKA;;;;;;;;;;;;;;;;;;;;;EAqBE;AACF;IAEC;;;OAGG;IACH,uDAKC;IAFA,kBAAyE;IACzE,mBAA4E;IAG7E;;;;;;;;;;;;;;;;OAgBG;IACH,4BANW,GAAG,iBACH,MAAM,YACN,MAAM,GAEL,MAAM,CAgFjB;CACD"}

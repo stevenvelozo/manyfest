@@ -8,15 +8,19 @@
 // Until we shift Manyfest to be a fable service, these three functions were pulled out of
 // fable to aid in parsing functions with nested enclosures.
 
+const DEFAULT_START_SYMBOL_MAP = { '{': 0, '[': 1, '(': 2 };
+const DEFAULT_END_SYMBOL_MAP = { '}': 0, ']': 1, ')': 2 };
+
 module.exports = {
 	/**
 	 * Count the number of segments in a string, respecting enclosures
-	 * 
-	 * @param {string} pString 
-	 * @param {string} pSeparator 
-	 * @param {object} pEnclosureStartSymbolMap 
-	 * @param {object} pEnclosureEndSymbolMap 
-	 * @returns the count of segments in the string as a number
+	 *
+	 * @param {string} pString
+	 * @param {string} [pSeparator]
+	 * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+	 * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+	 *
+	 * @return {number} - The number of segments in the string
 	 */
 	stringCountSegments: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) =>
 	{
@@ -24,8 +28,8 @@ module.exports = {
 
 		let tmpSeparator = (typeof(pSeparator) == 'string') ? pSeparator : '.';
 
-		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStart : { '{': 0, '[': 1, '(': 2 };
-		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEnd : { '}': 0, ']': 1, ')': 2 };
+		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
 
 		if (pString.length < 1)
 		{
@@ -66,12 +70,13 @@ module.exports = {
 
 	/**
 	 * Get the first segment in a string, respecting enclosures
-	 * 
-	 * @param {string} pString 
-	 * @param {string} pSeparator 
-	 * @param {object} pEnclosureStartSymbolMap 
-	 * @param {object} pEnclosureEndSymbolMap 
-	 * @returns the first segment in the string as a string
+	 *
+	 * @param {string} pString
+	 * @param {string} [pSeparator]
+	 * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+	 * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+	 *
+	 * @return {string} - the first segment in the string as a string
 	 */
 	stringGetFirstSegment: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) =>
 	{
@@ -79,12 +84,12 @@ module.exports = {
 
 		let tmpSeparator = (typeof(pSeparator) == 'string') ? pSeparator : '.';
 
-		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStart : { '{': 0, '[': 1, '(': 2 };
-		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEnd : { '}': 0, ']': 1, ')': 2 };
+		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
 
 		if (pString.length < 1)
 		{
-			return 0;
+			return '';
 		}
 
 		let tmpEnclosureStack = [];
@@ -120,21 +125,22 @@ module.exports = {
 
 	/**
 	 * Get all segments in a string, respecting enclosures
-	 * 
-	 * @param {string} pString 
-	 * @param {string} pSeparator 
-	 * @param {object} pEnclosureStartSymbolMap 
-	 * @param {object} pEnclosureEndSymbolMap 
-	 * @returns the first segment in the string as a string
+	 *
+	 * @param {string} pString
+	 * @param {string} [pSeparator]
+	 * @param {Record<string, number>} [pEnclosureStartSymbolMap]
+	 * @param {Record<string, number>} [pEnclosureEndSymbolMap]
+	 *
+	 * @return {Array<string>} - the segments in the string as an array of strings
 	 */
-	stringGetSegments: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap)=>
+	stringGetSegments: (pString, pSeparator, pEnclosureStartSymbolMap, pEnclosureEndSymbolMap) =>
 	{
 		let tmpString = (typeof(pString) == 'string') ? pString : '';
 
 		let tmpSeparator = (typeof(pSeparator) == 'string') ? pSeparator : '.';
 
-		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStart : { '{': 0, '[': 1, '(': 2 };
-		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEnd : { '}': 0, ']': 1, ')': 2 };
+		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
+		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
 
 		let tmpCurrentSegmentStart = 0;
 		let tmpSegmentList = [];
@@ -187,8 +193,8 @@ module.exports = {
 	 * If no start or end characters are specified, it will default to parentheses.  If the string is not a string, it will return 0.
 	 *
 	 * @param {string} pString
-	 * @param {string} pEnclosureStart
-	 * @param {string} pEnclosureEnd
+	 * @param {string} [pEnclosureStart]
+	 * @param {string} [pEnclosureEnd]
 	 * @returns the count of full in the string
 	 */
 	stringCountEnclosures: (pString, pEnclosureStart, pEnclosureEnd) =>
@@ -227,9 +233,10 @@ module.exports = {
 	 *
 	 * @param {string} pString
 	 * @param {number} pEnclosureIndexToGet
-	 * @param {string} pEnclosureStart
-	 * @param {string}} pEnclosureEnd
-	 * @returns {string}
+	 * @param {string} [pEnclosureStart]
+	 * @param {string} [pEnclosureEnd]
+	 *
+	 * @return {string} - The value of the enclosure at the specified index
 	 */
 	stringGetEnclosureValueByIndex: (pString, pEnclosureIndexToGet, pEnclosureStart, pEnclosureEnd) =>
 	{
