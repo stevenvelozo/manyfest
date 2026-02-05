@@ -5,6 +5,8 @@ let libSimpleLog = require('./Manyfest-LogToConsole.js');
 let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 let fParseConditionals = require(`../source/Manyfest-ParseConditionals.js`)
 
+let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
+
 /**
 * Object Address Resolver - DeleteValue
 *
@@ -74,11 +76,11 @@ class ManyfestObjectAddressResolverDeleteValue
 			tmpParentAddress = pParentAddress;
 		}
 
-		// TODO: Make this work for things like SomeRootObject.Metadata["Some.People.Use.Bad.Object.Property.Names"]
-		let tmpSeparatorIndex = pAddress.indexOf('.');
+		// Use enclosure-aware parser to find the first segment separator
+		let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
 		// This is the terminal address string (no more dots so the RECUSION ENDS IN HERE somehow)
-		if (tmpSeparatorIndex == -1)
+		if (tmpAddressPartBeginning.length == pAddress.length)
 		{
 			// Check if the address refers to a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
@@ -201,8 +203,8 @@ class ManyfestObjectAddressResolverDeleteValue
 		}
 		else
 		{
-			let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-			let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+			let tmpSubObjectName = tmpAddressPartBeginning;
+			let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length+1);
 
 			// BOXED ELEMENTS
 			// Test if the tmpNewAddress is an array or object

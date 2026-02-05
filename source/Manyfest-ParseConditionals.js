@@ -27,20 +27,16 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 	{
 		case 'TRUE':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) === true);
-			break;
 		case 'FALSE':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) === false);
-			break;
 		case 'LNGT':
 		case 'LENGTH_GREATER_THAN':
 			switch(typeof(pManyfest.getValueAtAddress(pRecord, pSearchAddress)))
 			{
 				case 'string':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue);
-					break;
 				case 'object':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length > pValue);
-					break;
 				default:
 					return false;
 					break;
@@ -52,10 +48,8 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 			{
 				case 'string':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue);
-					break;
 				case 'object':
 					return (pManyfest.getValueAtAddress(pRecord, pSearchAddress).length < pValue);
-					break;
 				default:
 					return false;
 					break;
@@ -72,26 +66,19 @@ const testCondition = (pManyfest, pRecord, pSearchAddress, pSearchComparator, pV
 		// 	break;
 		case '!=':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) != pValue);
-			break;
 		case '<':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) < pValue);
-			break;
 		case '>':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) > pValue);
-			break;
 		case '<=':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) <= pValue);
-			break;
 		case '>=':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) >= pValue);
-			break;
 		case '===':
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) === pValue);
-			break;
 		case '==':
 		default:
 			return (pManyfest.getValueAtAddress(pRecord, pSearchAddress) == pValue);
-			break;
 	}
 };
 

@@ -244,7 +244,7 @@ class ManyfestObjectAddressResolverCheckAddressExists
 				{
 					let tmpArgumentValues = [];
 
-					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
+
 
 					// Now get the value for each argument
 					for (let i = 0; i < tmpFunctionArguments.length; i++)
@@ -351,9 +351,8 @@ class ManyfestObjectAddressResolverCheckAddressExists
 			}
 			else
 			{
-				// Create a subobject and then pass that
-				pObject[tmpSubObjectName] = {};
-				return this.checkAddressExists(pObject[tmpSubObjectName], tmpNewAddress, tmpRootObject);
+				// The sub-object doesn't exist, so the address doesn't exist
+				return false;
 			}
 		}
 	}

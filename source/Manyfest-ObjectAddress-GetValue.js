@@ -205,8 +205,6 @@ class ManyfestObjectAddressResolverGetValue
 				{
 					let tmpArgumentValues = [];
 
-					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
-
 					// Now get the value for each argument
 					for (let i = 0; i < tmpFunctionArguments.length; i++)
 					{
@@ -358,13 +356,13 @@ class ManyfestObjectAddressResolverGetValue
 			else
 			{
 				// Now is the point in recursion to return the value in the address
-				if (typeof(pObject[pAddress]) != null)
+				if (typeof(pObject[pAddress]) != 'undefined')
 				{
 					return pObject[pAddress];
 				}
 				else
 				{
-					return null;
+					return undefined;
 				}
 			}
 		}
@@ -438,8 +436,6 @@ class ManyfestObjectAddressResolverGetValue
 				else
 				{
 					let tmpArgumentValues = [];
-
-					let tmpRootObject = (typeof(pRootObject) == 'undefined') ? pObject : pRootObject;
 
 					// Now get the value for each argument
 					for (let i = 0; i < tmpFunctionArguments.length; i++)

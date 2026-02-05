@@ -229,11 +229,8 @@ class Manyfest extends libFableServiceProviderBase
 		{
 			if (typeof(tmpManifest.HashTranslations) === 'object')
 			{
-				for (let i = 0; i < tmpManifest.HashTranslations.length; i++)
-				{
-					// Each translation is
-					//FIXME: ?????????
-				}
+				// HashTranslations is serialized as a plain object of source:target pairs
+				this.hashTranslations.addTranslation(tmpManifest.HashTranslations);
 			}
 		}
 	}
@@ -406,13 +403,15 @@ class Manyfest extends libFableServiceProviderBase
 
 	lintAddress(pAddress)
 	{
-		let tmpLintedAddress = pAddress.trim();
-		// Check for a single . (but not a ..) at the end of the address and remove it.
-		if (tmpLintedAddress.endsWith('..'))
+		// Guard against non-string input
+		if (typeof(pAddress) != 'string')
 		{
-			tmpLintedAddress = tmpLintedAddress.slice(0, -1);
+			return '';
 		}
-		else if (tmpLintedAddress.endsWith('.'))
+		let tmpLintedAddress = pAddress.trim();
+		// Check for a single trailing . (but not a ..) at the end of the address and remove it.
+		// We must not strip '..' because that is back-navigation syntax.
+		if (tmpLintedAddress.endsWith('.') && !tmpLintedAddress.endsWith('..'))
 		{
 			tmpLintedAddress = tmpLintedAddress.slice(0, -1);
 		}
@@ -454,16 +453,16 @@ class Manyfest extends libFableServiceProviderBase
 	}
 
 	// Delete the value of an element by its hash
-	deleteValueByHash(pObject, pHash, pValue)
+	deleteValueByHash(pObject, pHash)
 	{
-		return this.deleteValueAtAddress(pObject, this.resolveHashAddress(pHash), pValue);
+		return this.deleteValueAtAddress(pObject, this.resolveHashAddress(pHash));
 	}
 
 	// Delete the value of an element at an address
-	deleteValueAtAddress (pObject, pAddress, pValue)
+	deleteValueAtAddress (pObject, pAddress)
 	{
 		let tmpLintedAddress = this.lintAddress(pAddress);
-		return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, tmpLintedAddress, pValue);
+		return this.objectAddressDeleteValue.deleteValueAtAddress(pObject, tmpLintedAddress);
 	}
 
 	// Validate the consistency of an object against the schema
@@ -560,12 +559,20 @@ class Manyfest extends libFableServiceProviderBase
 						}
 						break;
 
+					case 'boolean':
+						if (tmpElementType != 'boolean')
+						{
+							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is of the type ${tmpElementType}`);
+						}
+						break;
+
 					case 'datetime':
 						let tmpValueDate = new Date(tmpValue);
 						if (tmpValueDate.toString() == 'Invalid Date')
 						{
 							addValidationError(tmpDescriptor.Address, `has a DataType ${tmpDescriptor.DataType} but is not parsable as a Date by Javascript`);
 						}
+						break;
 
 					default:
 						// Check if this is a string, in the default case
@@ -605,7 +612,13 @@ class Manyfest extends libFableServiceProviderBase
 			let tmpDataType = ('DataType' in pDescriptor) ? pDescriptor.DataType : 'String';
 			if (tmpDataType in this.options.defaultValues)
 			{
-				return this.options.defaultValues[tmpDataType];
+				let tmpDefaultValue = this.options.defaultValues[tmpDataType];
+				// Return a copy of mutable defaults (Array and Object) to prevent shared state
+				if (typeof(tmpDefaultValue) == 'object' && tmpDefaultValue !== null)
+				{
+					return JSON.parse(JSON.stringify(tmpDefaultValue));
+				}
+				return tmpDefaultValue;
 			}
 			else
 			{

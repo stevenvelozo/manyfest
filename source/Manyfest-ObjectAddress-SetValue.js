@@ -4,6 +4,8 @@
 let libSimpleLog = require('./Manyfest-LogToConsole.js');
 let fCleanWrapCharacters = require('./Manyfest-CleanWrapCharacters.js');
 
+let _MockFable = { DataFormat: require('./Manyfest-ObjectAddress-Parser.js') };
+
 /**
 * Object Address Resolver - SetValue
 *
@@ -53,9 +55,10 @@ class ManyfestObjectAddressSetValue
 		// Make sure pAddress is a string
 		if (typeof(pAddress) != 'string') return false;
 
-		let tmpSeparatorIndex = pAddress.indexOf('.');
+		// Use enclosure-aware parser to find the first segment separator
+		let tmpAddressPartBeginning = _MockFable.DataFormat.stringGetFirstSegment(pAddress);
 
-		if (tmpSeparatorIndex == -1)
+		if (tmpAddressPartBeginning.length == pAddress.length)
 		{
 			// Check if it's a boxed property
 			let tmpBracketStartIndex = pAddress.indexOf('[');
@@ -155,8 +158,8 @@ class ManyfestObjectAddressSetValue
 		}
 		else
 		{
-			let tmpSubObjectName = pAddress.substring(0, tmpSeparatorIndex);
-			let tmpNewAddress = pAddress.substring(tmpSeparatorIndex+1);
+			let tmpSubObjectName = tmpAddressPartBeginning;
+			let tmpNewAddress = pAddress.substring(tmpAddressPartBeginning.length+1);
 
 			// Test if the tmpNewAddress is an array or object
 			// Check if it's a boxed property

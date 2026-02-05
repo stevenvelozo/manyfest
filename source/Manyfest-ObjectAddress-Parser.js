@@ -31,7 +31,7 @@ module.exports = {
 		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
 		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
 
-		if (pString.length < 1)
+		if (tmpString.length < 1)
 		{
 			return 0;
 		}
@@ -87,7 +87,7 @@ module.exports = {
 		let tmpEnclosureStartSymbolMap = (typeof(pEnclosureStartSymbolMap) == 'object') ? pEnclosureStartSymbolMap : DEFAULT_START_SYMBOL_MAP;
 		let tmpEnclosureEndSymbolMap = (typeof(pEnclosureEndSymbolMap) == 'object') ? pEnclosureEndSymbolMap : DEFAULT_END_SYMBOL_MAP;
 
-		if (pString.length < 1)
+		if (tmpString.length < 1)
 		{
 			return '';
 		}
@@ -145,7 +145,7 @@ module.exports = {
 		let tmpCurrentSegmentStart = 0;
 		let tmpSegmentList = [];
 
-		if (pString.length < 1)
+		if (tmpString.length < 1)
 		{
 			return tmpSegmentList;
 		}
