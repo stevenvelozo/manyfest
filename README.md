@@ -17,11 +17,56 @@ Manyfest's purpose is to solve this problem by creating a simple pattern to desc
 
 _Man-E-Faces approves of Manyfest!_
 
+## Quick Example
+
+```javascript
+const libManyfest = require('manyfest');
+
+// Define a schema
+const manifest = new libManyfest({
+    Scope: 'User',
+    Descriptors: {
+        'Name': { DataType: 'String', Required: true },
+        'Email': { DataType: 'String', Required: true },
+        'Profile.Age': { DataType: 'Integer' },
+        'Profile.Bio': { DataType: 'String', Default: '' }
+    }
+});
+
+// Read safely from nested objects (no exceptions on missing paths)
+const user = { Name: 'Alice', Profile: { Age: 30 } };
+manifest.getValueAtAddress(user, 'Profile.Age');     // 30
+manifest.getValueAtAddress(user, 'Profile.Phone');   // undefined
+
+// Write to any depth (intermediate objects are created automatically)
+const newUser = {};
+manifest.setValueAtAddress(newUser, 'Name', 'Bob');
+manifest.setValueAtAddress(newUser, 'Profile.Age', 25);
+// newUser is now: { Name: 'Bob', Profile: { Age: 25 } }
+
+// Validate against the schema
+const result = manifest.validate({ Name: 'Carol' });
+// result.Errors: ['Element at address "Email" is flagged REQUIRED but is not set in the object.']
+```
+
+## Documentation
+
+| Guide | Description |
+| ----- | ----------- |
+| [Quickstart](docs/quickstart.md) | Installation, first schema, and basic operations in under five minutes. |
+| [Reading Values](docs/reading.md) | `getValueAtAddress`, `getValueByHash`, array access, boxed properties, back-navigation, function resolution and defaults. |
+| [Writing Values](docs/writing.md) | `setValueAtAddress`, `setValueByHash`, auto-creation of nested structures, populating defaults and deleting values. |
+| [Validating Objects](docs/validating.md) | Required fields, strict mode, data type checking and the validation result structure. |
+| [Schema Definition](docs/schema.md) | Descriptors, data types, scope, serialization, cloning and programmatic schema building. |
+| [Address Notation](docs/address-notation.md) | The complete address syntax: dot notation, arrays, boxed properties, object sets, back-navigation and function calls. |
+| [Hash Translation](docs/hash-translation.md) | Reusing schemas with different hash mappings for multiple API shapes. |
+| [Schema Manipulation](docs/schema-manipulation.md) | Remapping addresses, merging schemas and auto-generating schemas from sample data. |
+
 ## Where Does this Run
 
-Either of a stand-alone library in node.js software, or, a dependency-free browser library.
+Either as a stand-alone library in node.js software, or, a dependency-free browser library.
 
-### Compatiblity
+### Compatibility
 
 This library is tested for node.js versions 8 through 16, and will likely work in future versions.  It is implemented as a simple set of es6 classes.
 
@@ -32,13 +77,13 @@ The browser version has been packaged into a minified as well as an expanded deb
 For use within node.js, run the following in the folder with your `package.json` file:
 
 ```
-npm install --save Manyfest
+npm install --save manyfest
 ```
 
 Then, you can include it in your source code as follows:
 
 ```javascript
-const libManyfest = require('Manyfest');
+const libManyfest = require('manyfest');
 
 // Construct a Manyfest with a few defined columns
 let animalManyfest = new libManyfest(
@@ -71,16 +116,16 @@ Below is a lexicon of terms used throughout this documentation.  If you see anyt
 
 | Term | Description |
 | ---- | ----------- |
-Scope | The scope of this representation; generally the clustered or parent record name (e.g. Animal, User, Transaction, etc.) -- does not have functional purpose; only for information and logging.
-Schema | The stateful representation of an object's structural definition.
-Element | A defined element of data in an object.
-Address | The address where that data lies in the object.
-Hash | A unique within this scope string-based key for this element.  Used for easy access of data.
-Descriptor | A description of an element including data such as Name, NameShort, Hash, Description, and other important properties.
-Name | The name of the element.  Meant to be the most succinct human readable name possible.
-NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name.
-Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)!
-Required | Set to true if this element is required.
+| Scope | The scope of this representation; generally the clustered or parent record name (e.g. Animal, User, Transaction, etc.) -- does not have functional purpose; only for information and logging. |
+| Schema | The stateful representation of an object's structural definition. |
+| Element | A defined element of data in an object. |
+| Address | The address where that data lies in the object. |
+| Hash | A unique within this scope string-based key for this element.  Used for easy access of data. |
+| Descriptor | A description of an element including data such as Name, NameShort, Hash, Description, and other important properties. |
+| Name | The name of the element.  Meant to be the most succinct human readable name possible. |
+| NameShort | A shorter name for the element.  Meant to be useful enough to identify the property in log lines, tabular views, graphs and anywhere where we don't always want to see the full name. |
+| Description | A description for the element.  Very useful when consuming other APIs with their own terse naming standards (or no naming standards)! |
+| Required | Set to true if this element is required. |
 
 Okay so these are a lot of crazy words.  The important two are *Address* and *Hash*.  Every element in a schema must have an address.  Having a hash just multiplies the usefulness of these addresses.
 
@@ -100,7 +145,7 @@ let animalManyfest = new libManyfest(
 				"IDAnimal": { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" },
 				"Name": { "Description":"The animal's colloquial species name (e.g. Rabbit, Dog, Bear, Mongoose)." },
 				"Type": { "Description":"Whether or not the animal is wild, domesticated, agricultural, in a research lab or a part of a zoo.." },
-				"MedicalStats": 
+				"MedicalStats":
 					{
 						"Name":"Medical Statistics", "Description":"Basic medical statistics for this animal"
 					},
@@ -126,19 +171,19 @@ To aid in this discovery, reference and such, we've given it a NameShort (for us
 
 | Type | Description |
 | ---- | ----------- |
-String | A pretty basic string
-Integer | An integer number
-Float | A floating point number; does not require a decimal point
-Number | A number of any type
-PreciseNumber | An arbitrary precision number, stored in a string
-Boolean | A boolean value represented by the JSON true or false
-Binary | A boolean value represented as 1 or 0
-YesNo | A boolean value represented as Y or N
-DateTime | A javascript date
-Key | A two-part Key with an Identifier and Globally Unique Identifier (ID and GUID)
-Array | A plain old javascript array
-Object | A plain old javascript object
-Null | A null value
+| String | A pretty basic string |
+| Integer | An integer number |
+| Float | A floating point number; does not require a decimal point |
+| Number | A number of any type |
+| PreciseNumber | An arbitrary precision number, stored in a string |
+| Boolean | A boolean value represented by the JSON true or false |
+| Binary | A boolean value represented as 1 or 0 |
+| YesNo | A boolean value represented as Y or N |
+| DateTime | A javascript date |
+| Key | A two-part Key with an Identifier and Globally Unique Identifier (ID and GUID) |
+| Array | A plain old javascript array |
+| Object | A plain old javascript object |
+| Null | A null value |
 
 #### Keys
 
@@ -215,14 +260,14 @@ For any elements that haven't defined a Hash, the Address is used.  This allows 
 
 ## Hash Translation Tables
 
-Sometimes we want to reuse the structure of a schema, but look up values by hash using translations.
+Sometimes we want to reuse the structure of a schema, but look up values by hash using translations.  See the [Hash Translation](docs/hash-translation.md) documentation for the full guide.
 
 ## Programmatically Defining a Schema
 
 Sometimes we don't have schemas, and want to define object element structure on the fly.  This can be done programmatically.  As a refresher, here is how we loaded our simplest schema manifest above:
 
 ```javascript
-const libManyfest = require('Manyfest');
+const libManyfest = require('manyfest');
 
 // Construct a Manyfest with a few defined columns
 let animalManyfest = new libManyfest(
@@ -240,13 +285,13 @@ let animalManyfest = new libManyfest(
 The programmatic equivalent is the following code:
 
 ```javascript
-const libManyfest = require('Manyfest');
+const libManyfest = require('manyfest');
 
 // Construct a Manyfest with a few defined columns
 let animalManyfest = new libManyfest();
 
 // Set the Scope
-animalManyfest.Scope = "Animal";
+animalManyfest.scope = "Animal";
 
 // Add descriptors
 animalManyfest.addDescriptor("IDAnimal", { "Name":"Database ID", "Description":"The unique integer-based database identifier for an Animal record.", "DataType":"Integer" });
@@ -268,9 +313,12 @@ With manyfest, you can easily create a description for each API and code against
 
 Modern APIs are super complicated.  And worse, they change.  Let's take a real example. [Archive.org](https://archive.org/) is a wonderful resource for downloading awesome content gathered from the web and such.
 
-There is an API to access their data.  It's ... really messy, the data you get back.  below is the JSON for a single video (a rad Count Chocula commercial from 1971) -- it takes quite a bit of scroll to get down to the bottom.
+There is an API to access their data.  It's ... really messy, the data you get back.  Below is the JSON for a single video (a rad Count Chocula commercial from 1971) -- it takes quite a bit of scroll to get down to the bottom.
 
 ![Count Chocula will Rise Again](http://ia800202.us.archive.org/7/items/FrankenberryCountChoculaTevevisionCommercial1971/frankerberry_countchockula_1971.0001.gif)
+
+<details>
+<summary>Archive.org JSON response (click to expand)</summary>
 
 ```JSON
 {
@@ -291,131 +339,6 @@ There is an API to access their data.  It's ... really messy, the data you get b
 			"sha1": "383303d9546c381267569ad4e33aff691f0bb8c7"
 		},
 		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000004.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336957",
-			"size": "6843",
-			"md5": "c93fa52000ab4665e69b25c403e11aff",
-			"crc32": "9444e6f6",
-			"sha1": "716b4f9950b8147f51d3265f9c62ff86451308d5"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000009.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336957",
-			"size": "8388",
-			"md5": "30eb3eb4cbbdfa08d531a0a74da7c000",
-			"crc32": "be874a9e",
-			"sha1": "0c392d777609e967b6022be27edad678c5ae74e2"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000014.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336958",
-			"size": "5993",
-			"md5": "4e9ebc3d076bec8cf7dfe76795f8c769",
-			"crc32": "912ec98c",
-			"sha1": "01dc49c852e1bbb421199450dd902935c62b06de"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000019.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336958",
-			"size": "4951",
-			"md5": "59f190f0c5b0a048415b26412860b6dd",
-			"crc32": "a70a30b1",
-			"sha1": "a284af9757cb24d28f96ec88ec1b1c23a8cea9fe"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000024.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336959",
-			"size": "3383",
-			"md5": "be2a908acd563b896e7758b598295148",
-			"crc32": "ed467831",
-			"sha1": "94c001e72ebc86d837a78c61a004db9ab9d597bd"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971.thumbs/frankerberry_countchockula_1971.0001_000029.jpg",
-			"source": "derivative",
-			"format": "Thumbnail",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336960",
-			"size": "3503",
-			"md5": "c82199d09be07633000fd07b363dd8a3",
-			"crc32": "a1fd79cb",
-			"sha1": "2bc8e761edb24a441fa5906dda1c424e1f98a47a"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971_archive.torrent",
-			"source": "metadata",
-			"btih": "de6b371e7cc3c83db1cc08150500753eae533409",
-			"mtime": "1542761794",
-			"size": "4093",
-			"md5": "a275d3b4028cccb5bea8b47a88c838af",
-			"crc32": "5ffa7334",
-			"sha1": "af8222637b574cba1360d0ea77e231640ffd43c4",
-			"format": "Archive BitTorrent"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971_files.xml",
-			"source": "metadata",
-			"format": "Metadata",
-			"md5": "3a7e87b08bed1e203a5858b31352c110"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971_meta.xml",
-			"source": "metadata",
-			"format": "Metadata",
-			"mtime": "1542761793",
-			"size": "1371",
-			"md5": "0b9c9bf21b9a26aea43a2f735b404624",
-			"crc32": "41077288",
-			"sha1": "22e6f2c73bf63072f671d846355da2785db51dbd"
-		},
-		{
-			"name": "FrankenberryCountChoculaTevevisionCommercial1971_reviews.xml",
-			"source": "original",
-			"mtime": "1466898697",
-			"size": "620",
-			"md5": "260bfba5d696772445dcc7ff6e6d5bdb",
-			"crc32": "25ea3229",
-			"sha1": "7d541f18fcd5ad9c6e593afe5a80f18771f23b32",
-			"format": "Metadata"
-		},
-		{
-			"name": "__ia_thumb.jpg",
-			"source": "original",
-			"mtime": "1539115881",
-			"size": "7481",
-			"md5": "8cec324fa0016fd77cc04e6a4b2ebb00",
-			"crc32": "d9e1b316",
-			"sha1": "4dab42952fe0405a3b7f80146636b33d7b1bd01e",
-			"format": "Item Tile",
-			"rotation": "0"
-		},
-		{
-			"name": "frankerberry_countchockula_1971.0001.gif",
-			"source": "derivative",
-			"format": "Animated GIF",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336965",
-			"size": "101114",
-			"md5": "b78a13094030f104900eb996bafe2b7d",
-			"crc32": "6650cd8",
-			"sha1": "669798c037205cac14f70592deef6f7831b3d4a1"
-		},
-		{
 			"name": "frankerberry_countchockula_1971.0001.mpg",
 			"source": "original",
 			"format": "MPEG2",
@@ -427,45 +350,6 @@ There is an API to access their data.  It's ... really messy, the data you get b
 			"length": "31.14",
 			"height": "480",
 			"width": "640"
-		},
-		{
-			"name": "frankerberry_countchockula_1971.0001.mpg.idx",
-			"source": "derivative",
-			"format": "Video Index",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336956",
-			"size": "31141",
-			"md5": "49423e072726e4ea3cdd8ebdd26c7dfc",
-			"crc32": "ae969a68",
-			"sha1": "805782cd2d0f9002555816daadf3b8607e621f79"
-		},
-		{
-			"name": "frankerberry_countchockula_1971.0001.ogv",
-			"source": "derivative",
-			"format": "Ogg Video",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336994",
-			"size": "2248166",
-			"md5": "f1b933e97ce63594fb28a0a019ff3436",
-			"crc32": "a2a0e5e9",
-			"sha1": "a6bf0aec9f006baeca37c03f586686ebe685d59b",
-			"length": "31.15",
-			"height": "300",
-			"width": "400"
-		},
-		{
-			"name": "frankerberry_countchockula_1971.0001_512kb.mp4",
-			"source": "derivative",
-			"format": "512Kb MPEG4",
-			"original": "frankerberry_countchockula_1971.0001.mpg",
-			"mtime": "1296336977",
-			"size": "2378677",
-			"md5": "a7750839519c61ba3bb99fc66b32011d",
-			"crc32": "4dbd37c8",
-			"sha1": "3929314c192dec006fac2739bcb4730788e8c068",
-			"length": "31.13",
-			"height": "240",
-			"width": "320"
 		}
 	],
 	"files_count": 17,
@@ -476,31 +360,8 @@ There is an API to access their data.  It's ... really messy, the data you get b
 		"title": "Franken Berry / Count Chocula : Tevevision Commercial 1971",
 		"creator": "General Mills",
 		"mediatype": "movies",
-		"collection": [
-			"classic_tv_commercials",
-			"television"
-		],
-		"description": "Count Chocula and Franken Berry were both introduced in 1971. Boo Berry Cereal appeared in 1973 followed by Fruit Brute in 1974. Yummy Mummy appeared more than a decade later in 1988 - completing the the group known as the General Mills Monster Cereals.",
-		"subject": "Third Eye Cinema; Classic Television Commercials; animation; cartoons;General Mills",
-		"licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/",
-		"publicdate": "2011-01-29 21:36:42",
-		"addeddate": "2011-01-29 21:35:38",
-		"uploader": "bolexman@msn.com",
-		"updater": [
-			"Bolexman",
-			"Bolexman",
-			"Jeff Kaplan"
-		],
-		"updatedate": [
-			"2011-01-29 21:45:38",
-			"2011-01-29 21:55:46",
-			"2011-01-29 23:04:55"
-		],
-		"sound": "sound",
-		"color": "color",
-		"runtime": "0:31",
-		"backup_location": "ia903608_22",
-		"ia_orig__runtime": "31 seconds"
+		"collection": ["classic_tv_commercials", "television"],
+		"description": "Count Chocula and Franken Berry were both introduced in 1971. Boo Berry Cereal appeared in 1973 followed by Fruit Brute in 1974. Yummy Mummy appeared more than a decade later in 1988 - completing the the group known as the General Mills Monster Cereals."
 	},
 	"reviews": [
 		{
@@ -508,18 +369,14 @@ There is an API to access their data.  It's ... really messy, the data you get b
 			"reviewtitle": "pre booberry",
 			"reviewer": "outofthebox",
 			"reviewdate": "2016-06-25 23:51:36",
-			"createdate": "2016-06-25 23:51:36",
 			"stars": "4"
 		}
 	],
-	"server": "ia800202.us.archive.org",
-	"uniq": 1957612749,
-	"workable_servers": [
-		"ia800202.us.archive.org",
-		"ia600202.us.archive.org"
-	]
+	"server": "ia800202.us.archive.org"
 }
 ```
+
+</details>
 
 ### A Manyfest Schema for Count Chocula to Thrive In
 
@@ -577,7 +434,7 @@ With just a small number of element descriptors, we can make this huge blob of J
 
 These two JSON files are in the [examples/chocula](https://github.com/stevenvelozo/manyfest/tree/main/examples/chocula) folder along with a javascript file `Chocula.js` you can try out yourself and hack on.
 
-```
+```javascript
 let libManyfest = require('../../source/Manyfest.js');
 
 let dataArchiveOrg = require(`./Data-Archive-org-Frankenberry.json`);
@@ -588,7 +445,7 @@ let _Schema = new libManyfest(schemaArchiveOrg);
 console.log(`The URL for "${_Schema.getValueByHash(dataArchiveOrg,'Title')}" is: ${_Schema.getValueByHash(dataArchiveOrg,'Server')}${_Schema.getValueByHash(dataArchiveOrg,'Path')}`);
 ```
 
-### A Manyfest Schema for Book records
+### A Manyfest Schema for Book Records
 
 This shows a book record with an Author Key as well.
 
@@ -624,12 +481,12 @@ This shows a book record with an Author Key as well.
 			"KeyRepresentation": "ID",
 			"GUIDAddress": "GUIDAuthor",
 			"IDAddress": "IDAuthor"
-		},
+		}
 	}
 }
 ```
 
-Because we expect only one scope to be the controlling scope for a particular key pair, we can use the key pair presence as a mechnism for resolution of IDs to GUIDs when they aren't natural.
+Because we expect only one scope to be the controlling scope for a particular key pair, we can use the key pair presence as a mechanism for resolution of IDs to GUIDs when they aren't natural.
 
 What does this mean in practice?
 
@@ -653,36 +510,10 @@ And the following Author record:
 }
 ```
 
-
 #### This gives rise to the need for a "Key" data type which is a tuple
 
 The tuple will be a GUID or ID, but will represent both.  As long as only one entity in the controlling scope (the Book table for instance) to have *both* the ID and the GUID, this can be used to make that the source of record for the Key.  This allows lookups back and forth between GUID and ID.
 
-1. Author is the cannonical source for finding the GUIDAuthor->IDAuthor connection, and vice versa.  Because it is the only record shape in the model space that contains both.
+1. Author is the canonical source for finding the GUIDAuthor->IDAuthor connection, and vice versa.  Because it is the only record shape in the model space that contains both.
 2. GUIDAuthor is not in the Descriptors as a secondary address, but IDAuthor is.  GUIDAuthor is, though, resolvable from the IDAuthor GUIDAddress property.
 3. This means we want to treat the "GUIDAuthor"/"IDAuthor" pairing as a single entry in a manyfest, which is a departure from how the rest of them operate.
-
-## BELOW WILL BE IN Pict
-
-## Record "Sieve"s
-
-Sometimes we want to take a record from a source shape, and translate it into a destination shape.  This can be done with an implicit sieve or an explicit sieve.
-
-### Handy Assertions for Working with a Sieve
-
-* A record is a single object without loops.
-* A record is part of a RecordSet.
-* A record has an RecordSet key (e.g. "Users", "Projects", "Books", etc.).
-* A record may have an Entity key (e.g. "Users", "Projects", "Books", etc.).
-* The difference between RecordSet and Entity is that an Entity is a Record associated with a Key is expected to be stored in an Entity Storage System of some kind whereas a RecordSet Record might be abstract.
-* A Record has a Key which represents a GUID and Identifier.
-* GUIDs are RecordSet scoped strings that are unique to a Record.
-* Identifiers are RecordSet Storage scoped strings or numbers that are unique to a Record.
-* There is only one cannonical provider of each Record Entity
-* When creating a sieve instance, we are going to migrate sets of records from one schema to another.
-
-### Implicit Sieve
-
-An implicit sieve embeds the configuration for Projection(s) within the current recordset.  There is a Projection array, each of which has an entry for basic record projections.  This should be good enough for simple transformation operations.
-
-Each of these Projections come as a simple record shape with templated expressions.
