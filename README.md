@@ -517,3 +517,15 @@ The tuple will be a GUID or ID, but will represent both.  As long as only one en
 1. Author is the canonical source for finding the GUIDAuthor->IDAuthor connection, and vice versa.  Because it is the only record shape in the model space that contains both.
 2. GUIDAuthor is not in the Descriptors as a secondary address, but IDAuthor is.  GUIDAuthor is, though, resolvable from the IDAuthor GUIDAddress property.
 3. This means we want to treat the "GUIDAuthor"/"IDAuthor" pairing as a single entry in a manyfest, which is a departure from how the rest of them operate.
+
+## Related Packages
+
+- [fable](https://github.com/stevenvelozo/fable) - Application services framework
+
+## License
+
+MIT
+
+## Contributing
+
+Pull requests are welcome. For details on our code of conduct, contribution process, and testing requirements, see the [Retold Contributing Guide](https://github.com/stevenvelozo/retold/blob/main/docs/contributing.md).
