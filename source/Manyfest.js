@@ -354,6 +354,32 @@ class Manyfest extends libFableServiceProviderBase
 		return this.objectAddressCheckAddressExists.checkAddressExists(pObject, pAddress);
 	}
 
+	/**
+	 * Check what role a string plays in this manifest -- whether it is a Hash, an Address, both or neither.
+	 *
+	 * @param {string} pString - The string to check.
+	 *
+	 * @return {{ IsHash: boolean, IsAddress: boolean, ResolvedAddress: string|undefined }} The role of the string.
+	 */
+	checkStringRole(pString)
+	{
+		if (typeof(pString) !== 'string' || pString.length === 0)
+		{
+			return { IsHash: false, IsAddress: false, ResolvedAddress: undefined };
+		}
+
+		let tmpIsAddress = (pString in this.elementDescriptors);
+		let tmpIsHash = (pString in this.elementHashes);
+		let tmpResolvedAddress = tmpIsHash ? this.elementHashes[pString] : undefined;
+
+		return (
+			{
+				IsHash: tmpIsHash,
+				IsAddress: tmpIsAddress,
+				ResolvedAddress: tmpResolvedAddress
+			});
+	}
+
 	// Turn a hash into an address, factoring in the translation table.
 	resolveHashAddress(pHash)
 	{
