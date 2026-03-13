@@ -208,25 +208,27 @@ class ManyfestObjectAddressResolverGetValue
 					// Now get the value for each argument
 					for (let i = 0; i < tmpFunctionArguments.length; i++)
 					{
+						// Trim whitespace from the argument (e.g. after comma separation: `Book`, `List` --> ` `List``)
+						let tmpArgument = tmpFunctionArguments[i].trim();
 						// Resolve the values for each subsequent entry
 						// Check if the argument value is a string literal or a reference to an address
-						if ((tmpFunctionArguments[i].length >= 2)
+						if ((tmpArgument.length >= 2)
 							&&
-							((tmpFunctionArguments[i].charAt(0) == '"')
-							|| (tmpFunctionArguments[i].charAt(0) == "'")
-							|| (tmpFunctionArguments[i].charAt(0) == "`"))
+							((tmpArgument.charAt(0) == '"')
+							|| (tmpArgument.charAt(0) == "'")
+							|| (tmpArgument.charAt(0) == "`"))
 							&&
-							((tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == '"')
-							|| (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == "'")
-							|| (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == "`")))
+							((tmpArgument.charAt(tmpArgument.length-1) == '"')
+							|| (tmpArgument.charAt(tmpArgument.length-1) == "'")
+							|| (tmpArgument.charAt(tmpArgument.length-1) == "`")))
 						{
 							// This is a string literal
-							tmpArgumentValues.push(tmpFunctionArguments[i].substring(1, tmpFunctionArguments[i].length-1));
+							tmpArgumentValues.push(tmpArgument.substring(1, tmpArgument.length-1));
 						}
 						else
 						{
 							// This is a hash address
-							tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+							tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpArgument));
 						}
 					}
 
@@ -440,25 +442,27 @@ class ManyfestObjectAddressResolverGetValue
 					// Now get the value for each argument
 					for (let i = 0; i < tmpFunctionArguments.length; i++)
 					{
+						// Trim whitespace from the argument (e.g. after comma separation: `Book`, `List` --> ` `List``)
+						let tmpArgument = tmpFunctionArguments[i].trim();
 						// Resolve the values for each subsequent entry
 						// Check if the argument value is a string literal or a reference to an address
-						if ((tmpFunctionArguments[i].length >= 2)
+						if ((tmpArgument.length >= 2)
 							&&
-							((tmpFunctionArguments[i].charAt(0) == '"')
-							|| (tmpFunctionArguments[i].charAt(0) == "'")
-							|| (tmpFunctionArguments[i].charAt(0) == "`"))
+							((tmpArgument.charAt(0) == '"')
+							|| (tmpArgument.charAt(0) == "'")
+							|| (tmpArgument.charAt(0) == "`"))
 							&&
-							((tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == '"')
-							|| (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == "'")
-							|| (tmpFunctionArguments[i].charAt(tmpFunctionArguments[i].length-1) == "`")))
+							((tmpArgument.charAt(tmpArgument.length-1) == '"')
+							|| (tmpArgument.charAt(tmpArgument.length-1) == "'")
+							|| (tmpArgument.charAt(tmpArgument.length-1) == "`")))
 						{
 							// This is a string literal
-							tmpArgumentValues.push(tmpFunctionArguments[i].substring(1, tmpFunctionArguments[i].length-1));
+							tmpArgumentValues.push(tmpArgument.substring(1, tmpArgument.length-1));
 						}
 						else
 						{
 							// This is a hash address
-							tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpFunctionArguments[i]));
+							tmpArgumentValues.push(this.getValueAtAddress(tmpRootObject, tmpArgument));
 						}
 					}
 

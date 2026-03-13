@@ -327,6 +327,71 @@ suite
 						fTestComplete();
 					}
 				);
+				test
+				(
+					'Function arguments with whitespace after comma separators',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest();
+
+						let tmpReceivedArgs = [];
+						let _MockObject = (
+							{
+								"Name": "TestValue",
+								"Category": "Books",
+								"SingleArgFunction": (pValue) => { return `Got: ${pValue}`; },
+								"MultiArgFunction": (pArg1, pArg2) => { tmpReceivedArgs = [pArg1, pArg2]; return `${pArg1}:${pArg2}`; },
+								"ThreeArgFunction": (pArg1, pArg2, pArg3) => { return `${pArg1}-${pArg2}-${pArg3}`; },
+								"Nested":
+									{
+										"Value": 42,
+										"MultiArgMethod": function(pArg1, pArg2) { return `${pArg1}+${pArg2}`; }
+									}
+							});
+
+						// Baseline: no spaces after commas (already worked)
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction("Book","List")'))
+							.to.equal('Book:List');
+
+						// THE BUG: spaces after comma with backtick-delimited string literals
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction(`Book`, `List`)'))
+							.to.equal('Book:List');
+
+						// Spaces after comma with double-quoted string literals
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction("Book", "List")'))
+							.to.equal('Book:List');
+
+						// Spaces after comma with single-quoted string literals
+						Expect(_Manyfest.getValueAtAddress(_MockObject, "MultiArgFunction('Book', 'List')"))
+							.to.equal('Book:List');
+
+						// Mixed quote styles with spaces
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction("Book", `List`)'))
+							.to.equal('Book:List');
+
+						// Multiple spaces after comma
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction(`Book`,   `List`)'))
+							.to.equal('Book:List');
+
+						// Spaces with address references (not string literals)
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction(Name, Category)'))
+							.to.equal('TestValue:Books');
+
+						// Mixed: string literal with space, then address reference with space
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'MultiArgFunction("Hello", Name)'))
+							.to.equal('Hello:TestValue');
+
+						// Three arguments with spaces
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'ThreeArgFunction(`A`, `B`, `C`)'))
+							.to.equal('A-B-C');
+
+						// Non-terminal function path with spaced arguments
+						Expect(_Manyfest.getValueAtAddress(_MockObject, 'Nested.MultiArgMethod(`X`, `Y`)'))
+							.to.equal('X+Y');
+
+						fTestComplete();
+					}
+				);
 			}
 		);
 	}

@@ -196,7 +196,7 @@ suite
 					}
 				);
 				//TODO: known broken case for multiple bracketed properties
-				test.skip
+				test
 				(
 					'Indexed subobject are settable double brackets',
 					(fTestComplete)=>
