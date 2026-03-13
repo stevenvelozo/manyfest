@@ -195,7 +195,6 @@ suite
 						fTestComplete();
 					}
 				);
-				//TODO: known broken case for multiple bracketed properties
 				test
 				(
 					'Indexed subobject are settable double brackets',
@@ -208,6 +207,79 @@ suite
 							.to.equal('123');
 						Expect(_SimpleObject._Object.SubObject.Property)
 							.to.equal('123');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Chained brackets with double-quoted inner bracket',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object[SubObject]["Property"]`, '456');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Property`))
+							.to.equal('456');
+						Expect(_SimpleObject._Object.SubObject.Property)
+							.to.equal('456');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Chained brackets with quoted outer and quoted inner',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object["SubObject"]['Property']`, '789');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Property`))
+							.to.equal('789');
+						Expect(_SimpleObject._Object.SubObject.Property)
+							.to.equal('789');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Chained bracket then dot path',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `_Object[SubObject]['Nested'].Deep`, 'abc');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `_Object.SubObject.Nested.Deep`))
+							.to.equal('abc');
+						Expect(_SimpleObject._Object.SubObject.Nested.Deep)
+							.to.equal('abc');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Array index then chained bracket',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = { Items: [{}, {}, {}] };
+						_Manyfest.setValueAtAddress(_SimpleObject, `Items[1]['Name']`, 'Second');
+						Expect(_Manyfest.getValueAtAddress(_SimpleObject, `Items[1].Name`))
+							.to.equal('Second');
+						Expect(_SimpleObject.Items[1].Name)
+							.to.equal('Second');
+						fTestComplete();
+					}
+				);
+				test
+				(
+					'Bracket at position zero (direct property access)',
+					(fTestComplete)=>
+					{
+						let _Manyfest = new libManyfest({});
+						let _SimpleObject = {};
+						_Manyfest.setValueAtAddress(_SimpleObject, `['DirectBracket']`, 'direct');
+						Expect(_SimpleObject.DirectBracket)
+							.to.equal('direct');
 						fTestComplete();
 					}
 				);

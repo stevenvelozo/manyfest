@@ -70,22 +70,84 @@ class ManyfestObjectAddressSetValue
 			// 		MyValues[`Cost`]
 			//
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
+			//
+			// Chained bracket elements look like this:
+			// 		MyValues[SubObject]['Property']
+			// 		MyValues[0]['Name']
+			//
+			// When we encounter chained brackets, resolve the first bracket pair and recurse with the remainder.
+			//
+			// Bracket-at-zero elements look like this (from chained bracket recursion):
+			// 		['Property']
+			// 		[0]
+			//
 			// The requirements to detect a boxed element are:
-			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			//    1) The start bracket exists
+			if ((tmpBracketStartIndex >= 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data
 				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
-				// The "Name" of the Object contained too the left of the bracket
-				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
+				// Check for any remaining address after the closing bracket (chained brackets or dot paths)
+				let tmpRemainingAddress = pAddress.substring(tmpBracketStopIndex + 1);
+				if (tmpRemainingAddress.length > 0 && tmpRemainingAddress.charAt(0) === '.')
+				{
+					// Strip leading dot separator (e.g. [SubObject].Property --> Property)
+					tmpRemainingAddress = tmpRemainingAddress.substring(1);
+				}
 
 				// The "Reference" to the property within it, either an array element or object property
 				let tmpBoxedPropertyReference = pAddress.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
 				// Attempt to parse the reference as a number, which will be used as an array element
 				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
 				let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+
+				// When the bracket is at position 0, there is no property name prefix -- we are
+				// accessing a property or index directly on the current object.  This happens when
+				// chained bracket resolution recurses with a remainder like ['Property'].
+				if (tmpBracketStartIndex === 0)
+				{
+					if (tmpIndexIsNumeric)
+					{
+						// Array access at position 0: [0], [1], etc.
+						if (!Array.isArray(pObject))
+						{
+							return false;
+						}
+						while (pObject.length < (tmpBoxedPropertyNumber + 1))
+						{
+							pObject.push({});
+						}
+						if (tmpRemainingAddress.length > 0)
+						{
+							return this.setValueAtAddress(pObject[tmpBoxedPropertyNumber], tmpRemainingAddress, pValue);
+						}
+						pObject[tmpBoxedPropertyNumber] = pValue;
+						return true;
+					}
+					else
+					{
+						// Named property access at position 0: ['Property'], ["Name"], etc.
+						tmpBoxedPropertyReference = this.cleanWrapCharacters('"', tmpBoxedPropertyReference);
+						tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
+						tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
+
+						if (tmpRemainingAddress.length > 0)
+						{
+							if (!(tmpBoxedPropertyReference in pObject) || typeof(pObject[tmpBoxedPropertyReference]) !== 'object')
+							{
+								pObject[tmpBoxedPropertyReference] = {};
+							}
+							return this.setValueAtAddress(pObject[tmpBoxedPropertyReference], tmpRemainingAddress, pValue);
+						}
+						pObject[tmpBoxedPropertyReference] = pValue;
+						return true;
+					}
+				}
+
+				// The "Name" of the Object contained to the left of the bracket
+				let tmpBoxedPropertyName = pAddress.substring(0, tmpBracketStartIndex).trim();
 
 				if (pObject[tmpBoxedPropertyName] == null)
 				{
@@ -132,8 +194,13 @@ class ManyfestObjectAddressSetValue
 						pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = {};
 					}
 
-					// Return the value in the property
-					//TODO: For cases where we have chained [][] properties, this needs to recurse somehow
+					// If there is remaining address after this bracket pair, recurse into the resolved subobject
+					if (tmpRemainingAddress.length > 0)
+					{
+						return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference], tmpRemainingAddress, pValue);
+					}
+
+					// No remaining address -- set the value directly
 					pObject[tmpBoxedPropertyName][tmpBoxedPropertyReference] = pValue;
 					return true;
 				}
@@ -143,6 +210,12 @@ class ManyfestObjectAddressSetValue
 					{
 						// If the subobject doesn't exist, create it
 						pObject[tmpBoxedPropertyName].push({});
+					}
+
+					// If there is remaining address after this bracket pair, recurse into the resolved element
+					if (tmpRemainingAddress.length > 0)
+					{
+						return this.setValueAtAddress(pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber], tmpRemainingAddress, pValue);
 					}
 
 					pObject[tmpBoxedPropertyName][tmpBoxedPropertyNumber] = pValue;
@@ -173,19 +246,79 @@ class ManyfestObjectAddressSetValue
 			//
 			// When we are passed SomeObject["Name"] this code below recurses as if it were SomeObject.Name
 			// The requirements to detect a boxed element are:
-			//    1) The start bracket is after character 0
-			if ((tmpBracketStartIndex > 0)
+			//    1) The start bracket exists
+			if ((tmpBracketStartIndex >= 0)
 			//    2) The end bracket has something between them
 				&& (tmpBracketStopIndex > tmpBracketStartIndex)
 			//    3) There is data
 				&& (tmpBracketStopIndex - tmpBracketStartIndex > 1))
 			{
+				// When the bracket is at position 0, there is no property name prefix -- we are
+				// accessing a property or index directly on the current object.  This happens when
+				// chained bracket resolution recurses with a segment like ['Nested'].
+				if (tmpBracketStartIndex === 0)
+				{
+					let tmpBoxedPropertyReference = tmpSubObjectName.substring(1, tmpBracketStopIndex).trim();
+					let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
+
+					if (!isNaN(tmpBoxedPropertyNumber))
+					{
+						// Array access: [0], [1], etc.
+						if (!Array.isArray(pObject))
+						{
+							return false;
+						}
+						while (pObject.length < (tmpBoxedPropertyNumber + 1))
+						{
+							pObject.push({});
+						}
+						return this.setValueAtAddress(pObject[tmpBoxedPropertyNumber], tmpNewAddress, pValue);
+					}
+					else
+					{
+						// Named property access: ['Nested'], ["Name"], etc.
+						tmpBoxedPropertyReference = this.cleanWrapCharacters('"', tmpBoxedPropertyReference);
+						tmpBoxedPropertyReference = this.cleanWrapCharacters('`', tmpBoxedPropertyReference);
+						tmpBoxedPropertyReference = this.cleanWrapCharacters("'", tmpBoxedPropertyReference);
+
+						if (!(tmpBoxedPropertyReference in pObject) || typeof(pObject[tmpBoxedPropertyReference]) !== 'object')
+						{
+							pObject[tmpBoxedPropertyReference] = {};
+						}
+						return this.setValueAtAddress(pObject[tmpBoxedPropertyReference], tmpNewAddress, pValue);
+					}
+				}
+
 				let tmpBoxedPropertyName = tmpSubObjectName.substring(0, tmpBracketStartIndex).trim();
 
 				let tmpBoxedPropertyReference = tmpSubObjectName.substring(tmpBracketStartIndex+1, tmpBracketStopIndex).trim();
 
 				let tmpBoxedPropertyNumber = parseInt(tmpBoxedPropertyReference, 10);
 				let tmpIndexIsNumeric = !isNaN(tmpBoxedPropertyNumber);
+
+				// Check for chained brackets within this segment (e.g. _Object[SubObject]['Nested'])
+				// Any remaining address after the first ] within the segment name needs to be
+				// prepended to tmpNewAddress so it is not lost during recursion.
+				let tmpSegmentRemainder = tmpSubObjectName.substring(tmpBracketStopIndex + 1);
+				if (tmpSegmentRemainder.length > 0)
+				{
+					// Prepend the remainder to the new address
+					// e.g. if segment was _Object[SubObject]['Nested'] and newAddress was Deep,
+					//      then combined address becomes ['Nested'].Deep
+					if (tmpNewAddress.length > 0)
+					{
+						tmpNewAddress = tmpSegmentRemainder + '.' + tmpNewAddress;
+					}
+					else
+					{
+						tmpNewAddress = tmpSegmentRemainder;
+					}
+					// Strip leading dot if present
+					if (tmpNewAddress.charAt(0) === '.')
+					{
+						tmpNewAddress = tmpNewAddress.substring(1);
+					}
+				}
 
 				//if (typeof(pObject[tmpBoxedPropertyName]) !== 'object')
 				if (pObject[tmpBoxedPropertyName] == null)
