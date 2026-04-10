@@ -49,7 +49,7 @@
         "fable-serviceproviderbase": "^3.0.19"
     },
     "devDependencies": {
-        "quackage": "^1.0.59",
+        "quackage": "^1.1.0",
         "typescript": "^5.9.3"
     },
     "author": "steven velozo <steven@velozo.com>",
