@@ -14,7 +14,7 @@ manifest.getValueByHash(data, 'Title');  // resolves to data.metadata.title
 A translation table adds a layer of indirection. It intercepts hash lookups and redirects them before the normal hash-to-address resolution runs:
 
 ```
-Hash Lookup → Translation Table → Descriptor Hash Table → Address → Value
+Hash Lookup -> Translation Table -> Descriptor Hash Table -> Address -> Value
 ```
 
 ## Access
