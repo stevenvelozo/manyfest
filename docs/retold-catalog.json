@@ -1,5 +1,5 @@
 {
-	"Generated": "2026-02-18T03:09:45.989Z",
+	"Generated": "2026-04-10T03:25:08.307Z",
 	"GitHubOrg": "stevenvelozo",
 	"DefaultBranch": "master",
 	"Groups": [
@@ -51,23 +51,6 @@
 			]
 		},
 		{
-			"Name": "Coverage",
-			"Key": "coverage",
-			"Description": "",
-			"Modules": [
-				{
-					"Name": "lcov-report",
-					"Repo": "lcov-report",
-					"Group": "coverage",
-					"Branch": "master",
-					"HasDocs": false,
-					"HasCover": false,
-					"Sidebar": [],
-					"DocFiles": []
-				}
-			]
-		},
-		{
 			"Name": "Dist",
 			"Key": "dist",
 			"Description": "",
@@ -81,6 +64,25 @@
 					"HasCover": false,
 					"Sidebar": [],
 					"DocFiles": []
+				}
+			]
+		},
+		{
+			"Name": "Docs",
+			"Key": "docs",
+			"Description": "",
+			"Modules": [
+				{
+					"Name": "css",
+					"Repo": "css",
+					"Group": "docs",
+					"Branch": "master",
+					"HasDocs": true,
+					"HasCover": false,
+					"Sidebar": [],
+					"DocFiles": [
+						"css/docuserve.css"
+					]
 				}
 			]
 		},
