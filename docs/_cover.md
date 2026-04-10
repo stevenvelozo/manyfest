@@ -1,4 +1,4 @@
-# Manyfest <small>1</small>
+# Manyfest
 
 > JSON Object Manifest for Data Description and Parsing
 
