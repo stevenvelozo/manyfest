@@ -1,0 +1,18 @@
+{
+	"Hash": "manyfest",
+	"Name": "Manyfest",
+	"Tagline": "JSON manifest for consistent data description, validation, and hash-address-based access across application layers",
+	"Palette": "mix",
+	"Icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 96 96\" width=\"96\" height=\"96\">\n\t\t<defs>\n\t\t\t<clipPath id=\"frame-manyfest-filled-light\">\n\t\t\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\"/>\n\t\t\t</clipPath>\n\t\t</defs>\n\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\" fill=\"#2197c7\"/>\n\t\t<g clip-path=\"url(#frame-manyfest-filled-light)\"><circle cx=\"48\" cy=\"48\" r=\"38\" fill=\"rgba(255,255,255,0.18)\"/>\n\t\t\t\t\t<circle cx=\"48\" cy=\"48\" r=\"19\" fill=\"#e3865f\"/></g>\n\t\t<text x=\"48\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\"\n\t\t\tfont-family=\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\"\n\t\t\tfont-size=\"56\" font-weight=\"700\"\n\t\t\tfill=\"#ffffff\" letter-spacing=\"-1\">M</text>\n\t</svg>",
+	"IconType": "svg",
+	"Favicon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 96 96\" width=\"96\" height=\"96\">\n\t\t<defs>\n\t\t\t<clipPath id=\"fav-manyfest-light\">\n\t\t\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\"/>\n\t\t\t</clipPath>\n\t\t</defs>\n\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\" fill=\"#2197c7\"/>\n\t\t<g clip-path=\"url(#fav-manyfest-light)\"><circle cx=\"48\" cy=\"48\" r=\"42\" fill=\"rgba(255,255,255,0.22)\"/>\n\t\t\t\t\t<circle cx=\"48\" cy=\"48\" r=\"19\" fill=\"#e3865f\"/></g>\n\t\t<text x=\"48\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\"\n\t\t\tfont-family=\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\"\n\t\t\tfont-size=\"60\" font-weight=\"800\"\n\t\t\tfill=\"#ffffff\" letter-spacing=\"-1\">M</text>\n\t</svg>",
+	"FaviconDark": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 96 96\" width=\"96\" height=\"96\">\n\t\t<defs>\n\t\t\t<clipPath id=\"fav-manyfest-dark\">\n\t\t\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\"/>\n\t\t\t</clipPath>\n\t\t</defs>\n\t\t<path d=\"M 2 48\n\t\t\tA 46 46 0 1 0 94 48\n\t\t\tA 46 46 0 1 0 2 48 Z\" fill=\"#65bcdf\"/>\n\t\t<g clip-path=\"url(#fav-manyfest-dark)\"><circle cx=\"48\" cy=\"48\" r=\"42\" fill=\"rgba(255,255,255,0.22)\"/>\n\t\t\t\t\t<circle cx=\"48\" cy=\"48\" r=\"19\" fill=\"#edbfab\"/></g>\n\t\t<text x=\"48\" y=\"50\" text-anchor=\"middle\" dominant-baseline=\"central\"\n\t\t\tfont-family=\"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif\"\n\t\t\tfont-size=\"60\" font-weight=\"800\"\n\t\t\tfill=\"#101418\" letter-spacing=\"-1\">M</text>\n\t</svg>",
+	"Colors": {
+		"Primary": "#2197c7",
+		"Secondary": "#e3865f",
+		"PrimaryLight": "#2197c7",
+		"PrimaryDark": "#65bcdf",
+		"SecondaryLight": "#e3865f",
+		"SecondaryDark": "#edbfab"
+	}
+}
